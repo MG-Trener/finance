@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderAll();
 });
 
-// ЗАГРУЗКА ДАННЫХ (Оригинальные прямые запросы к GitHub)
+// ЗАГРУЗКА ДАННЫХ
 async function loadLocalData() {
     const savedConfig = localStorage.getItem('finance_config');
     if (savedConfig) {
@@ -63,7 +63,6 @@ async function loadLocalData() {
 
     if (config.ghRepo && config.ghToken) {
         try {
-            // Возвращено: Прямой запрос к официальному API GitHub
             const response = await fetch(`https://api.github.com/repos/${config.ghRepo}/contents/data.json`, {
                 headers: {
                     'Authorization': `token ${config.ghToken}`,
@@ -80,7 +79,7 @@ async function loadLocalData() {
                     if (errDiv) errDiv.style.display = 'none';
                 }
             } else {
-                showGitHubError(`GitHub вернул статус ${response.status}. Возможно, неверный токен или data.json отсутствует.`);
+                showGitHubError(`GitHub вернул статус ${response.status}. Проверьте токен или наличие data.json.`);
             }
         } catch (err) {
             showGitHubError(`Ошибка сети при запросе к GitHub: ${err.message}`);
@@ -113,24 +112,18 @@ function saveLocalData() {
     localStorage.setItem('finance_state', JSON.stringify(state));
 }
 
-// БЕЗОПАСНАЯ СИНХРОНИЗАЦИЯ: Защита от затирания данных
+// СИНХРОНИЗАЦИЯ НА GITHUB C ЗАЩИТОЙ ОТ ЗАТИРАНИЯ
 async function syncWithGitHub() {
     if (!config.ghRepo || !config.ghToken) {
         alert('Пожалуйста, заполните параметры GitHub в Настройках!');
         return;
     }
 
-    const btn = document.getElementById('sync-btn');
-    if (btn) {
-        btn.disabled = true;
-        btn.textContent = 'Синхронизация...';
-    }
-
     try {
         let sha = '';
         let remoteTransactionsCount = 0;
 
-        // 1. Сначала проверяем, что лежит на GitHub прямо сейчас
+        // 1. Проверяем файл на GitHub до отправки
         const resGet = await fetch(`https://api.github.com/repos/${config.ghRepo}/contents/data.json`, {
             headers: { 'Authorization': `token ${config.ghToken}` }
         });
@@ -139,25 +132,22 @@ async function syncWithGitHub() {
             const fileInfo = await resGet.json();
             sha = fileInfo.sha;
             
-            // Пробуем декодировать и прочитать старый файл с сервера
             try {
                 const contentText = decodeURIComponent(escape(atob(fileInfo.content)));
                 const remoteData = JSON.parse(contentText);
                 if (remoteData && remoteData.transactions) {
                     remoteTransactionsCount = remoteData.transactions.length;
                 }
-            } catch(e) {
-                console.log("Не удалось прочесть старый файл для проверки, пропускаем.");
-            }
+            } catch(e) {}
         }
 
-        // 2. ЗАЩИТНЫЙ БЛОК: Если на сервере были транзакции, а у нас в локальном коде пусто — БЛОКИРУЕМ
+        // 2. Защитный блок
         if (remoteTransactionsCount > 0 && (!state.transactions || state.transactions.length === 0)) {
-            alert(`⚠️ СИНХРОНИЗАЦИЯ ОТМЕНЕНА!\n\nНа GitHub обнаружено ${remoteTransactionsCount} транзакций, а на вашем экране сейчас 0 (пусто).\n\nЧтобы не затереть данные, отправка заблокирована. Сначала обновите страницу (или включите VPN), чтобы данные скачались в браузер.`);
-            return; // Прерываем выполнение, файл на гитхабе не затрется!
+            alert(`⚠️ СИНХРОНИЗАЦИЯ ОТМЕНЕНА!\n\nНа сервере GitHub есть данные (${remoteTransactionsCount} шт.), а у вас на экране пусто.\n\nВключите VPN или обновите страницу, чтобы сначала скачать ваши старые транзакции.`);
+            return;
         }
 
-        // 3. Если всё безопасно — отправляем данные
+        // 3. Отправка данных
         const jsonString = JSON.stringify(state, null, 2);
         const base64Content = btoa(encodeURIComponent(jsonString).replace(/%([0-9A-F]{2})/g, function(match, p1) {
             return String.fromCharCode('0x' + p1);
@@ -177,7 +167,7 @@ async function syncWithGitHub() {
         });
 
         if (resPut.ok) {
-            alert('Данные успешно отправлены в data.json на GitHub!');
+            alert('Данные успешно сохранены в репозитории на GitHub!');
             const errDiv = document.getElementById('gh-debug-error');
             if (errDiv) errDiv.style.display = 'none';
         } else {
@@ -185,11 +175,6 @@ async function syncWithGitHub() {
         }
     } catch (err) {
         alert(`Ошибка синхронизации: ${err.message}`);
-    } finally {
-        if (btn) {
-            btn.disabled = false;
-            btn.textContent = 'Синхронизировать сейчас';
-        }
     }
 }
 
@@ -220,7 +205,7 @@ function updateAuthStatus() {
 }
 
 function initForms() {
-    // Форма добавления транзакции
+    // Форма транзакций
     const txForm = document.getElementById('transaction-form');
     if (txForm) {
         txForm.addEventListener('submit', (e) => {
@@ -243,7 +228,7 @@ function initForms() {
         });
     }
 
-    // Форма добавления категории
+    // Форма добавления категорий
     const catForm = document.getElementById('category-form');
     if (catForm) {
         catForm.addEventListener('submit', (e) => {
@@ -259,7 +244,7 @@ function initForms() {
         });
     }
 
-    // Сохранение конфигурации
+    // Обработчик сохранения настроек
     const setForm = document.getElementById('settings-form');
     if (setForm) {
         setForm.addEventListener('submit', async (e) => {
@@ -270,16 +255,22 @@ function initForms() {
             localStorage.setItem('finance_config', JSON.stringify(config));
             updateAuthStatus();
             
-            // Фикс: Принудительно скачиваем свежий data.json сразу после нажатия кнопки "Сохранить"
             await loadLocalData();
             renderAll();
             alert('Конфигурация сохранена! Данные с GitHub успешно синхронизированы.');
         });
     }
 
-    const syncBtn = document.getElementById('sync-btn');
-    if (syncBtn) {
-        syncBtn.addEventListener('click', syncWithGitHub);
+    // Обработчик для НОВОЙ кнопки "СОХРАНИТЬ" на Главном меню
+    const mainSaveBtn = document.getElementById('main-save-btn');
+    if (mainSaveBtn) {
+        mainSaveBtn.addEventListener('click', async () => {
+            mainSaveBtn.disabled = true;
+            mainSaveBtn.textContent = '🔄 Сохраняю данные на GitHub...';
+            await syncWithGitHub();
+            mainSaveBtn.disabled = false;
+            mainSaveBtn.textContent = '💾 СОХРАНИТЬ ВСЕ ДАННЫЕ НА GITHUB';
+        });
     }
 
     const filterSelect = document.getElementById('month-filter');
@@ -479,7 +470,7 @@ function deleteTransaction(id) {
     renderAll();
 }
 
-// ИИ-АНАЛИТИК (Оригинальный прямой запрос к серверам Google)
+// ИИ-АНАЛИТИК
 async function generateAIRecommendations() {
     const container = document.getElementById('ai-response-container');
     const textBlock = document.getElementById('ai-response-text');
@@ -506,12 +497,9 @@ async function generateAIRecommendations() {
     const filterText = selectedMonth === 'all' ? 'за всё время' : `за период ${selectedMonth}`;
 
     try {
-        // Возвращено: Прямой запрос к официальному серверу Google Gemini API
         const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${config.aiKey}`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 contents: [{
                     parts: [{
@@ -553,9 +541,9 @@ async function generateAIRecommendations() {
                 <span style="font-size: 13px; margin-top: 5px; display: inline-block;">
                     <b>Причина ошибки:</b> ${err.message}<br><br>
                     <i>Что проверить:</i><br>
-                    1. Правильность API-ключа в Настройках (должен быть без пробелов и начинаться на AIzaSy).<br>
+                    1. Правильность API-ключа в Настройках.<br>
                     2. Активирован ли Gemini API в вашей Google AI Studio.<br>
-                    3. Стабильность интернет-соединения (при необходимости включите VPN).
+                    3. Стабильность интернет-соединения (включите VPN).
                 </span>
             </div>`;
     } finally {
