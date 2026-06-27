@@ -49,7 +49,15 @@
       "category": "Транспорт",
       "amount": 12000,
       "comment": ""
+    },
+    {
+      "id": 1782587147408,
+      "date": "2026-06-27",
+      "type": "expense",
+      "category": "Коммуналка",
+      "amount": 16000,
+      "comment": ""
     }
   ],
-  "sha": "145b02cb5b5dcfe2ade487d5e4db3169104aa390"
+  "sha": "f69a1a9dfa8bfceded2c1cce1ebce52c31fd2735"
 }
