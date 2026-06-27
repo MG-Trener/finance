@@ -4,7 +4,8 @@
       "Зарплата",
       "Фриланс",
       "Кэшбэк",
-      "Conductor.kz"
+      "Conductor.kz",
+      "Разное"
     ],
     "expense": [
       "Продукты",
@@ -17,5 +18,5 @@
     ]
   },
   "transactions": [],
-  "sha": "7b169afa772000a204a1d0322526e5f50caf852f"
+  "sha": "a8ac17d95c9bdfb6d9b57dda9cd9a2cda7c1e78a"
 }
