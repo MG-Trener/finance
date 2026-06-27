@@ -444,3 +444,53 @@ async function generateAIRecommendations() {
         btn.textContent = 'Сгенерировать рекомендации';
     }
 }
+
+// Функция сохранения данных обратно на GitHub в data.json
+async function syncWithGitHub() {
+    if (!config.ghRepo || !config.ghToken) {
+        alert('Заполните настройки GitHub для синхронизации!');
+        return;
+    }
+
+    const btn = document.getElementById('sync-btn');
+    btn.disabled = true;
+    btn.textContent = 'Синхронизация...';
+
+    try {
+        // Получаем SHA текущего файла (нужно для перезаписи в API GitHub)
+        let sha = '';
+        const resGet = await fetch(`https://api.github.com/repos/${config.ghRepo}/contents/data.json`, {
+            headers: { 'Authorization': `token ${config.ghToken}` }
+        });
+        
+        if (resGet.ok) {
+            const fileInfo = await resGet.json();
+            sha = fileInfo.sha;
+        }
+
+        // Отправляем обновленный файл
+        const resPut = await fetch(`https://api.github.com/repos/${config.ghRepo}/contents/data.json`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `token ${config.ghToken}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                message: 'Update finance data from web app',
+                content: btoa(unescape(encodeURIComponent(JSON.stringify(state, null, 2)))), // Кодируем в Base64 без поломки кириллицы
+                sha: sha || undefined
+            })
+        });
+
+        if (resPut.ok) {
+            alert('Данные успешно синхронизированы с GitHub!');
+        } else {
+            throw new Error(`Ошибка сохранения: ${resPut.status}`);
+        }
+    } catch (err) {
+        alert(`Ошибка синхронизации: ${err.message}`);
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Синхронизировать сейчас';
+    }
+}
