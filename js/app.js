@@ -18,7 +18,7 @@ let config = {
 
 document.addEventListener('DOMContentLoaded', () => {
     initTabs();
-    initForms();
+    initForms(); // Важно: инициализируем формы и фильтры до загрузки данных
     loadConfigInputs();
     
     if (config.token && config.repo) {
@@ -48,8 +48,10 @@ function loadConfigInputs() {
 
 function updateStatus(text, type) {
     const badge = document.getElementById('auth-status');
-    badge.textContent = text;
-    badge.className = `status-badge ${type}`;
+    if (badge) {
+        badge.textContent = text;
+        badge.className = `status-badge ${type}`;
+    }
 }
 
 async function fetchDataFromGitHub() {
@@ -72,7 +74,6 @@ async function fetchDataFromGitHub() {
         const data = await response.json();
         state.sha = data.sha;
         
-        // Безопасное декодирование Base64 обратно в кириллицу UTF-8
         const binString = atob(data.content.replace(/\s/g, ""));
         const bytes = Uint8Array.from(binString, (m) => m.charCodeAt(0));
         const decodedContent = JSON.parse(new TextDecoder().decode(bytes));
@@ -96,7 +97,6 @@ async function saveDataToGitHub() {
     }
     updateStatus('Сохранение...', 'loading');
     
-    // Безопасное кодирование UTF-8 (кириллицы) в Base64
     const jsonString = JSON.stringify(state, null, 2);
     const bytes = new TextEncoder().encode(jsonString);
     const binString = Array.from(bytes, (byte) => String.fromCharCode(byte)).join("");
@@ -138,7 +138,10 @@ function renderApp() {
 
 function renderSelectOptions() {
     const select = document.getElementById('tx-category');
-    const type = document.querySelector('input[name="type"]:checked').value;
+    const checkedRadio = document.querySelector('input[name="type"]:checked');
+    if (!select || !checkedRadio) return;
+
+    const type = checkedRadio.value;
     select.innerHTML = '';
     state.categories[type].forEach(cat => {
         const opt = document.createElement('option');
@@ -152,8 +155,9 @@ function renderDashboard() {
     const now = new Date();
     const currentYearMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
     
-    // 1. Собираем все уникальные месяцы из транзакций для фильтра
     const filterSelect = document.getElementById('month-filter');
+    if (!filterSelect) return;
+
     const selectedMonth = filterSelect.value || 'all';
     const monthsSet = new Set();
     
@@ -173,7 +177,6 @@ function renderDashboard() {
         filterSelect.value = selectedMonth;
     }
 
-    // 2. Считаем основные карточки баланса
     state.transactions.forEach(t => {
         const amt = parseFloat(t.amount);
         if (t.type === 'income') {
@@ -189,7 +192,6 @@ function renderDashboard() {
     document.getElementById('month-income').textContent = `+${currentMonthInc.toLocaleString()} ₸`;
     document.getElementById('month-expense').textContent = `-${currentMonthExp.toLocaleString()} ₸`;
 
-    // 3. Подготовка раздельных данных для графиков доходов и расходов
     const incomeDataMap = {};
     const expenseDataMap = {};
 
@@ -204,10 +206,13 @@ function renderDashboard() {
         }
     });
 
-    // 4. Функция-помощник для создания/обновления каждого графика
-    const buildChart = (canvasId, currentChartObj, labels, data, labelName, color) => {
+    // Исправленная функция-помощник (работает с глобальными переменными напрямую)
+    const buildChart = (canvasId, isIncome, labels, data, labelName, color) => {
         const ctx = document.getElementById(canvasId).getContext('2d');
-        if (currentChartObj) currentChartObj.destroy();
+        
+        // Уничтожаем старый график, проверяя глобальные переменные
+        if (isIncome && incomeChart) { incomeChart.destroy(); }
+        if (!isIncome && expenseChart) { expenseChart.destroy(); }
 
         return new Chart(ctx, {
             type: 'bar',
@@ -234,19 +239,19 @@ function renderDashboard() {
         });
     };
 
-    // 5. Отрисовываем оба графика отдельно
     const expenseLabels = Object.keys(expenseDataMap);
     const expenseValues = Object.values(expenseDataMap);
-    expenseChart = buildChart('expenseChart', expenseChart, expenseLabels, expenseValues, 'Расходы (₸)', '#e74c3c');
+    expenseChart = buildChart('expenseChart', false, expenseLabels, expenseValues, 'Расходы (₸)', '#e74c3c');
 
     const incomeLabels = Object.keys(incomeDataMap);
     const incomeValues = Object.values(incomeDataMap);
-    incomeChart = buildChart('incomeChart', incomeChart, incomeLabels, incomeValues, 'Доходы (₸)', '#2ecc71');
+    incomeChart = buildChart('incomeChart', true, incomeLabels, incomeValues, 'Доходы (₸)', '#2ecc71');
 }
 
 function renderCategories() {
     const renderList = (elementId, list, type) => {
         const container = document.getElementById(elementId);
+        if (!container) return;
         container.innerHTML = '';
         list.forEach(cat => {
             const li = document.createElement('li');
@@ -269,6 +274,7 @@ function renderCategories() {
 
 function renderHistory() {
     const tbody = document.getElementById('history-table-body');
+    if (!tbody) return;
     tbody.innerHTML = '';
     const sorted = [...state.transactions].sort((a,b) => new Date(b.date) - new Date(a.date));
     
@@ -330,6 +336,5 @@ function initForms() {
         fetchDataFromGitHub();
     });
     document.getElementById('sync-btn').addEventListener('click', fetchDataFromGitHub);
-    // Слушатель изменения месяца в фильтре
     document.getElementById('month-filter').addEventListener('change', renderApp);
 }
