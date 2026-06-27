@@ -41,7 +41,15 @@
       "category": "Продукты",
       "amount": 5000,
       "comment": ""
+    },
+    {
+      "id": 1782587117090,
+      "date": "2026-06-27",
+      "type": "expense",
+      "category": "Транспорт",
+      "amount": 12000,
+      "comment": ""
     }
   ],
-  "sha": "85564f6189ffcc36b2d414d7cca0b1031d09b3d2"
+  "sha": "145b02cb5b5dcfe2ade487d5e4db3169104aa390"
 }
