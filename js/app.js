@@ -1,3 +1,22 @@
+// Аварийный вывод ошибок прямо на экран для мобилок
+window.onerror = function (message, source, lineno, colno, error) {
+    const errorDiv = document.createElement('div');
+    errorDiv.style.position = 'fixed';
+    errorDiv.style.top = '0';
+    errorDiv.style.left = '0';
+    errorDiv.style.width = '100%';
+    errorDiv.style.background = '#e74c3c';
+    errorDiv.style.color = '#fff';
+    errorDiv.style.padding = '15px';
+    errorDiv.style.zIndex = '99999';
+    errorDiv.style.fontSize = '12px';
+    errorDiv.style.fontFamily = 'monospace';
+    errorDiv.style.whiteSpace = 'pre-wrap';
+    errorDiv.innerHTML = `<strong>JS КРИТИЧЕСКАЯ ОШИБКА:</strong><br>${message}<br>Файл: ${source}<br>Строка: ${lineno}:${colno}`;
+    document.body.appendChild(errorDiv);
+    return false;
+};
+
 let incomeChart = null;
 let expenseChart = null;
 
