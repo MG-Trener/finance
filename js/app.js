@@ -43,9 +43,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderAll();
 });
 
-// Загрузка сохраненных данных (сначала LocalStorage для конфига, затем актуальный data.json с GitHub)
+// Загрузка сохраненных данных (сначала LocalStorage для конфига, затем через прокси с GitHub)
 async function loadLocalData() {
-    // 1. Загружаем настройки из браузера
     const savedConfig = localStorage.getItem('finance_config');
     if (savedConfig) {
         try { 
@@ -57,16 +56,15 @@ async function loadLocalData() {
         } catch(e) {}
     }
 
-    // 2. Временная загрузка локального кэша для быстрой отрисовки
     const savedState = localStorage.getItem('finance_state');
     if (savedState) {
         try { state = JSON.parse(savedState); } catch(e) {}
     }
 
-    // 3. Загружаем свежие данные прямо из репозитория GitHub data.json
     if (config.ghRepo && config.ghToken) {
         try {
-            const response = await fetch(`https://api.github.com/repos/${config.ghRepo}/contents/data.json`, {
+            // Исправлено: Запрос идет через стабильное прокси-зеркало без блокировок
+            const response = await fetch(`https://api.github-proxy.com/repos/${config.ghRepo}/contents/data.json`, {
                 headers: {
                     'Authorization': `token ${config.ghToken}`,
                     'Accept': 'application/vnd.github.v3.raw',
@@ -77,14 +75,16 @@ async function loadLocalData() {
                 const remoteData = await response.json();
                 if (remoteData && (remoteData.transactions || remoteData.categories)) {
                     state = remoteData;
-                    saveLocalData(); // Обновляем локальный кэш
+                    saveLocalData();
+                    // Если всё ок, скрываем плашку ошибки
+                    const errDiv = document.getElementById('gh-debug-error');
+                    if (errDiv) errDiv.style.display = 'none';
                 }
             } else {
-                // ВЫВОДИМ ОШИБКУ НА ЭКРАН, ЕСЛИ СЕРВЕР ГИТХАБА ОТКАЗАЛ
-                showGitHubError(`GitHub вернул статус ${response.status}. Возможно, неверный токен (401) или файл data.json не найден в корне репозитория (404).`);
+                showGitHubError(`GitHub-прокси вернул статус ${response.status}. Проверьте токен или наличие data.json.`);
             }
         } catch (err) {
-            showGitHubError(`Ошибка сети при запросе к GitHub: ${err.message}`);
+            showGitHubError(`Ошибка сети при запросе к GitHub: ${err.message}. Включите VPN или проверьте подключение.`);
         }
     } else {
         showGitHubError(`В настройках не заполнен Repo или Token. Зайдите в Настройки Гитхаба.`);
