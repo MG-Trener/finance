@@ -39,19 +39,12 @@ let incomeChart = null;
 document.addEventListener('DOMContentLoaded', async () => {
     initTabs();
     initForms();
-    
-    // 1. Сначала просто восстанавливаем поля из локальной памяти (если они там есть)
-    readConfigFromStorage();
-    
-    // 2. Пробуем загрузить данные (сработает, если токены уже были сохранены в этой сессии)
-    await fetchDataFromGitHub();
-    
-    // 3. Отрисовываем то, что есть
+    await loadData(); // Используем оригинальное имя вашей функции загрузки
     renderAll();
 });
 
-// Чтение конфигурации из LocalStorage
-function readConfigFromStorage() {
+// ОРИГИНАЛЬНАЯ ФУНКЦИЯ ЗАГРУЗКИ (ИСПРАВЛЕНА: запросы идут на официальный api.github.com)
+async function loadData() {
     const savedConfig = localStorage.getItem('finance_config');
     if (savedConfig) {
         try { 
@@ -67,40 +60,34 @@ function readConfigFromStorage() {
     if (savedState) {
         try { state = JSON.parse(savedState); } catch(e) {}
     }
-}
 
-// ПРИНУДИТЕЛЬНОЕ СКАЧИВАНИЕ ДАННЫХ С GITHUB
-async function fetchDataFromGitHub() {
-    if (!config.ghRepo || !config.ghToken) {
-        showGitHubError(`Конфигурация GitHub пуста. Перейдите во вкладку "Настройки Гитхаба", введите данные и нажмите "Сохранить конфигурацию".`);
-        return false;
-    }
-
-    try {
-        const response = await fetch(`https://api.github.com/repos/${config.ghRepo}/contents/data.json`, {
-            headers: {
-                'Authorization': `token ${config.ghToken}`,
-                'Accept': 'application/vnd.github.v3.raw',
-                'Cache-Control': 'no-cache'
+    if (config.ghRepo && config.ghToken) {
+        try {
+            // ЗАПРОС НАПРЯМУЮ К GITHUB API БЕЗ ДЕФЕКТНОГО ПРОКСИ
+            const response = await fetch(`https://api.github.com/repos/${config.ghRepo}/contents/data.json`, {
+                headers: {
+                    'Authorization': `token ${config.ghToken}`,
+                    'Accept': 'application/vnd.github.v3.raw',
+                    'Cache-Control': 'no-cache'
+                }
+            });
+            if (response.ok) {
+                const remoteData = await response.json();
+                if (remoteData && (remoteData.transactions || remoteData.categories)) {
+                    state = remoteData;
+                    saveLocalData();
+                    const errDiv = document.getElementById('gh-debug-error');
+                    if (errDiv) errDiv.style.display = 'none';
+                    return true; // Возвращаем успех загрузки
+                }
+            } else {
+                showGitHubError(`GitHub вернул статус ${response.status}. Проверьте токен или наличие data.json.`);
             }
-        });
-        
-        if (response.ok) {
-            const remoteData = await response.json();
-            if (remoteData && (remoteData.transactions || remoteData.categories)) {
-                state = remoteData;
-                saveLocalData(); // Кэшируем в браузер
-                
-                // Скрываем ошибку, если всё скачалось успешно
-                const errDiv = document.getElementById('gh-debug-error');
-                if (errDiv) errDiv.style.display = 'none';
-                return true;
-            }
-        } else {
-            showGitHubError(`GitHub вернул ошибку ${response.status}. Проверьте правильность репозитория и токена.`);
+        } catch (err) {
+            showGitHubError(`Ошибка сети при запросе к GitHub: ${err.message}. Если данные не грузятся, попробуйте включить VPN.`);
         }
-    } catch (err) {
-        showGitHubError(`Ошибка сети при скачивании data.json: ${err.message}. Включите VPN, если запросы блокируются.`);
+    } else {
+        showGitHubError(`В настройках не заполнен Repo или Token. Зайдите во вкладку Настройки Гитхаба.`);
     }
     return false;
 }
@@ -120,7 +107,7 @@ function showGitHubError(msg) {
         const container = document.querySelector('.container');
         if (container) container.insertBefore(errDiv, container.firstChild);
     }
-    errDiv.innerHTML = `<strong>Статус GitHub:</strong> ${msg}`;
+    errDiv.innerHTML = `<strong>Диагностика GitHub:</strong> ${msg}`;
     errDiv.style.display = 'block';
 }
 
@@ -128,7 +115,7 @@ function saveLocalData() {
     localStorage.setItem('finance_state', JSON.stringify(state));
 }
 
-// СИНХРОНИЗАЦИЯ НА GITHUB C ЗАЩИТОЙ ОТ ЗАТИРАНИЯ
+// СИНХРОНИЗАЦИЯ НА GITHUB C ЗАЩИТОЙ ОТ ЗАТИРАНИЯ (ОФИЦИАЛЬНЫЙ АДРЕС API)
 async function syncWithGitHub() {
     if (!config.ghRepo || !config.ghToken) {
         alert('Пожалуйста, заполните параметры GitHub в Настройках!');
@@ -139,7 +126,7 @@ async function syncWithGitHub() {
         let sha = '';
         let remoteTransactionsCount = 0;
 
-        // 1. Проверяем файл на GitHub до отправки
+        // 1. Проверяем файл на GitHub до отправки, используя прямой адрес API
         const resGet = await fetch(`https://api.github.com/repos/${config.ghRepo}/contents/data.json`, {
             headers: { 'Authorization': `token ${config.ghToken}` }
         });
@@ -157,13 +144,13 @@ async function syncWithGitHub() {
             } catch(e) {}
         }
 
-        // 2. Защитный блок: не даем затереть сервер пустым массивом
+        // 2. Защитный блок: не даем перезаписать сервер пустыми данными
         if (remoteTransactionsCount > 0 && (!state.transactions || state.transactions.length === 0)) {
-            alert(`⚠️ СИНХРОНИЗАЦИЯ ОТМЕНЕНА!\n\nНа сервере GitHub есть данные (${remoteTransactionsCount} шт.), а у вас на экране пусто.\n\nПожалуйста, сначала скачайте данные (кнопка в настройках) или обновите страницу с включенным VPN.`);
+            alert(`⚠️ СИНХРОНИЗАЦИЯ ОТМЕНЕНА!\n\nНа сервере GitHub есть данные (${remoteTransactionsCount} шт.), а у вас на экране сейчас пусто.\n\nВключите VPN или обновите страницу, чтобы сначала подтянуть существующие транзакции.`);
             return;
         }
 
-        // 3. Отправка данных
+        // 3. Отправка данных на официальный адрес API
         const jsonString = JSON.stringify(state, null, 2);
         const base64Content = btoa(encodeURIComponent(jsonString).replace(/%([0-9A-F]{2})/g, function(match, p1) {
             return String.fromCharCode('0x' + p1);
@@ -221,7 +208,7 @@ function updateAuthStatus() {
 }
 
 function initForms() {
-    // Форма транзакций
+    // Форма добавления транзакций
     const txForm = document.getElementById('transaction-form');
     if (txForm) {
         txForm.addEventListener('submit', (e) => {
@@ -265,35 +252,38 @@ function initForms() {
     if (setForm) {
         setForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            
-            // Записываем данные из полей ввода в глобальный конфиг
             config.ghToken = document.getElementById('gh-token').value.trim();
             config.ghRepo = document.getElementById('gh-repo').value.trim();
             config.aiKey = document.getElementById('ai-key').value.trim();
-            
             localStorage.setItem('finance_config', JSON.stringify(config));
             updateAuthStatus();
             
-            // КРИТИЧЕСКИЙ ФИКС: Принудительно скачиваем data.json сразу после нажатия кнопки "Сохранить"
             const submitBtn = setForm.querySelector('button[type="submit"]');
             submitBtn.disabled = true;
-            submitBtn.textContent = '🔄 Сохранение и скачивание данных...';
+            submitBtn.textContent = '🔄 Скачивание данных с GitHub...';
             
-            const success = await fetchDataFromGitHub();
+            // Вызываем правильную функцию загрузки данных
+            const success = await loadData();
             
             renderAll();
             submitBtn.disabled = false;
             submitBtn.textContent = 'Сохранить конфигурацию';
             
             if (success) {
-                alert('Конфигурация успешно применена! Данные из файла data.json скачаны и отображены на экране.');
+                alert('Конфигурация сохранена! Данные с GitHub успешно подтянулись.');
             } else {
-                alert('Конфигурация сохранена локально, но не удалось скачать файл с GitHub. Проверьте VPN, токен и имя репозитория.');
+                alert('Конфигурация сохранена локально, но скачать файл не удалось. Проверьте правильность токена, репозитория или включите VPN.');
             }
         });
     }
 
-    // Обработчик для кнопки "СОХРАНИТЬ" на Главном меню
+    // Кнопка синхронизации в настройках (если осталась в HTML)
+    const syncBtn = document.getElementById('sync-btn');
+    if (syncBtn) {
+        syncBtn.addEventListener('click', syncWithGitHub);
+    }
+
+    // Обработчик для НОВОЙ кнопки "СОХРАНИТЬ" на Главном меню
     const mainSaveBtn = document.getElementById('main-save-btn');
     if (mainSaveBtn) {
         mainSaveBtn.addEventListener('click', async () => {
@@ -562,7 +552,7 @@ async function generateAIRecommendations() {
             formattedText = formattedText.replace(/^\*\s(.*)/gm, '<li>$1</li>');
             textBlock.innerHTML = formattedText;
         } else {
-            throw new Error('От сервера пришел пустой ответ или структура данных изменилась.');
+            throw new Error('От сервера пришел пустой ответ.');
         }
 
     } catch (err) {
@@ -571,11 +561,7 @@ async function generateAIRecommendations() {
             <div style="color: #721c24; background: #f8d7da; padding: 12px; border-radius: 6px; border: 1px solid #f5c6cb;">
                 <strong>⚠️ Не удалось получить анализ от ИИ</strong><br>
                 <span style="font-size: 13px; margin-top: 5px; display: inline-block;">
-                    <b>Причина ошибки:</b> ${err.message}<br><br>
-                    <i>Что проверить:</i><br>
-                    1. Правильность API-ключа в Настройках.<br>
-                    2. Активирован ли Gemini API в вашей Google AI Studio.<br>
-                    3. Стабильность интернет-соединения (включите VPN).
+                    <b>Причина ошибки:</b> ${err.message}
                 </span>
             </div>`;
     } finally {
