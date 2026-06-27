@@ -354,3 +354,70 @@ function initForms() {
     document.getElementById('month-filter').addEventListener('change', renderApp);
     document.getElementById('ai-analyze-btn').addEventListener('click', generateAIRecommendations);
 }
+
+async function generateAIRecommendations() {
+    if (!config.aiKey) {
+        alert('Пожалуйста, укажите Gemini API Key во вкладке "Настройки Гитхаба". Получить его можно бесплатно на Google AI Studio.');
+        return;
+    }
+
+    const btn = document.getElementById('ai-analyze-btn');
+    const container = document.getElementById('ai-response-container');
+    const textBlock = document.getElementById('ai-response-text');
+    const filterSelect = document.getElementById('month-filter');
+    const selectedMonth = filterSelect ? filterSelect.value : 'all';
+
+    // Собираем данные для анализа
+    let totalIncome = 0;
+    let totalExpense = 0;
+    const categoriesReport = {};
+
+    state.transactions.forEach(t => {
+        if (selectedMonth !== 'all' && !t.date.startsWith(selectedMonth)) return;
+        const amt = parseFloat(t.amount);
+        if (t.type === 'income') {
+            totalIncome += amt;
+        } else {
+            totalExpense += amt;
+        }
+        categoriesReport[t.category] = (categoriesReport[t.category] || 0) + amt;
+    });
+
+    btn.disabled = true;
+    btn.textContent = 'ИИ анализирует данные...';
+    container.style.display = 'block';
+    textBlock.innerHTML = '<i>Загрузка рекомендаций, пожалуйста, подождите...</i>';
+
+    // Формируем текстовый промпт для модели
+    const prompt = `Ты — профессиональный финансовый консультант. Дай краткий, емкий и точный анализ финансового состояния пользователя на основе следующих данных за период "${selectedMonth}":
+- Общий доход: ${totalIncome} KZT.
+- Общие расходы: ${totalExpense} KZT.
+- Чистый остаток за период: ${totalIncome - totalExpense} KZT.
+- Распределение по категориям (включая доходы и расходы): ${JSON.stringify(categoriesReport)}.
+
+Напиши 3-4 конкретных практических совета по оптимизации бюджета, укажи на возможные проблемные зоны (например, если расходы превышают доходы или близки к ним) и похвали за сильные стороны, если они есть. Ответ отформатируй с использованием тегов <p>, <ul>, <li>, <strong>, чтобы его было красиво читать в HTML. Избегай Markdown (не используй звездочки **).`;
+
+    try {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${config.aiKey}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                contents: [{ parts: [{ text: prompt }] }]
+            })
+        });
+
+        if (!response.ok) throw new Error('Ошибка при запросе к API Gemini');
+
+        const result = await response.json();
+        const aiText = result.candidates[0].content.parts[0].text;
+        
+        // Выводим результат
+        textBlock.innerHTML = aiText;
+    } catch (err) {
+        console.error(err);
+        textBlock.innerHTML = '<span style="color:red;">Не удалось получить анализ от ИИ. Проверьте правильность API-ключа и подключение к интернету.</span>';
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Сгенерировать рекомендации';
+    }
+}
