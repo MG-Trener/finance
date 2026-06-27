@@ -43,12 +43,9 @@ document.addEventListener('DOMContentLoaded', () => {
     renderAll();
 });
 
-// Загрузка сохраненных данных из LocalStorage
-function loadLocalData() {
-    const savedState = localStorage.getItem('finance_state');
-    if (savedState) {
-        try { state = JSON.parse(savedState); } catch(e) {}
-    }
+// Загрузка сохраненных данных (сначала LocalStorage, затем GitHub `data.json`)
+async function loadLocalData() {
+    // 1. Пытаемся взять конфигурацию из браузера
     const savedConfig = localStorage.getItem('finance_config');
     if (savedConfig) {
         try { 
@@ -58,6 +55,37 @@ function loadLocalData() {
             document.getElementById('ai-key').value = config.aiKey || '';
             updateAuthStatus();
         } catch(e) {}
+    }
+
+    // 2. Смотрим, есть ли локальные транзакции
+    const savedState = localStorage.getItem('finance_state');
+    if (savedState) {
+        try { 
+            state = JSON.parse(savedState); 
+            renderAll();
+        } catch(e) {}
+    }
+
+    // 3. Если настроен GitHub, стягиваем актуальный `data.json` оттуда
+    if (config.ghRepo && config.ghToken) {
+        try {
+            const response = await fetch(`https://api.github.com/repos/${config.ghRepo}/contents/data.json`, {
+                headers: {
+                    'Authorization': `token ${config.ghToken}`,
+                    'Accept': 'application/vnd.github.v3.raw'
+                }
+            });
+            if (response.ok) {
+                const remoteData = await response.json();
+                if (remoteData && (remoteData.transactions || remoteData.categories)) {
+                    state = remoteData;
+                    saveLocalData(); // Кэшируем локально
+                    renderAll();     // Перерисовываем графики и историю
+                }
+            }
+        } catch (err) {
+            console.error('Не удалось загрузить данные с GitHub:', err);
+        }
     }
 }
 
