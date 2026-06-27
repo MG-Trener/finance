@@ -1,3 +1,5 @@
+let financeChart = null;
+
 let state = {
     categories: {
         income: ["Зарплата", "Фриланс", "Кэшбэк"],
@@ -149,6 +151,29 @@ function renderDashboard() {
     const now = new Date();
     const currentYearMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
     
+    // 1. Собираем все уникальные месяцы из транзакций для фильтра
+    const filterSelect = document.getElementById('month-filter');
+    const selectedMonth = filterSelect.value || 'all';
+    const monthsSet = new Set();
+    
+    state.transactions.forEach(t => {
+        if (t.date) monthsSet.add(t.date.substring(0, 7)); // Получаем YYYY-MM
+    });
+    
+    // Перерисовываем селект месяцев, только если количество изменилось
+    const currentOptionsCount = filterSelect.options.length - 1;
+    if (monthsSet.size !== currentOptionsCount) {
+        filterSelect.innerHTML = '<option value="all">За всё время</option>';
+        [...monthsSet].sort().reverse().forEach(m => {
+            const opt = document.createElement('option');
+            opt.value = m;
+            opt.textContent = m;
+            filterSelect.appendChild(opt);
+        });
+        filterSelect.value = selectedMonth; // сохраняем выбор
+    }
+
+    // 2. Считаем основные карточки баланса (всегда за текущий месяц и общий)
     state.transactions.forEach(t => {
         const amt = parseFloat(t.amount);
         if (t.type === 'income') {
@@ -163,6 +188,67 @@ function renderDashboard() {
     document.getElementById('total-balance').textContent = `${balance.toLocaleString()} ₸`;
     document.getElementById('month-income').textContent = `+${currentMonthInc.toLocaleString()} ₸`;
     document.getElementById('month-expense').textContent = `-${currentMonthExp.toLocaleString()} ₸`;
+
+    // 3. Подготовка данных для гистограммы с учетом фильтра времени
+    const chartData = {};
+    
+    state.transactions.forEach(t => {
+        // Если выбран конкретный месяц и транзакция не из него — пропускаем
+        if (selectedMonth !== 'all' && !t.date.startsWith(selectedMonth)) return;
+        
+        if (!chartData[t.category]) {
+            chartData[t.category] = { income: 0, expense: 0 };
+        }
+        chartData[t.category][t.type] += parseFloat(t.amount);
+    });
+
+    const labels = Object.keys(chartData);
+    const incomeData = labels.map(cat => chartData[cat].income);
+    const expenseData = labels.map(cat => chartData[cat].expense);
+
+    // 4. Отрисовка или обновление графика Chart.js
+    const ctx = document.getElementById('analyticsChart').getContext('2d');
+    
+    if (financeChart) {
+        financeChart.destroy(); // Уничтожаем старый график перед перерисовкой
+    }
+
+    financeChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Доходы (₸)',
+                    data: incomeData,
+                    backgroundColor: '#2ecc71',
+                    borderRadius: 4
+                },
+                {
+                    label: 'Расходы (₸)',
+                    data: expenseData,
+                    backgroundColor: '#e74c3c',
+                    borderRadius: 4
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { color: '#e1e4e8' }
+                },
+                x: {
+                    grid: { display: false }
+                }
+            },
+            plugins: {
+                legend: { position: 'top' }
+            }
+        }
+    });
 }
 
 function renderCategories() {
@@ -251,4 +337,6 @@ function initForms() {
         fetchDataFromGitHub();
     });
     document.getElementById('sync-btn').addEventListener('click', fetchDataFromGitHub);
+    // Слушатель изменения месяца в фильтре
+    document.getElementById('month-filter').addEventListener('change', renderApp);
 }
