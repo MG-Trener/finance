@@ -21,66 +21,76 @@
         </nav>
 
         <main>
-            <section id="dashboard" class="tab-content active">
-                
-                <div class="balance-cards">
-                    <div class="card total">
-                        <h3>Текущий баланс</h3>
-                        <p id="total-balance">0 ₸</p>
-                    </div>
-                    <div class="card income">
-                        <h3>Доходы (месяц)</h3>
-                        <p id="month-income">0 ₸</p>
-                    </div>
-                    <div class="card expense">
-                        <h3>Расходы (месяц)</h3>
-                        <p id="month-expense">0 ₸</p>
+    <section id="dashboard" class="tab-content active">
+        
+        <div class="balance-cards">
+            <div class="card total">
+                <h3>Текущий баланс</h3>
+                <p id="total-balance">0 ₸</p>
+            </div>
+            <div class="card income">
+                <h3>Доходы (месяц)</h3>
+                <p id="month-income">0 ₸</p>
+            </div>
+            <div class="card expense">
+                <h3>Расходы (месяц)</h3>
+                <p id="month-expense">0 ₸</p>
+            </div>
+        </div>
+
+        <div class="form-container" style="margin-bottom: 25px;">
+            <h2>Новая операция</h2>
+            <form id="transaction-form">
+                <div class="form-group">
+                    <label>Тип</label>
+                    <div class="radio-group">
+                        <label><input type="radio" name="type" value="expense" checked> Расход</label>
+                        <label><input type="radio" name="type" value="income"> Доход</label>
                     </div>
                 </div>
-
-                <div class="form-container" style="margin-bottom: 25px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                        <h2>Аналитика категорий</h2>
-                        <select id="month-filter" style="width: auto; padding: 5px 10px;">
-                            <option value="all">За всё время</option>
-                        </select>
-                    </div>
-                    <div style="position: relative; height:300px; width:100%">
-                        <canvas id="analyticsChart"></canvas>
-                    </div>
+                <div class="form-group">
+                    <label for="tx-category">Категория</label>
+                    <select id="tx-category" required></select>
                 </div>
-
-                <div class="form-container">
-                    <h2>Новая充перация</h2>
-                    <form id="transaction-form">
-                        <div class="form-group">
-                            <label>Тип</label>
-                            <div class="radio-group">
-                                <label><input type="radio" name="type" value="expense" checked> Расход</label>
-                                <label><input type="radio" name="type" value="income"> Доход</label>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="tx-category">Категория</label>
-                            <select id="tx-category" required></select>
-                        </div>
-                        <div class="form-group">
-                            <label for="tx-amount">Сумма (₸)</label>
-                            <input type="number" id="tx-amount" min="1" step="any" required placeholder="0.00">
-                        </div>
-                        <div class="form-group">
-                            <label for="tx-date">Дата</label>
-                            <input type="date" id="tx-date" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="tx-comment">Комментарий</label>
-                            <input type="text" id="tx-comment" placeholder="Например: Супермаркет">
-                        </div>
-                        <button type="submit" class="btn btn-success">Добавить операцию</button>
-                    </form>
+                <div class="form-group">
+                    <label for="tx-amount">Сумма (₸)</label>
+                    <input type="number" id="tx-amount" min="1" step="any" required placeholder="0.00">
                 </div>
-            </section>
+                <div class="form-group">
+                    <label for="tx-date">Дата</label>
+                    <input type="date" id="tx-date" required>
+                </div>
+                <div class="form-group">
+                    <label for="tx-comment">Комментарий</label>
+                    <input type="text" id="tx-comment" placeholder="Например: Супермаркет">
+                </div>
+                <button type="submit" class="btn btn-success">Добавить операцию</button>
+            </form>
+        </div>
 
+        <div class="form-container">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2>Аналитика</h2>
+                <select id="month-filter" style="width: auto; padding: 5px 10px;">
+                    <option value="all">За всё время</option>
+                </select>
+            </div>
+            
+            <div style="margin-bottom: 30px;">
+                <h3 style="font-size: 14px; color: #666; margin-bottom: 10px;">Расходы по категориям</h3>
+                <div style="position: relative; height:250px; width:100%">
+                    <canvas id="expenseChart"></canvas>
+                </div>
+            </div>
+
+            <div>
+                <h3 style="font-size: 14px; color: #666; margin-bottom: 10px;">Доходы по категориям</h3>
+                <div style="position: relative; height:250px; width:100%">
+                    <canvas id="incomeChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </section>
             <section id="categories" class="tab-content">
                 <div class="grid-2">
                     <div class="category-block">
