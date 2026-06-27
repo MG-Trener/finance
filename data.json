@@ -1,5 +1,38 @@
 {
-  "transactions": [],
+  "transactions": [
+    {
+      "id": "1782594490016",
+      "type": "expense",
+      "category": "Жилье",
+      "amount": 100000,
+      "date": "2026-06-27",
+      "comment": ""
+    },
+    {
+      "id": "1782594481658",
+      "type": "expense",
+      "category": "Транспорт",
+      "amount": 15000,
+      "date": "2026-06-27",
+      "comment": ""
+    },
+    {
+      "id": "1782594474669",
+      "type": "expense",
+      "category": "Продукты",
+      "amount": 20000,
+      "date": "2026-06-27",
+      "comment": ""
+    },
+    {
+      "id": "1782594462108",
+      "type": "income",
+      "category": "Зарплата",
+      "amount": 500000,
+      "date": "2026-06-27",
+      "comment": ""
+    }
+  ],
   "categories": {
     "expense": [
       "Продукты",
