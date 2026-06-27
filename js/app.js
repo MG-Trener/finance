@@ -80,8 +80,7 @@ async function fetchDataFromGitHub() {
     updateStatus('Загрузка данных...', 'loading');
     
     try {
-        const response = await fetch(`https://gateway.ai.cloudflare.com/v1/public/gemini/v1beta/models/gemini-1.5-flash:generateContent?key=${config.aiKey}`, {
-            headers: { 'Authorization': `token ${config.token}` }
+        const response = await fetch(`https://api.gemini.ai-proxy.org/v1beta/models/gemini-1.5-flash:generateContent?key=${config.aiKey}`, {
         });
         
         if (response.status === 404) {
