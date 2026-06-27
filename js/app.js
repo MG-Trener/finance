@@ -13,13 +13,13 @@ let state = {
 let config = {
     token: localStorage.getItem('gh_token') || '',
     repo: localStorage.getItem('gh_repo') || '',
-    aiKey: localStorage.getItem('ai_key') || '', // Новый ключ
+    aiKey: localStorage.getItem('ai_key') || '', // Ключ ИИ
     filename: 'data.json'
 };
 
 document.addEventListener('DOMContentLoaded', () => {
     initTabs();
-    initForms(); // Важно: инициализируем формы и фильтры до загрузки данных
+    initForms(); // Инициализируем формы и фильтры до загрузки данных
     loadConfigInputs();
     
     if (config.token && config.repo) {
@@ -76,9 +76,15 @@ async function fetchDataFromGitHub() {
         const data = await response.json();
         state.sha = data.sha;
         
-        const binString = atob(data.content.replace(/\s/g, ""));
-        const bytes = Uint8Array.from(binString, (m) => m.charCodeAt(0));
-        const decodedContent = JSON.parse(new TextDecoder().decode(bytes));
+        // Исправлено: Безопасное декодирование Base64 с поддержкой кириллицы (UTF-8)
+        const base64Content = data.content.replace(/\s/g, "");
+        const binaryString = window.atob(base64Content);
+        const len = binaryString.length;
+        const bytes = new Uint8Array(len);
+        for (let i = 0; i < len; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+        }
+        const decodedContent = JSON.parse(new TextDecoder("utf-8").decode(bytes));
         
         if (decodedContent.categories) state.categories = decodedContent.categories;
         if (decodedContent.transactions) state.transactions = decodedContent.transactions;
@@ -120,7 +126,7 @@ async function saveDataToGitHub() {
             body: JSON.stringify(body)
         });
         
-        if (!response.ok) throw new Error('Не удалось обновить файл');
+        if (!response.ok) throw new Error('Не удалось обновить HTML-файл');
         
         const resData = await response.json();
         state.sha = resData.content.sha;
@@ -170,7 +176,7 @@ function renderDashboard() {
     const currentOptionsCount = filterSelect.options.length - 1;
     if (monthsSet.size !== currentOptionsCount) {
         filterSelect.innerHTML = '<option value="all">За всё время</option>';
-        [...monthsSet].sort().reverse().forEach(m => {
+        ...[monthsSet].sort().reverse().forEach(m => {
             const opt = document.createElement('option');
             opt.value = m;
             opt.textContent = m;
@@ -208,11 +214,11 @@ function renderDashboard() {
         }
     });
 
-    // Исправленная функция-помощник (работает с глобальными переменными напрямую)
     const buildChart = (canvasId, isIncome, labels, data, labelName, color) => {
-        const ctx = document.getElementById(canvasId).getContext('2d');
+        const canvasElement = document.getElementById(canvasId);
+        if (!canvasElement) return null;
+        const ctx = canvasElement.getContext('2d');
         
-        // Уничтожаем старый график, проверяя глобальные переменные
         if (isIncome && incomeChart) { incomeChart.destroy(); }
         if (!isIncome && expenseChart) { expenseChart.destroy(); }
 
@@ -318,16 +324,18 @@ function initForms() {
         document.getElementById('tx-comment').value = '';
     });
 
+    // Исправлено: Корректное сохранение настроек и ключа ИИ без дублирования кода
     document.getElementById('settings-form').addEventListener('submit', (e) => {
         e.preventDefault();
         config.token = document.getElementById('gh-token').value.trim();
         config.repo = document.getElementById('gh-repo').value.trim();
-        config.aiKey = document.getElementById('ai-key').value.trim(); // Сохраняем ключ ИИ
+        config.aiKey = document.getElementById('ai-key').value.trim();
         
         localStorage.setItem('gh_token', config.token);
         localStorage.setItem('gh_repo', config.repo);
-        localStorage.setItem('ai_key', config.config.aiKey); // В localStorage
+        localStorage.setItem('ai_key', config.aiKey);
         
+        alert('Конфигурация успешно сохранена!');
         fetchDataFromGitHub();
     });
     
@@ -342,14 +350,6 @@ function initForms() {
         }
     });
     
-    document.getElementById('settings-form').addEventListener('submit', (e) => {
-        e.preventDefault();
-        config.token = document.getElementById('gh-token').value.trim();
-        config.repo = document.getElementById('gh-repo').value.trim();
-        localStorage.setItem('gh_token', config.token);
-        localStorage.setItem('gh_repo', config.repo);
-        fetchDataFromGitHub();
-    });
     document.getElementById('sync-btn').addEventListener('click', fetchDataFromGitHub);
     document.getElementById('month-filter').addEventListener('change', renderApp);
     document.getElementById('ai-analyze-btn').addEventListener('click', generateAIRecommendations);
@@ -367,7 +367,6 @@ async function generateAIRecommendations() {
     const filterSelect = document.getElementById('month-filter');
     const selectedMonth = filterSelect ? filterSelect.value : 'all';
 
-    // Собираем данные для анализа
     let totalIncome = 0;
     let totalExpense = 0;
     const categoriesReport = {};
@@ -388,7 +387,6 @@ async function generateAIRecommendations() {
     container.style.display = 'block';
     textBlock.innerHTML = '<i>Загрузка рекомендаций, пожалуйста, подождите...</i>';
 
-    // Формируем текстовый промпт для модели
     const prompt = `Ты — профессиональный финансовый консультант. Дай краткий, емкий и точный анализ финансового состояния пользователя на основе следующих данных за период "${selectedMonth}":
 - Общий доход: ${totalIncome} KZT.
 - Общие расходы: ${totalExpense} KZT.
@@ -411,7 +409,6 @@ async function generateAIRecommendations() {
         const result = await response.json();
         const aiText = result.candidates[0].content.parts[0].text;
         
-        // Выводим результат
         textBlock.innerHTML = aiText;
     } catch (err) {
         console.error(err);
