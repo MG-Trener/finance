@@ -22,7 +22,7 @@
 
         <main>
             <section id="dashboard" class="tab-content active">
-                
+                         
                 <div class="balance-cards">
                     <div class="card total">
                         <h3>Текущий баланс</h3>
@@ -90,6 +90,16 @@
                         </div>
                     </div>
                 </div>
+
+                      <div class="form-container" style="margin-top: 25px;">
+                    <h2>🤖 Персональный ИИ-Аналитик</h2>
+                    <p class="help-text" style="margin-bottom: 15px;">ИИ проанализирует структуру ваших доходов и расходов за выбранный период и предложит точки роста.</p>
+                    <button id="ai-analyze-btn" class="btn" style="background-color: #8e44ad;">Сгенерировать рекомендации</button>
+                    
+                    <div id="ai-response-container" style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-left: 4px solid #8e44ad; border-radius: 4px; display: none; line-height: 1.6;">
+                        <div id="ai-response-text"></div>
+                    </div>
+                </div>
             </section>
 
             <section id="categories" class="tab-content">
@@ -153,6 +163,11 @@
                         <label for="gh-repo">Репозиторий (в формате: имя_пользователя/имя_репозитория)</label>
                         <input type="text" id="gh-repo" required placeholder="myusername/my-finance-tracker">
                     </div>
+                    <div class="form-group">
+                        <label for="ai-key">Gemini API Key (Необязательно)</label>
+                        <input type="password" id="ai-key" placeholder="AIzaSy...">
+                    </div>
+                    <button type="submit" class="btn btn-success">Сохранить конфигурацию</button>
                     <button type="submit" class="btn btn-success">Сохранить конфигурацию</button>
                 </form>
                 <div style="margin-top:20px;">
