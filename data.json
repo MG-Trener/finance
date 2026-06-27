@@ -33,7 +33,15 @@
       "category": "Продукты",
       "amount": 20000,
       "comment": ""
+    },
+    {
+      "id": 1782589838083,
+      "date": "2026-06-27",
+      "type": "expense",
+      "category": "Коммуналка",
+      "amount": 20000,
+      "comment": ""
     }
   ],
-  "sha": "1f449f6019e37a13233d702af2f86095714648c5"
+  "sha": "f5339be20b95ae10bd33d66245bc5031bd405007"
 }
