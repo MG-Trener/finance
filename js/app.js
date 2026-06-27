@@ -115,7 +115,7 @@ function saveLocalData() {
     localStorage.setItem('finance_state', JSON.stringify(state));
 }
 
-// Сохранение данных обратно на GitHub в data.json
+// Функция сохранения данных обратно на GitHub через прокси-зеркало
 async function syncWithGitHub() {
     if (!config.ghRepo || !config.ghToken) {
         alert('Пожалуйста, заполните параметры GitHub в Настройках!');
@@ -129,9 +129,9 @@ async function syncWithGitHub() {
     }
 
     try {
-        // Узнаем SHA файла для его перезаписи
         let sha = '';
-        const resGet = await fetch(`https://api.github.com/repos/${config.ghRepo}/contents/data.json`, {
+        // Исправлено: Используем прокси для GET запроса SHA
+        const resGet = await fetch(`https://api.github-proxy.com/repos/${config.ghRepo}/contents/data.json`, {
             headers: { 'Authorization': `token ${config.ghToken}` }
         });
         
@@ -140,13 +140,13 @@ async function syncWithGitHub() {
             sha = fileInfo.sha;
         }
 
-        // Загружаем данные на Гитхаб (с поддержкой кириллицы)
         const jsonString = JSON.stringify(state, null, 2);
         const base64Content = btoa(encodeURIComponent(jsonString).replace(/%([0-9A-F]{2})/g, function(match, p1) {
             return String.fromCharCode('0x' + p1);
         }));
 
-        const resPut = await fetch(`https://api.github.com/repos/${config.ghRepo}/contents/data.json`, {
+        // Исправлено: Используем прокси для PUT запроса сохранения
+        const resPut = await fetch(`https://api.github-proxy.com/repos/${config.ghRepo}/contents/data.json`, {
             method: 'PUT',
             headers: {
                 'Authorization': `token ${config.ghToken}`,
@@ -161,6 +161,8 @@ async function syncWithGitHub() {
 
         if (resPut.ok) {
             alert('Данные успешно отправлены в data.json на GitHub!');
+            const errDiv = document.getElementById('gh-debug-error');
+            if (errDiv) errDiv.style.display = 'none';
         } else {
             throw new Error(`Статус ответа сервера: ${resPut.status}`);
         }
