@@ -244,21 +244,54 @@ function initForms() {
         });
     }
 
-    // Сохранение конфигурации GitHub и ИИ
+   // Сохранение конфигурации GitHub и ИИ
     const setForm = document.getElementById('settings-form');
     if (setForm) {
         setForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+            
+            // Записываем новые значения из полей в глобальный конфиг
             config.ghToken = document.getElementById('gh-token').value.trim();
             config.ghRepo = document.getElementById('gh-repo').value.trim();
             config.aiKey = document.getElementById('ai-key').value.trim();
+            
+            // Сохраняем в локальную память браузера, чтобы настройки не слетали
             localStorage.setItem('finance_config', JSON.stringify(config));
             updateAuthStatus();
             
-            // Сразу же пробуем скачать данные после ввода новых ключей
-            await loadLocalData();
-            renderAll();
-            alert('Конфигурация сохранена! Данные с GitHub обновлены.');
+            // КРИТИЧЕСКИЙ ФИКС: Сразу после сохранения настроек принудительно выкачиваем файл data.json с GitHub
+            alert('Конфигурация сохранена! Запускаю скачивание data.json с GitHub...');
+            
+            if (config.ghRepo && config.ghToken) {
+                try {
+                    // Используем ваше настроенное зеркало/прокси
+                    const response = await fetch(`https://api.github-proxy.com/repos/${config.ghRepo}/contents/data.json`, {
+                        headers: {
+                            'Authorization': `token ${config.ghToken}`,
+                            'Accept': 'application/vnd.github.v3.raw',
+                            'Cache-Control': 'no-cache'
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        const remoteData = await response.json();
+                        if (remoteData && (remoteData.transactions || remoteData.categories)) {
+                            state = remoteData;
+                            saveLocalData(); // Кэшируем внутри браузера
+                            renderAll();     // Перерисовываем графики и историю на экране
+                            
+                            const errDiv = document.getElementById('gh-debug-error');
+                            if (errDiv) errDiv.style.display = 'none';
+                            
+                            alert('Данные из data.json успешно загружены и отображены на экране!');
+                        }
+                    } else {
+                        alert(`GitHub вернул ошибку ${response.status}. Проверьте правильность репозитория и токена.`);
+                    }
+                } catch (err) {
+                    alert(`Не удалось подключиться к GitHub при сохранении: ${err.message}`);
+                }
+            }
         });
     }
 
