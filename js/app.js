@@ -35,56 +35,55 @@ let config = {
 let expenseChart = null;
 let incomeChart = null;
 
-// Инициализация при загрузке страницы
-document.addEventListener('DOMContentLoaded', () => {
-    loadLocalData();
+// ИИ-АНАЛИТИК: Вынесено вверх для инициализации
+document.addEventListener('DOMContentLoaded', async () => {
     initTabs();
     initForms();
+    await loadLocalData(); // Ждем загрузки настроек и данных
     renderAll();
 });
 
-// Загрузка сохраненных данных (сначала LocalStorage, затем GitHub `data.json`)
+// Загрузка сохраненных данных (сначала LocalStorage для конфига, затем актуальный data.json с GitHub)
 async function loadLocalData() {
-    // 1. Пытаемся взять конфигурацию из браузера
+    // 1. Загружаем настройки из браузера
     const savedConfig = localStorage.getItem('finance_config');
     if (savedConfig) {
         try { 
             config = JSON.parse(savedConfig);
-            document.getElementById('gh-token').value = config.ghToken || '';
-            document.getElementById('gh-repo').value = config.ghRepo || '';
-            document.getElementById('ai-key').value = config.aiKey || '';
+            if (document.getElementById('gh-token')) document.getElementById('gh-token').value = config.ghToken || '';
+            if (document.getElementById('gh-repo')) document.getElementById('gh-repo').value = config.ghRepo || '';
+            if (document.getElementById('ai-key')) document.getElementById('ai-key').value = config.aiKey || '';
             updateAuthStatus();
         } catch(e) {}
     }
 
-    // 2. Смотрим, есть ли локальные транзакции
+    // 2. Временная загрузка локального кэша для быстрой отрисовки
     const savedState = localStorage.getItem('finance_state');
     if (savedState) {
-        try { 
-            state = JSON.parse(savedState); 
-            renderAll();
-        } catch(e) {}
+        try { state = JSON.parse(savedState); } catch(e) {}
     }
 
-    // 3. Если настроен GitHub, стягиваем актуальный `data.json` оттуда
+    // 3. Загружаем свежие данные прямо из репозитория GitHub data.json
     if (config.ghRepo && config.ghToken) {
         try {
             const response = await fetch(`https://api.github.com/repos/${config.ghRepo}/contents/data.json`, {
                 headers: {
                     'Authorization': `token ${config.ghToken}`,
-                    'Accept': 'application/vnd.github.v3.raw'
+                    'Accept': 'application/vnd.github.v3.raw',
+                    'Cache-Control': 'no-cache' // Запрещаем браузеру кэшировать старую версию файла
                 }
             });
             if (response.ok) {
                 const remoteData = await response.json();
                 if (remoteData && (remoteData.transactions || remoteData.categories)) {
                     state = remoteData;
-                    saveLocalData(); // Кэшируем локально
-                    renderAll();     // Перерисовываем графики и историю
+                    saveLocalData(); // Обновляем локальный кэш
                 }
+            } else {
+                console.warn(`Файл data.json не найден на GitHub или ошибка доступа: ${response.status}`);
             }
         } catch (err) {
-            console.error('Не удалось загрузить данные с GitHub:', err);
+            console.error('Ошибка сети при запросе к GitHub:', err);
         }
     }
 }
@@ -92,6 +91,65 @@ async function loadLocalData() {
 // Сохранение данных в LocalStorage
 function saveLocalData() {
     localStorage.setItem('finance_state', JSON.stringify(state));
+}
+
+// Сохранение данных обратно на GitHub в data.json
+async function syncWithGitHub() {
+    if (!config.ghRepo || !config.ghToken) {
+        alert('Пожалуйста, заполните параметры GitHub в Настройках!');
+        return;
+    }
+
+    const btn = document.getElementById('sync-btn');
+    if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'Синхронизация...';
+    }
+
+    try {
+        // Узнаем SHA файла для его перезаписи
+        let sha = '';
+        const resGet = await fetch(`https://api.github.com/repos/${config.ghRepo}/contents/data.json`, {
+            headers: { 'Authorization': `token ${config.ghToken}` }
+        });
+        
+        if (resGet.ok) {
+            const fileInfo = await resGet.json();
+            sha = fileInfo.sha;
+        }
+
+        // Загружаем данные на Гитхаб (с поддержкой кириллицы)
+        const jsonString = JSON.stringify(state, null, 2);
+        const base64Content = btoa(encodeURIComponent(jsonString).replace(/%([0-9A-F]{2})/g, function(match, p1) {
+            return String.fromCharCode('0x' + p1);
+        }));
+
+        const resPut = await fetch(`https://api.github.com/repos/${config.ghRepo}/contents/data.json`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `token ${config.ghToken}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                message: 'Финансовые данные обновлены через веб-интерфейс',
+                content: base64Content,
+                sha: sha || undefined
+            })
+        });
+
+        if (resPut.ok) {
+            alert('Данные успешно отправлены в data.json на GitHub!');
+        } else {
+            throw new Error(`Статус ответа сервера: ${resPut.status}`);
+        }
+    } catch (err) {
+        alert(`Ошибка синхронизации: ${err.message}`);
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.textContent = 'Синхронизировать сейчас';
+        }
+    }
 }
 
 // Переключение вкладок (Табы)
@@ -103,7 +161,8 @@ function initTabs() {
             
             btn.classList.add('active');
             const tabId = btn.getAttribute('data-tab');
-            document.getElementById(tabId).classList.add('active');
+            const targetContent = document.getElementById(tabId);
+            if (targetContent) targetContent.classList.add('active');
         });
     });
 }
@@ -111,6 +170,7 @@ function initTabs() {
 // Статус авторизации GitHub
 function updateAuthStatus() {
     const badge = document.getElementById('auth-status');
+    if (!badge) return;
     if (config.ghToken && config.ghRepo) {
         badge.textContent = "GitHub подключен";
         badge.className = "status-badge success";
@@ -120,61 +180,85 @@ function updateAuthStatus() {
     }
 }
 
-// Инициализация обработчиков событий для всех форм и фильтров
+// ИИ-АНАЛИТИК: Инициализация обработчиков событий для всех форм и фильтров
 function initForms() {
     // Добавление операции
-    document.getElementById('transaction-form').addEventListener('submit', (e) => {
-        e.preventDefault();
-        const transaction = {
-            id: Date.now().toString(),
-            type: document.querySelector('input[name="type"]:checked').value,
-            category: document.getElementById('tx-category').value,
-            amount: parseFloat(document.getElementById('tx-amount').value),
-            date: document.getElementById('tx-date').value,
-            comment: document.getElementById('tx-comment').value
-        };
-        state.transactions.unshift(transaction);
-        saveLocalData();
-        renderAll();
-        e.target.reset();
-        document.getElementById('tx-date').valueAsDate = new Date();
-        updateCategorySelects();
-    });
-
-    // Добавление новой категории
-    document.getElementById('category-form').addEventListener('submit', (e) => {
-        e.preventDefault();
-        const type = document.getElementById('cat-type').value;
-        const name = document.getElementById('cat-name').value.trim();
-        if (name && !state.categories[type].includes(name)) {
-            state.categories[type].push(name);
+    const txForm = document.getElementById('transaction-form');
+    if (txForm) {
+        txForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const transaction = {
+                id: Date.now().toString(),
+                type: document.querySelector('input[name="type"]:checked').value,
+                category: document.getElementById('tx-category').value,
+                amount: parseFloat(document.getElementById('tx-amount').value),
+                date: document.getElementById('tx-date').value,
+                comment: document.getElementById('tx-comment').value
+            };
+            state.transactions.unshift(transaction);
             saveLocalData();
             renderAll();
             e.target.reset();
-        }
-    });
+            document.getElementById('tx-date').valueAsDate = new Date();
+            updateCategorySelects();
+        });
+    }
+
+    // Добавление новой категории
+    const catForm = document.getElementById('category-form');
+    if (catForm) {
+        catForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const type = document.getElementById('cat-type').value;
+            const name = document.getElementById('cat-name').value.trim();
+            if (name && !state.categories[type].includes(name)) {
+                state.categories[type].push(name);
+                saveLocalData();
+                renderAll();
+                e.target.reset();
+            }
+        });
+    }
 
     // Сохранение конфигурации GitHub и ИИ
-    document.getElementById('settings-form').addEventListener('submit', (e) => {
-        e.preventDefault();
-        config.ghToken = document.getElementById('gh-token').value.trim();
-        config.ghRepo = document.getElementById('gh-repo').value.trim();
-        config.aiKey = document.getElementById('ai-key').value.trim();
-        localStorage.setItem('finance_config', JSON.stringify(config));
-        updateAuthStatus();
-        alert('Конфигурация успешно сохранена!');
-    });
+    const setForm = document.getElementById('settings-form');
+    if (setForm) {
+        setForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            config.ghToken = document.getElementById('gh-token').value.trim();
+            config.ghRepo = document.getElementById('gh-repo').value.trim();
+            config.aiKey = document.getElementById('ai-key').value.trim();
+            localStorage.setItem('finance_config', JSON.stringify(config));
+            updateAuthStatus();
+            
+            // Сразу же пробуем скачать данные после ввода новых ключей
+            await loadLocalData();
+            renderAll();
+            alert('Конфигурация сохранена! Данные с GitHub обновлены.');
+        });
+    }
+
+    // Кнопка принудительной синхронизации на GitHub
+    const syncBtn = document.getElementById('sync-btn');
+    if (syncBtn) {
+        syncBtn.addEventListener('click', syncWithGitHub);
+    }
 
     // Фильтр аналитики по месяцам
-    document.getElementById('month-filter').addEventListener('change', () => {
-        renderDashboard();
-    });
+    const filterSelect = document.getElementById('month-filter');
+    if (filterSelect) {
+        filterSelect.addEventListener('change', renderDashboard);
+    }
 
     // Кнопка запуска ИИ-Аналитика
-    document.getElementById('ai-analyze-btn').addEventListener('click', generateAIRecommendations);
+    const aiBtn = document.getElementById('ai-analyze-btn');
+    if (aiBtn) {
+        aiBtn.addEventListener('click', generateAIRecommendations);
+    }
 
     // Установка текущей даты по умолчанию в форму операции
-    document.getElementById('tx-date').valueAsDate = new Date();
+    const dateInput = document.getElementById('tx-date');
+    if (dateInput) dateInput.valueAsDate = new Date();
 }
 
 // Обновление селектов категорий при изменении типа (доход/расход)
@@ -183,7 +267,9 @@ document.querySelectorAll('input[name="type"]').forEach(radio => {
 });
 
 function updateCategorySelects() {
-    const type = document.querySelector('input[name="type"]:checked').value;
+    const typeEl = document.querySelector('input[name="type"]:checked');
+    if (!typeEl) return;
+    const type = typeEl.value;
     const select = document.getElementById('tx-category');
     if (!select) return;
     select.innerHTML = '';
@@ -215,9 +301,11 @@ function renderDashboard() {
     const selectedMonth = filterSelect.value || 'all';
     const monthsSet = new Set();
     
-    state.transactions.forEach(t => {
-        if (t.date) monthsSet.add(t.date.substring(0, 7));
-    });
+    if (state.transactions && state.transactions.length > 0) {
+        state.transactions.forEach(t => {
+            if (t.date) monthsSet.add(t.date.substring(0, 7));
+        });
+    }
     
     const currentOptionsCount = filterSelect.options.length - 1;
     if (monthsSet.size !== currentOptionsCount) {
@@ -231,16 +319,18 @@ function renderDashboard() {
         filterSelect.value = selectedMonth;
     }
 
-    state.transactions.forEach(t => {
-        const amt = parseFloat(t.amount);
-        if (t.type === 'income') {
-            balance += amt;
-            if (t.date.startsWith(currentYearMonth)) currentMonthInc += amt;
-        } else {
-            balance -= amt;
-            if (t.date.startsWith(currentYearMonth)) currentMonthExp += amt;
-        }
-    });
+    if (state.transactions && state.transactions.length > 0) {
+        state.transactions.forEach(t => {
+            const amt = parseFloat(t.amount) || 0;
+            if (t.type === 'income') {
+                balance += amt;
+                if (t.date && t.date.startsWith(currentYearMonth)) currentMonthInc += amt;
+            } else {
+                balance -= amt;
+                if (t.date && t.date.startsWith(currentYearMonth)) currentMonthExp += amt;
+            }
+        });
+    }
     
     document.getElementById('total-balance').textContent = `${balance.toLocaleString()} ₸`;
     document.getElementById('month-income').textContent = `+${currentMonthInc.toLocaleString()} ₸`;
@@ -249,16 +339,18 @@ function renderDashboard() {
     const incomeDataMap = {};
     const expenseDataMap = {};
 
-    state.transactions.forEach(t => {
-        if (selectedMonth !== 'all' && !t.date.startsWith(selectedMonth)) return;
-        
-        const amt = parseFloat(t.amount);
-        if (t.type === 'income') {
-            incomeDataMap[t.category] = (incomeDataMap[t.category] || 0) + amt;
-        } else {
-            expenseDataMap[t.category] = (expenseDataMap[t.category] || 0) + amt;
-        }
-    });
+    if (state.transactions && state.transactions.length > 0) {
+        state.transactions.forEach(t => {
+            if (selectedMonth !== 'all' && (!t.date || !t.date.startsWith(selectedMonth))) return;
+            
+            const amt = parseFloat(t.amount) || 0;
+            if (t.type === 'income') {
+                incomeDataMap[t.category] = (incomeDataMap[t.category] || 0) + amt;
+            } else {
+                expenseDataMap[t.category] = (expenseDataMap[t.category] || 0) + amt;
+            }
+        });
+    }
 
     const buildChart = (canvasId, isIncome, labels, data, labelName, color) => {
         const canvasElement = document.getElementById(canvasId);
@@ -308,11 +400,13 @@ function renderCategories() {
         const ul = document.getElementById(elementId);
         if (!ul) return;
         ul.innerHTML = '';
-        state.categories[type].forEach(cat => {
-            const li = document.createElement('li');
-            li.innerHTML = `${cat} <button class="delete-btn" onclick="deleteCategory('${type}', '${cat}')">&times;</button>`;
-            ul.appendChild(li);
-        });
+        if (state.categories && state.categories[type]) {
+            state.categories[type].forEach(cat => {
+                const li = document.createElement('li');
+                li.innerHTML = `${cat} <button class="delete-btn" onclick="deleteCategory('${type}', '${cat}')">&times;</button>`;
+                ul.appendChild(li);
+            });
+        }
     };
     renderList('expense-categories-list', 'expense');
     renderList('income-categories-list', 'income');
@@ -330,21 +424,23 @@ function renderHistory() {
     if (!tbody) return;
     tbody.innerHTML = '';
     
-    state.transactions.forEach(t => {
-        const tr = document.createElement('tr');
-        const sign = t.type === 'income' ? '+' : '-';
-        const cls = t.type === 'income' ? 'tx-inc' : 'tx-exp';
-        
-        tr.innerHTML = `
-            <td>${t.date || ''}</td>
-            <td><span class="${cls}">${t.type === 'income' ? 'Доход' : 'Расход'}</span></td>
-            <td>${t.category}</td>
-            <td class="${cls}">${sign}${parseFloat(t.amount).toLocaleString()} ₸</td>
-            <td>${t.comment || ''}</td>
-            <td><button class="delete-btn" onclick="deleteTransaction('${t.id}')">&times;</button></td>
-        `;
-        tbody.appendChild(tr);
-    });
+    if (state.transactions && state.transactions.length > 0) {
+        state.transactions.forEach(t => {
+            const tr = document.createElement('tr');
+            const sign = t.type === 'income' ? '+' : '-';
+            const cls = t.type === 'income' ? 'tx-inc' : 'tx-exp';
+            
+            tr.innerHTML = `
+                <td>${t.date || ''}</td>
+                <td><span class="${cls}">${t.type === 'income' ? 'Доход' : 'Расход'}</span></td>
+                <td>${t.category}</td>
+                <td class="${cls}">${sign}${parseFloat(t.amount).toLocaleString()} ₸</td>
+                <td>${t.comment || ''}</td>
+                <td><button class="delete-btn" onclick="deleteTransaction('${t.id}')">&times;</button></td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
 }
 
 function deleteTransaction(id) {
@@ -364,7 +460,6 @@ async function generateAIRecommendations() {
         return;
     }
 
-    // Собираем данные за выбранный на панели аналитики период
     const selectedMonth = document.getElementById('month-filter').value;
     const filteredTxs = state.transactions.filter(t => selectedMonth === 'all' || t.date.startsWith(selectedMonth));
 
@@ -378,12 +473,10 @@ async function generateAIRecommendations() {
     container.style.display = 'block';
     textBlock.innerHTML = '<em>Генерирую персональный финансовый разбор... Подождите несколько секунд.</em>';
 
-    // Форматируем сжатый финансовый лог для отправки в промпт
     const summaryData = filteredTxs.map(t => `${t.date} | ${t.type === 'income' ? 'Доход' : 'Расход'} | ${t.category} | ${t.amount} ₸ | ${t.comment || ''}`).join('\n');
     const filterText = selectedMonth === 'all' ? 'за всё время' : `за период ${selectedMonth}`;
 
     try {
-        // Используем выделенный прокси-эндпоинт с поддержкой CORS для GitHub Pages
         const response = await fetch(`https://api.gemini.ai-proxy.org/v1beta/models/gemini-1.5-flash:generateContent?key=${config.aiKey}`, {
             method: 'POST',
             headers: {
@@ -413,12 +506,9 @@ async function generateAIRecommendations() {
         }
 
         const data = await response.json();
-        
-        // Извлекаем текст ответа согласно правильной структуре JSON Gemini
         const aiText = data.candidates?.[0]?.content?.parts?.[0]?.text;
         
         if (aiText) {
-            // Форматируем markdown-звездочки, если модель прислала их вместо HTML
             let formattedText = aiText.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
             formattedText = formattedText.replace(/^\*\s(.*)/gm, '<li>$1</li>');
             textBlock.innerHTML = formattedText;
@@ -442,55 +532,5 @@ async function generateAIRecommendations() {
     } finally {
         btn.disabled = false;
         btn.textContent = 'Сгенерировать рекомендации';
-    }
-}
-
-// Функция сохранения данных обратно на GitHub в data.json
-async function syncWithGitHub() {
-    if (!config.ghRepo || !config.ghToken) {
-        alert('Заполните настройки GitHub для синхронизации!');
-        return;
-    }
-
-    const btn = document.getElementById('sync-btn');
-    btn.disabled = true;
-    btn.textContent = 'Синхронизация...';
-
-    try {
-        // Получаем SHA текущего файла (нужно для перезаписи в API GitHub)
-        let sha = '';
-        const resGet = await fetch(`https://api.github.com/repos/${config.ghRepo}/contents/data.json`, {
-            headers: { 'Authorization': `token ${config.ghToken}` }
-        });
-        
-        if (resGet.ok) {
-            const fileInfo = await resGet.json();
-            sha = fileInfo.sha;
-        }
-
-        // Отправляем обновленный файл
-        const resPut = await fetch(`https://api.github.com/repos/${config.ghRepo}/contents/data.json`, {
-            method: 'PUT',
-            headers: {
-                'Authorization': `token ${config.ghToken}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                message: 'Update finance data from web app',
-                content: btoa(unescape(encodeURIComponent(JSON.stringify(state, null, 2)))), // Кодируем в Base64 без поломки кириллицы
-                sha: sha || undefined
-            })
-        });
-
-        if (resPut.ok) {
-            alert('Данные успешно синхронизированы с GitHub!');
-        } else {
-            throw new Error(`Ошибка сохранения: ${resPut.status}`);
-        }
-    } catch (err) {
-        alert(`Ошибка синхронизации: ${err.message}`);
-    } finally {
-        btn.disabled = false;
-        btn.textContent = 'Синхронизировать сейчас';
     }
 }
