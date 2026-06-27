@@ -17,6 +17,15 @@
       "Разное"
     ]
   },
-  "transactions": [],
-  "sha": "a8ac17d95c9bdfb6d9b57dda9cd9a2cda7c1e78a"
+  "transactions": [
+    {
+      "id": 1782587035417,
+      "date": "2026-06-27",
+      "type": "income",
+      "category": "Зарплата",
+      "amount": 118000,
+      "comment": ""
+    }
+  ],
+  "sha": "d3a28c50027e2a0ca673a42a78ccd960aa17db79"
 }
