@@ -16,12 +16,7 @@
   },
   "transactions": [
     {
-      "id": 1782585347912,
-      "date": "2026-06-26",
-      "type": "expense",
-      "category": "Транспорт",
-      "amount": 12000,
-      "comment": ""
+      
     }
   ],
   "sha": "2701bb5b422bb248dedaa589d95f1d843327725a"
