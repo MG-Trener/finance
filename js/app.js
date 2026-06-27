@@ -68,7 +68,11 @@ async function fetchDataFromGitHub() {
         
         const data = await response.json();
         state.sha = data.sha;
-        const decodedContent = JSON.parse(atob(data.content));
+        
+        // Безопасное декодирование Base64 обратно в кириллицу UTF-8
+        const binString = atob(data.content.replace(/\s/g, ""));
+        const bytes = Uint8Array.from(binString, (m) => m.charCodeAt(0));
+        const decodedContent = JSON.parse(new TextDecoder().decode(bytes));
         
         if (decodedContent.categories) state.categories = decodedContent.categories;
         if (decodedContent.transactions) state.transactions = decodedContent.transactions;
@@ -89,7 +93,12 @@ async function saveDataToGitHub() {
     }
     updateStatus('Сохранение...', 'loading');
     
-    const contentPayload = btoa(unescape(encodeURIComponent(JSON.stringify(state, null, 2))));
+    // Безопасное кодирование UTF-8 (кириллицы) в Base64
+    const jsonString = JSON.stringify(state, null, 2);
+    const bytes = new TextEncoder().encode(jsonString);
+    const binString = Array.from(bytes, (byte) => String.fromCharCode(byte)).join("");
+    const contentPayload = btoa(binString);
+    
     const body = {
         message: 'wallet update via github pages',
         content: contentPayload
