@@ -18,6 +18,14 @@
     ]
   },
   "transactions": [
+    {
+      "id": 1782589820314,
+      "date": "2026-06-27",
+      "type": "income",
+      "category": "Зарплата",
+      "amount": 500000,
+      "comment": ""
+    }
   ],
-  "sha": "3442e3cc44330006ed7f82a3d292e842bfb92b54"
+  "sha": "94ac2df33cfacda757b2731a8c20894f120f8d83"
 }
