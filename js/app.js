@@ -70,7 +70,7 @@ async function loadLocalData() {
                 headers: {
                     'Authorization': `token ${config.ghToken}`,
                     'Accept': 'application/vnd.github.v3.raw',
-                    'Cache-Control': 'no-cache' // Запрещаем браузеру кэшировать старую версию файла
+                    'Cache-Control': 'no-cache'
                 }
             });
             if (response.ok) {
@@ -80,12 +80,34 @@ async function loadLocalData() {
                     saveLocalData(); // Обновляем локальный кэш
                 }
             } else {
-                console.warn(`Файл data.json не найден на GitHub или ошибка доступа: ${response.status}`);
+                // ВЫВОДИМ ОШИБКУ НА ЭКРАН, ЕСЛИ СЕРВЕР ГИТХАБА ОТКАЗАЛ
+                showGitHubError(`GitHub вернул статус ${response.status}. Возможно, неверный токен (401) или файл data.json не найден в корне репозитория (404).`);
             }
         } catch (err) {
-            console.error('Ошибка сети при запросе к GitHub:', err);
+            showGitHubError(`Ошибка сети при запросе к GitHub: ${err.message}`);
         }
+    } else {
+        showGitHubError(`В настройках не заполнен Repo или Token. Зайдите в Настройки Гитхаба.`);
     }
+}
+
+// Вспомогательная функция для отображения ошибок GitHub на экране
+function showGitHubError(msg) {
+    let errDiv = document.getElementById('gh-debug-error');
+    if (!errDiv) {
+        errDiv = document.createElement('div');
+        errDiv.id = 'gh-debug-error';
+        errDiv.style.background = '#fff3cd';
+        errDiv.style.color = '#856404';
+        errDiv.style.padding = '10px 15px';
+        errDiv.style.marginBottom = '15px';
+        errDiv.style.borderRadius = '6px';
+        errDiv.style.border = '1px solid #ffeeba';
+        errDiv.style.fontSize = '13px';
+        const container = document.querySelector('.container');
+        if (container) container.insertBefore(errDiv, container.firstChild);
+    }
+    errDiv.innerHTML = `<strong>Диагностика GitHub:</strong> ${msg}`;
 }
 
 // Сохранение данных в LocalStorage
