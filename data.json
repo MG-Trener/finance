@@ -57,7 +57,15 @@
       "category": "Коммуналка",
       "amount": 16000,
       "comment": ""
+    },
+    {
+      "id": 1782588124256,
+      "date": "2026-06-27",
+      "type": "expense",
+      "category": "Развлечения",
+      "amount": 7000,
+      "comment": ""
     }
   ],
-  "sha": "f69a1a9dfa8bfceded2c1cce1ebce52c31fd2735"
+  "sha": "3442e3cc44330006ed7f82a3d292e842bfb92b54"
 }
