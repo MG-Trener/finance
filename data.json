@@ -18,54 +18,6 @@
     ]
   },
   "transactions": [
-    {
-      "id": 1782587035417,
-      "date": "2026-06-27",
-      "type": "income",
-      "category": "Зарплата",
-      "amount": 118000,
-      "comment": ""
-    },
-    {
-      "id": 1782587063790,
-      "date": "2026-06-27",
-      "type": "income",
-      "category": "Зарплата",
-      "amount": 19000,
-      "comment": ""
-    },
-    {
-      "id": 1782587102426,
-      "date": "2026-06-27",
-      "type": "expense",
-      "category": "Продукты",
-      "amount": 5000,
-      "comment": ""
-    },
-    {
-      "id": 1782587117090,
-      "date": "2026-06-27",
-      "type": "expense",
-      "category": "Транспорт",
-      "amount": 12000,
-      "comment": ""
-    },
-    {
-      "id": 1782587147408,
-      "date": "2026-06-27",
-      "type": "expense",
-      "category": "Коммуналка",
-      "amount": 16000,
-      "comment": ""
-    },
-    {
-      "id": 1782588124256,
-      "date": "2026-06-27",
-      "type": "expense",
-      "category": "Развлечения",
-      "amount": 7000,
-      "comment": ""
-    }
   ],
   "sha": "3442e3cc44330006ed7f82a3d292e842bfb92b54"
 }
