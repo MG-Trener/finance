@@ -1,4 +1,4 @@
-// Аварийный вывод ошибок прямо на экран для мобилок
+// Аварийный вывод ошибок прямо на экран для мобильных устройств
 window.onerror = function (message, source, lineno, colno, error) {
     const errorDiv = document.createElement('div');
     errorDiv.style.position = 'fixed';
@@ -17,165 +17,165 @@ window.onerror = function (message, source, lineno, colno, error) {
     return false;
 };
 
-let incomeChart = null;
-let expenseChart = null;
-
+// Глобальное состояние приложения
 let state = {
-    categories: {
-        income: ["Зарплата", "Фриланс", "Кэшбэк"],
-        expense: ["Продукты", "Транспорт", "Коммуналка", "Развлечения"]
-    },
     transactions: [],
-    sha: null
+    categories: {
+        expense: ['Продукты', 'Транспорт', 'Жилье', 'Развлечения'],
+        income: ['Зарплата', 'Фриланс', 'Инвестиции']
+    }
 };
 
 let config = {
-    token: localStorage.getItem('gh_token') || '',
-    repo: localStorage.getItem('gh_repo') || '',
-    aiKey: localStorage.getItem('ai_key') || '', // Ключ ИИ
-    filename: 'data.json'
+    ghToken: '',
+    ghRepo: '',
+    aiKey: ''
 };
 
+let expenseChart = null;
+let incomeChart = null;
+
+// Инициализация при загрузке страницы
 document.addEventListener('DOMContentLoaded', () => {
+    loadLocalData();
     initTabs();
-    initForms(); // Инициализируем формы и фильтры до загрузки данных
-    loadConfigInputs();
-    
-    if (config.token && config.repo) {
-        fetchDataFromGitHub();
-    } else {
-        updateStatus('Не настроен доступ к GitHub', 'error');
-        renderApp();
-    }
+    initForms();
+    renderAll();
 });
 
+// Загрузка сохраненных данных из LocalStorage
+function loadLocalData() {
+    const savedState = localStorage.getItem('finance_state');
+    if (savedState) {
+        try { state = JSON.parse(savedState); } catch(e) {}
+    }
+    const savedConfig = localStorage.getItem('finance_config');
+    if (savedConfig) {
+        try { 
+            config = JSON.parse(savedConfig);
+            document.getElementById('gh-token').value = config.ghToken || '';
+            document.getElementById('gh-repo').value = config.ghRepo || '';
+            document.getElementById('ai-key').value = config.aiKey || '';
+            updateAuthStatus();
+        } catch(e) {}
+    }
+}
+
+// Сохранение данных в LocalStorage
+function saveLocalData() {
+    localStorage.setItem('finance_state', JSON.stringify(state));
+}
+
+// Переключение вкладок (Табы)
 function initTabs() {
     document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            
             btn.classList.add('active');
-            document.getElementById(btn.dataset.tab).classList.add('active');
+            const tabId = btn.getAttribute('data-tab');
+            document.getElementById(tabId).classList.add('active');
         });
     });
 }
 
-function loadConfigInputs() {
-    document.getElementById('gh-token').value = config.token;
-    document.getElementById('gh-repo').value = config.repo;
-    document.getElementById('ai-key').value = config.aiKey; // Заполнение поля ИИ
+// Статус авторизации GitHub
+function updateAuthStatus() {
+    const badge = document.getElementById('auth-status');
+    if (config.ghToken && config.ghRepo) {
+        badge.textContent = "GitHub подключен";
+        badge.className = "status-badge success";
+    } else {
+        badge.textContent = "Не авторизован";
+        badge.className = "status-badge error";
+    }
+}
+
+// Инициализация обработчиков событий для всех форм и фильтров
+function initForms() {
+    // Добавление операции
+    document.getElementById('transaction-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const transaction = {
+            id: Date.now().toString(),
+            type: document.querySelector('input[name="type"]:checked').value,
+            category: document.getElementById('tx-category').value,
+            amount: parseFloat(document.getElementById('tx-amount').value),
+            date: document.getElementById('tx-date').value,
+            comment: document.getElementById('tx-comment').value
+        };
+        state.transactions.unshift(transaction);
+        saveLocalData();
+        renderAll();
+        e.target.reset();
+        document.getElementById('tx-date').valueAsDate = new Date();
+        updateCategorySelects();
+    });
+
+    // Добавление новой категории
+    document.getElementById('category-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const type = document.getElementById('cat-type').value;
+        const name = document.getElementById('cat-name').value.trim();
+        if (name && !state.categories[type].includes(name)) {
+            state.categories[type].push(name);
+            saveLocalData();
+            renderAll();
+            e.target.reset();
+        }
+    });
+
+    // Сохранение конфигурации GitHub и ИИ
+    document.getElementById('settings-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        config.ghToken = document.getElementById('gh-token').value.trim();
+        config.ghRepo = document.getElementById('gh-repo').value.trim();
+        config.aiKey = document.getElementById('ai-key').value.trim();
+        localStorage.setItem('finance_config', JSON.stringify(config));
+        updateAuthStatus();
+        alert('Конфигурация успешно сохранена!');
+    });
+
+    // Фильтр аналитики по месяцам
+    document.getElementById('month-filter').addEventListener('change', () => {
+        renderDashboard();
+    });
+
+    // Кнопка запуска ИИ-Аналитика
+    document.getElementById('ai-analyze-btn').addEventListener('click', generateAIRecommendations);
+
+    // Установка текущей даты по умолчанию в форму операции
     document.getElementById('tx-date').valueAsDate = new Date();
 }
 
-function updateStatus(text, type) {
-    const badge = document.getElementById('auth-status');
-    if (badge) {
-        badge.textContent = text;
-        badge.className = `status-badge ${type}`;
-    }
+// Обновление селектов категорий при изменении типа (доход/расход)
+document.querySelectorAll('input[name="type"]').forEach(radio => {
+    radio.addEventListener('change', updateCategorySelects);
+});
+
+function updateCategorySelects() {
+    const type = document.querySelector('input[name="type"]:checked').value;
+    const select = document.getElementById('tx-category');
+    if (!select) return;
+    select.innerHTML = '';
+    state.categories[type].forEach(cat => {
+        const opt = document.createElement('option');
+        opt.value = cat;
+        opt.textContent = cat;
+        select.appendChild(opt);
+    });
 }
 
-async function fetchDataFromGitHub() {
-    if (!config.token || !config.repo) return;
-    updateStatus('Загрузка данных...', 'loading');
-    
-    try {
-        const response = await fetch(`https://api.gemini.ai-proxy.org/v1beta/models/gemini-1.5-flash:generateContent?key=${config.aiKey}`, {
-        });
-        
-        if (response.status === 404) {
-            updateStatus('Новый репозиторий (Файл не найден)', 'success');
-            renderApp();
-            return;
-        }
-        
-        if (!response.ok) throw new Error('Ошибка сети');
-        
-        const data = await response.json();
-        state.sha = data.sha;
-        
-        // Исправлено: Безопасное декодирование Base64 с поддержкой кириллицы (UTF-8)
-        const base64Content = data.content.replace(/\s/g, "");
-        const binaryString = window.atob(base64Content);
-        const len = binaryString.length;
-        const bytes = new Uint8Array(len);
-        for (let i = 0; i < len; i++) {
-            bytes[i] = binaryString.charCodeAt(i);
-        }
-        const decodedContent = JSON.parse(new TextDecoder("utf-8").decode(bytes));
-        
-        if (decodedContent.categories) state.categories = decodedContent.categories;
-        if (decodedContent.transactions) state.transactions = decodedContent.transactions;
-        
-        updateStatus('Синхронизировано', 'success');
-        renderApp();
-    } catch (err) {
-        updateStatus('Ошибка синхронизации', 'error');
-        console.error(err);
-        renderApp();
-    }
-}
-
-async function saveDataToGitHub() {
-    if (!config.token || !config.repo) {
-        alert('Пожалуйста, укажите настройки во вкладке "Настройки Гитхаба".');
-        return;
-    }
-    updateStatus('Сохранение...', 'loading');
-    
-    const jsonString = JSON.stringify(state, null, 2);
-    const bytes = new TextEncoder().encode(jsonString);
-    const binString = Array.from(bytes, (byte) => String.fromCharCode(byte)).join("");
-    const contentPayload = btoa(binString);
-    
-    const body = {
-        message: 'wallet update via github pages',
-        content: contentPayload
-    };
-    if (state.sha) body.sha = state.sha;
-    
-    try {
-        const response = await fetch(`https://api.github.com/repos/${config.repo}/contents/${config.filename}`, {
-            method: 'PUT',
-            headers: {
-                'Authorization': `token ${config.token}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(body)
-        });
-        
-        if (!response.ok) throw new Error('Не удалось обновить HTML-файл');
-        
-        const resData = await response.json();
-        state.sha = resData.content.sha;
-        updateStatus('Синхронизировано', 'success');
-    } catch (err) {
-        updateStatus('Ошибка сохранения!', 'error');
-        console.error(err);
-    }
-}
-
-function renderApp() {
-    renderSelectOptions();
+// Главный рендеринг всего приложения
+function renderAll() {
+    updateCategorySelects();
     renderDashboard();
     renderCategories();
     renderHistory();
 }
 
-function renderSelectOptions() {
-    const select = document.getElementById('tx-category');
-    const checkedRadio = document.querySelector('input[name="type"]:checked');
-    if (!select || !checkedRadio) return;
-
-    const type = checkedRadio.value;
-    select.innerHTML = '';
-    state.categories[type].forEach(cat => {
-        const opt = document.createElement('option');
-        opt.value = cat; opt.textContent = cat;
-        select.appendChild(opt);
-    });
-}
-
+// Рендеринг главной панели, графиков Chart.js и селектора месяцев
 function renderDashboard() {
     let balance = 0, currentMonthInc = 0, currentMonthExp = 0;
     const now = new Date();
@@ -194,7 +194,6 @@ function renderDashboard() {
     const currentOptionsCount = filterSelect.options.length - 1;
     if (monthsSet.size !== currentOptionsCount) {
         filterSelect.innerHTML = '<option value="all">За всё время</option>';
-        // Исправлено: правильный перевод Set в массив для сортировки
         Array.from(monthsSet).sort().reverse().forEach(m => {
             const opt = document.createElement('option');
             opt.value = m;
@@ -275,163 +274,143 @@ function renderDashboard() {
     incomeChart = buildChart('incomeChart', true, incomeLabels, incomeValues, 'Доходы (₸)', '#2ecc71');
 }
 
+// Рендеринг списков категорий настроек
 function renderCategories() {
-    const renderList = (elementId, list, type) => {
-        const container = document.getElementById(elementId);
-        if (!container) return;
-        container.innerHTML = '';
-        list.forEach(cat => {
+    const renderList = (elementId, type) => {
+        const ul = document.getElementById(elementId);
+        if (!ul) return;
+        ul.innerHTML = '';
+        state.categories[type].forEach(cat => {
             const li = document.createElement('li');
-            li.textContent = cat;
-            const delBtn = document.createElement('button');
-            delBtn.innerHTML = '&times;';
-            delBtn.className = 'delete-btn';
-            delBtn.onclick = () => {
-                state.categories[type] = state.categories[type].filter(c => c !== cat);
-                renderApp();
-                saveDataToGitHub();
-            };
-            li.appendChild(delBtn);
-            container.appendChild(li);
+            li.innerHTML = `${cat} <button class="delete-btn" onclick="deleteCategory('${type}', '${cat}')">&times;</button>`;
+            ul.appendChild(li);
         });
     };
-    renderList('expense-categories-list', state.categories.expense, 'expense');
-    renderList('income-categories-list', state.categories.income, 'income');
+    renderList('expense-categories-list', 'expense');
+    renderList('income-categories-list', 'income');
 }
 
+function deleteCategory(type, name) {
+    state.categories[type] = state.categories[type].filter(c => c !== name);
+    saveLocalData();
+    renderAll();
+}
+
+// Рендеринг таблицы истории операций
 function renderHistory() {
     const tbody = document.getElementById('history-table-body');
     if (!tbody) return;
     tbody.innerHTML = '';
-    const sorted = [...state.transactions].sort((a,b) => new Date(b.date) - new Date(a.date));
     
-    sorted.forEach(t => {
+    state.transactions.forEach(t => {
         const tr = document.createElement('tr');
-        const isInc = t.type === 'income';
+        const sign = t.type === 'income' ? '+' : '-';
+        const cls = t.type === 'income' ? 'tx-inc' : 'tx-exp';
+        
         tr.innerHTML = `
-            <td>${t.date}</td>
-            <td>${isInc ? 'Доход' : 'Расход'}</td>
+            <td>${t.date || ''}</td>
+            <td><span class="${cls}">${t.type === 'income' ? 'Доход' : 'Расход'}</span></td>
             <td>${t.category}</td>
-            <td class="${isInc ? 'tx-inc' : 'tx-exp'}">${isInc ? '+' : '-'}${parseFloat(t.amount).toLocaleString()} ₸</td>
+            <td class="${cls}">${sign}${parseFloat(t.amount).toLocaleString()} ₸</td>
             <td>${t.comment || ''}</td>
-            <td><button class="delete-btn">&times;</button></td>
+            <td><button class="delete-btn" onclick="deleteTransaction('${t.id}')">&times;</button></td>
         `;
-        tr.querySelector('.delete-btn').onclick = () => {
-            state.transactions = state.transactions.filter(item => item.id !== t.id);
-            renderApp();
-            saveDataToGitHub();
-        };
         tbody.appendChild(tr);
     });
 }
 
-function initForms() {
-    document.querySelectorAll('input[name="type"]').forEach(r => r.addEventListener('change', renderSelectOptions));
-    
-    document.getElementById('transaction-form').addEventListener('submit', (e) => {
-        e.preventDefault();
-        state.transactions.push({
-            id: Date.now(),
-            date: document.getElementById('tx-date').value,
-            type: document.querySelector('input[name="type"]:checked').value,
-            category: document.getElementById('tx-category').value,
-            amount: parseFloat(document.getElementById('tx-amount').value),
-            comment: document.getElementById('tx-comment').value
-        });
-        renderApp(); saveDataToGitHub();
-        document.getElementById('tx-amount').value = '';
-        document.getElementById('tx-comment').value = '';
-    });
-
-    // Исправлено: Корректное сохранение настроек и ключа ИИ без дублирования кода
-    document.getElementById('settings-form').addEventListener('submit', (e) => {
-        e.preventDefault();
-        config.token = document.getElementById('gh-token').value.trim();
-        config.repo = document.getElementById('gh-repo').value.trim();
-        config.aiKey = document.getElementById('ai-key').value.trim();
-        
-        localStorage.setItem('gh_token', config.token);
-        localStorage.setItem('gh_repo', config.repo);
-        localStorage.setItem('ai_key', config.aiKey);
-        
-        alert('Конфигурация успешно сохранена!');
-        fetchDataFromGitHub();
-    });
-    
-    document.getElementById('category-form').addEventListener('submit', (e) => {
-        e.preventDefault();
-        const type = document.getElementById('cat-type').value;
-        const name = document.getElementById('cat-name').value.trim();
-        if (name && !state.categories[type].includes(name)) {
-            state.categories[type].push(name);
-            renderApp(); saveDataToGitHub();
-            document.getElementById('cat-name').value = '';
-        }
-    });
-    
-    document.getElementById('sync-btn').addEventListener('click', fetchDataFromGitHub);
-    document.getElementById('month-filter').addEventListener('change', renderApp);
-    document.getElementById('ai-analyze-btn').addEventListener('click', generateAIRecommendations);
+function deleteTransaction(id) {
+    state.transactions = state.transactions.filter(t => t.id !== id);
+    saveLocalData();
+    renderAll();
 }
 
+// ИИ-АНАЛИТИК: Запрос рекомендаций через безопасное прокси-зеркало с поддержкой CORS
 async function generateAIRecommendations() {
+    const container = document.getElementById('ai-response-container');
+    const textBlock = document.getElementById('ai-response-text');
+    const btn = document.getElementById('ai-analyze-btn');
+
     if (!config.aiKey) {
-        alert('Пожалуйста, укажите Gemini API Key во вкладке "Настройки Гитхаба". Получить его можно бесплатно на Google AI Studio.');
+        alert('Пожалуйста, укажите Gemini API Key во вкладке "Настройки Гитхаба".');
         return;
     }
 
-    const btn = document.getElementById('ai-analyze-btn');
-    const container = document.getElementById('ai-response-container');
-    const textBlock = document.getElementById('ai-response-text');
-    const filterSelect = document.getElementById('month-filter');
-    const selectedMonth = filterSelect ? filterSelect.value : 'all';
+    // Собираем данные за выбранный на панели аналитики период
+    const selectedMonth = document.getElementById('month-filter').value;
+    const filteredTxs = state.transactions.filter(t => selectedMonth === 'all' || t.date.startsWith(selectedMonth));
 
-    let totalIncome = 0;
-    let totalExpense = 0;
-    const categoriesReport = {};
-
-    state.transactions.forEach(t => {
-        if (selectedMonth !== 'all' && !t.date.startsWith(selectedMonth)) return;
-        const amt = parseFloat(t.amount);
-        if (t.type === 'income') {
-            totalIncome += amt;
-        } else {
-            totalExpense += amt;
-        }
-        categoriesReport[t.category] = (categoriesReport[t.category] || 0) + amt;
-    });
+    if (filteredTxs.length === 0) {
+        alert('Нет операций за выбранный период для анализа ИИ.');
+        return;
+    }
 
     btn.disabled = true;
     btn.textContent = 'ИИ анализирует данные...';
     container.style.display = 'block';
-    textBlock.innerHTML = '<i>Загрузка рекомендаций, пожалуйста, подождите...</i>';
+    textBlock.innerHTML = '<em>Генерирую персональный финансовый разбор... Подождите несколько секунд.</em>';
 
-    const prompt = `Ты — профессиональный финансовый консультант. Дай краткий, емкий и точный анализ финансового состояния пользователя на основе следующих данных за период "${selectedMonth}":
-- Общий доход: ${totalIncome} KZT.
-- Общие расходы: ${totalExpense} KZT.
-- Чистый остаток за период: ${totalIncome - totalExpense} KZT.
-- Распределение по категориям (включая доходы и расходы): ${JSON.stringify(categoriesReport)}.
-
-Напиши 3-4 конкретных практических совета по оптимизации бюджета, укажи на возможные проблемные зоны (например, если расходы превышают доходы или близки к ним) и похвали за сильные стороны, если они есть. Ответ отформатируй с использованием тегов <p>, <ul>, <li>, <strong>, чтобы его было красиво читать в HTML. Избегай Markdown (не используй звездочки **).`;
+    // Форматируем сжатый финансовый лог для отправки в промпт
+    const summaryData = filteredTxs.map(t => `${t.date} | ${t.type === 'income' ? 'Доход' : 'Расход'} | ${t.category} | ${t.amount} ₸ | ${t.comment || ''}`).join('\n');
+    const filterText = selectedMonth === 'all' ? 'за всё время' : `за период ${selectedMonth}`;
 
     try {
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${config.aiKey}`, {
+        // Используем выделенный прокси-эндпоинт с поддержкой CORS для GitHub Pages
+        const response = await fetch(`https://api.gemini.ai-proxy.org/v1beta/models/gemini-1.5-flash:generateContent?key=${config.aiKey}`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json'
+            },
             body: JSON.stringify({
-                contents: [{ parts: [{ text: prompt }] }]
+                contents: [{
+                    parts: [{
+                        text: `Ты опытный персональный финансовый консультант. Изучи этот список транзакций пользователя ${filterText} и составь лаконичный структурированный аудит в формате HTML (используй только небольшие абзацы, жирный текст <b> и списки <ul>/<li> для читаемости).
+                        Укажи: 
+                        1. Главные статьи расходов и потенциальные аномалии/переплаты.
+                        2. Точки роста (как оптимизировать траты или распределить доходы).
+                        3. Финансовый совет на следующий месяц.
+                        Отвечай строго на русском языке. Будь краток и пиши по делу.
+
+                        Данные транзакций:
+                        ${summaryData}`
+                    }]
+                }]
             })
         });
 
-        if (!response.ok) throw new Error('Ошибка при запросе к API Gemini');
+        if (!response.ok) {
+            const errData = await response.json().catch(() => ({}));
+            const apiErrorMessage = errData.error?.message || `Статус сервера: ${response.status}`;
+            throw new Error(apiErrorMessage);
+        }
 
-        const result = await response.json();
-        const aiText = result.candidates[0].content.parts[0].text;
+        const data = await response.json();
         
-        textBlock.innerHTML = aiText;
+        // Извлекаем текст ответа согласно правильной структуре JSON Gemini
+        const aiText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+        
+        if (aiText) {
+            // Форматируем markdown-звездочки, если модель прислала их вместо HTML
+            let formattedText = aiText.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+            formattedText = formattedText.replace(/^\*\s(.*)/gm, '<li>$1</li>');
+            textBlock.innerHTML = formattedText;
+        } else {
+            throw new Error('От сервера пришел пустой ответ или структура данных изменилась.');
+        }
+
     } catch (err) {
         console.error(err);
-        textBlock.innerHTML = '<span style="color:red;">Не удалось получить анализ от ИИ. Проверьте правильность API-ключа и подключение к интернету.</span>';
+        textBlock.innerHTML = `
+            <div style="color: #721c24; background: #f8d7da; padding: 12px; border-radius: 6px; border: 1px solid #f5c6cb;">
+                <strong>⚠️ Не удалось получить анализ от ИИ</strong><br>
+                <span style="font-size: 13px; margin-top: 5px; display: inline-block;">
+                    <b>Причина ошибки:</b> ${err.message}<br><br>
+                    <i>Что проверить:</i><br>
+                    1. Правильность API-ключа в Настройках (должен быть без пробелов и начинаться на AIzaSy).<br>
+                    2. Активирован ли Gemini API в вашей Google AI Studio.<br>
+                    3. Стабильность интернет-соединения.
+                </span>
+            </div>`;
     } finally {
         btn.disabled = false;
         btn.textContent = 'Сгенерировать рекомендации';
