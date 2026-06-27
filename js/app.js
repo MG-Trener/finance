@@ -176,7 +176,8 @@ function renderDashboard() {
     const currentOptionsCount = filterSelect.options.length - 1;
     if (monthsSet.size !== currentOptionsCount) {
         filterSelect.innerHTML = '<option value="all">За всё время</option>';
-        ...[monthsSet].sort().reverse().forEach(m => {
+        // Исправлено: правильный перевод Set в массив для сортировки
+        Array.from(monthsSet).sort().reverse().forEach(m => {
             const opt = document.createElement('option');
             opt.value = m;
             opt.textContent = m;
