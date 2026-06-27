@@ -39,11 +39,11 @@ let incomeChart = null;
 document.addEventListener('DOMContentLoaded', async () => {
     initTabs();
     initForms();
-    await loadLocalData(); // Загружаем настройки и файлы
+    await loadLocalData();
     renderAll();
 });
 
-// ЗАГРУЗКА ДАННЫХ (Через прокси-зеркало)
+// ЗАГРУЗКА ДАННЫХ (Оригинальные прямые запросы к GitHub)
 async function loadLocalData() {
     const savedConfig = localStorage.getItem('finance_config');
     if (savedConfig) {
@@ -63,8 +63,8 @@ async function loadLocalData() {
 
     if (config.ghRepo && config.ghToken) {
         try {
-            // Исправлено: Запрос идет через стабильное прокси-зеркало без блокировок
-            const response = await fetch(`https://api.github-proxy.com/repos/${config.ghRepo}/contents/data.json`, {
+            // Возвращено: Прямой запрос к официальному API GitHub
+            const response = await fetch(`https://api.github.com/repos/${config.ghRepo}/contents/data.json`, {
                 headers: {
                     'Authorization': `token ${config.ghToken}`,
                     'Accept': 'application/vnd.github.v3.raw',
@@ -80,10 +80,10 @@ async function loadLocalData() {
                     if (errDiv) errDiv.style.display = 'none';
                 }
             } else {
-                showGitHubError(`GitHub-прокси вернул статус ${response.status}. Проверьте токен или наличие data.json в репозитории.`);
+                showGitHubError(`GitHub вернул статус ${response.status}. Возможно, неверный токен или data.json отсутствует.`);
             }
         } catch (err) {
-            showGitHubError(`Ошибка сети при запросе к GitHub: ${err.message}. Проверьте блокировки или настройки.`);
+            showGitHubError(`Ошибка сети при запросе к GitHub: ${err.message}`);
         }
     } else {
         showGitHubError(`В настройках не заполнен Repo или Token. Зайдите во вкладку Настройки Гитхаба.`);
@@ -113,7 +113,7 @@ function saveLocalData() {
     localStorage.setItem('finance_state', JSON.stringify(state));
 }
 
-// СИНХРОНИЗАЦИЯ НА GITHUB (Исправленные адреса прокси)
+// СИНХРОНИЗАЦИЯ НА GITHUB (Оригинальная прямая отправка)
 async function syncWithGitHub() {
     if (!config.ghRepo || !config.ghToken) {
         alert('Пожалуйста, заполните параметры GitHub в Настройках!');
@@ -128,8 +128,8 @@ async function syncWithGitHub() {
 
     try {
         let sha = '';
-        // Получаем актуальный SHA старого файла через прокси
-        const resGet = await fetch(`https://api.github-proxy.com/repos/${config.ghRepo}/contents/data.json`, {
+        // Возвращено: Прямой GET запрос к GitHub для получения SHA файла
+        const resGet = await fetch(`https://api.github.com/repos/${config.ghRepo}/contents/data.json`, {
             headers: { 'Authorization': `token ${config.ghToken}` }
         });
         
@@ -143,8 +143,8 @@ async function syncWithGitHub() {
             return String.fromCharCode('0x' + p1);
         }));
 
-        // Отправляем обновленный файл через прокси-сервер
-        const resPut = await fetch(`https://api.github-proxy.com/repos/${config.ghRepo}/contents/data.json`, {
+        // Возвращено: Прямой PUT запрос к официальному API GitHub
+        const resPut = await fetch(`https://api.github.com/repos/${config.ghRepo}/contents/data.json`, {
             method: 'PUT',
             headers: {
                 'Authorization': `token ${config.ghToken}`,
@@ -240,7 +240,7 @@ function initForms() {
         });
     }
 
-    // Обработчик сохранения настроек конфигурации
+    // Сохранение конфигурации
     const setForm = document.getElementById('settings-form');
     if (setForm) {
         setForm.addEventListener('submit', async (e) => {
@@ -251,7 +251,7 @@ function initForms() {
             localStorage.setItem('finance_config', JSON.stringify(config));
             updateAuthStatus();
             
-            // Принудительно скачиваем свежий data.json сразу после сохранения
+            // Фикс: Принудительно скачиваем свежий data.json сразу после нажатия кнопки "Сохранить"
             await loadLocalData();
             renderAll();
             alert('Конфигурация сохранена! Данные с GitHub успешно синхронизированы.');
@@ -460,7 +460,7 @@ function deleteTransaction(id) {
     renderAll();
 }
 
-// ИИ-АНАЛИТИК (Через стабильный шлюз Cloudflare)
+// ИИ-АНАЛИТИК (Оригинальный прямой запрос к серверам Google)
 async function generateAIRecommendations() {
     const container = document.getElementById('ai-response-container');
     const textBlock = document.getElementById('ai-response-text');
@@ -487,8 +487,8 @@ async function generateAIRecommendations() {
     const filterText = selectedMonth === 'all' ? 'за всё время' : `за период ${selectedMonth}`;
 
     try {
-        // Изменено на сверхстабильный CORS-прокси шлюз для ИИ
-        const response = await fetch(`https://gateway.ai.cloudflare.com/v1/public/gemini/v1beta/models/gemini-1.5-flash:generateContent?key=${config.aiKey}`, {
+        // Возвращено: Прямой запрос к официальному серверу Google Gemini API
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${config.aiKey}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -519,7 +519,7 @@ async function generateAIRecommendations() {
         const data = await response.json();
         const aiText = data.candidates?.[0]?.content?.parts?.[0]?.text;
         if (aiText) {
-            let formattedText = aiText.replace(/\*\*(.*?)\*\"/g, '<b>$1</b>');
+            let formattedText = aiText.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
             formattedText = formattedText.replace(/^\*\s(.*)/gm, '<li>$1</li>');
             textBlock.innerHTML = formattedText;
         } else {
@@ -534,9 +534,9 @@ async function generateAIRecommendations() {
                 <span style="font-size: 13px; margin-top: 5px; display: inline-block;">
                     <b>Причина ошибки:</b> ${err.message}<br><br>
                     <i>Что проверить:</i><br>
-                    1. Вы обновили js/app.js на гитхабе и зашли через Инкогнито?<br>
-                    2. Вставлен ли новый рабочий ключ в настройках (начинается на AIzaSy)?<br>
-                    3. Попробуйте на пару секунд включить VPN для первого запроса, чтобы проверить, пропускает ли его ваша сеть.
+                    1. Правильность API-ключа в Настройках (должен быть без пробелов и начинаться на AIzaSy).<br>
+                    2. Активирован ли Gemini API в вашей Google AI Studio.<br>
+                    3. Стабильность интернет-соединения (при необходимости включите VPN).
                 </span>
             </div>`;
     } finally {
