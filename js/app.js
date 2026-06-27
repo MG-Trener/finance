@@ -113,7 +113,7 @@ function saveLocalData() {
     localStorage.setItem('finance_state', JSON.stringify(state));
 }
 
-// СИНХРОНИЗАЦИЯ НА GITHUB (Оригинальная прямая отправка)
+// БЕЗОПАСНАЯ СИНХРОНИЗАЦИЯ: Защита от затирания данных
 async function syncWithGitHub() {
     if (!config.ghRepo || !config.ghToken) {
         alert('Пожалуйста, заполните параметры GitHub в Настройках!');
@@ -128,7 +128,9 @@ async function syncWithGitHub() {
 
     try {
         let sha = '';
-        // Возвращено: Прямой GET запрос к GitHub для получения SHA файла
+        let remoteTransactionsCount = 0;
+
+        // 1. Сначала проверяем, что лежит на GitHub прямо сейчас
         const resGet = await fetch(`https://api.github.com/repos/${config.ghRepo}/contents/data.json`, {
             headers: { 'Authorization': `token ${config.ghToken}` }
         });
@@ -136,14 +138,31 @@ async function syncWithGitHub() {
         if (resGet.ok) {
             const fileInfo = await resGet.json();
             sha = fileInfo.sha;
+            
+            // Пробуем декодировать и прочитать старый файл с сервера
+            try {
+                const contentText = decodeURIComponent(escape(atob(fileInfo.content)));
+                const remoteData = JSON.parse(contentText);
+                if (remoteData && remoteData.transactions) {
+                    remoteTransactionsCount = remoteData.transactions.length;
+                }
+            } catch(e) {
+                console.log("Не удалось прочесть старый файл для проверки, пропускаем.");
+            }
         }
 
+        // 2. ЗАЩИТНЫЙ БЛОК: Если на сервере были транзакции, а у нас в локальном коде пусто — БЛОКИРУЕМ
+        if (remoteTransactionsCount > 0 && (!state.transactions || state.transactions.length === 0)) {
+            alert(`⚠️ СИНХРОНИЗАЦИЯ ОТМЕНЕНА!\n\nНа GitHub обнаружено ${remoteTransactionsCount} транзакций, а на вашем экране сейчас 0 (пусто).\n\nЧтобы не затереть данные, отправка заблокирована. Сначала обновите страницу (или включите VPN), чтобы данные скачались в браузер.`);
+            return; // Прерываем выполнение, файл на гитхабе не затрется!
+        }
+
+        // 3. Если всё безопасно — отправляем данные
         const jsonString = JSON.stringify(state, null, 2);
         const base64Content = btoa(encodeURIComponent(jsonString).replace(/%([0-9A-F]{2})/g, function(match, p1) {
             return String.fromCharCode('0x' + p1);
         }));
 
-        // Возвращено: Прямой PUT запрос к официальному API GitHub
         const resPut = await fetch(`https://api.github.com/repos/${config.ghRepo}/contents/data.json`, {
             method: 'PUT',
             headers: {
