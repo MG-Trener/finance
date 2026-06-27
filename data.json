@@ -1,14 +1,5 @@
 {
-  "transactions": [
-    {
-      "id": "1782592040537",
-      "type": "expense",
-      "category": "Продукты",
-      "amount": 2000,
-      "date": "2026-06-27",
-      "comment": ""
-    }
-  ],
+  "transactions": [],
   "categories": {
     "expense": [
       "Продукты",
