@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Домашняя Бухгалтерия</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Учет Расходов и Доходов</h1>
+            <div id="auth-status" class="status-badge error">Не авторизован</div>
+        </header>
+
+        <nav class="tabs">
+            <button class="tab-btn active" data-tab="dashboard">Дашборд</button>
+            <button class="tab-btn" data-tab="categories">Категории</button>
+            <button class="tab-btn" data-tab="history">История</button>
+            <button class="tab-btn" data-tab="settings">Настройки Гитхаба</button>
+        </nav>
+
+        <main>
+            <section id="dashboard" class="tab-content active">
+                <div class="balance-cards">
+                    <div class="card total">
+                        <h3>Текущий баланс</h3>
+                        <p id="total-balance">0 ₸</p>
+                    </div>
+                    <div class="card income">
+                        <h3>Доходы (месяц)</h3>
+                        <p id="month-income">0 ₸</p>
+                    </div>
+                    <div class="card expense">
+                        <h3>Расходы (месяц)</h3>
+                        <p id="month-expense">0 ₸</p>
+                    </div>
+                </div>
+
+                <div class="form-container">
+                    <h2>Новая операция</h2>
+                    <form id="transaction-form">
+                        <div class="form-group">
+                            <label>Тип</label>
+                            <div class="radio-group">
+                                <label><input type="radio" name="type" value="expense" checked> Расход</label>
+                                <label><input type="radio" name="type" value="income"> Доход</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="tx-category">Категория</label>
+                            <select id="tx-category" required></select>
+                        </div>
+                        <div class="form-group">
+                            <label for="tx-amount">Сумма (₸)</label>
+                            <input type="number" id="tx-amount" min="1" step="any" required placeholder="0.00">
+                        </div>
+                        <div class="form-group">
+                            <label for="tx-date">Дата</label>
+                            <input type="date" id="tx-date" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="tx-comment">Комментарий</label>
+                            <input type="text" id="tx-comment" placeholder="Например: Супермаркет">
+                        </div>
+                        <button type="submit" class="btn btn-success">Добавить операцию</button>
+                    </form>
+                </div>
+            </section>
+
+            <section id="categories" class="tab-content">
+                <div class="grid-2">
+                    <div class="category-block">
+                        <h2>Категории Расходов</h2>
+                        <ul id="expense-categories-list" class="list"></ul>
+                    </div>
+                    <div class="category-block">
+                        <h2>Категории Доходов</h2>
+                        <ul id="income-categories-list" class="list"></ul>
+                    </div>
+                </div>
+                <div class="form-container" style="margin-top: 20px;">
+                    <h2>Добавить новую категорию</h2>
+                    <form id="category-form">
+                        <div class="form-group">
+                            <label>Тип категории</label>
+                            <select id="cat-type">
+                                <option value="expense">Расход</option>
+                                <option value="income">Доход</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="cat-name">Название</label>
+                            <input type="text" id="cat-name" required placeholder="Например: Подписки">
+                        </div>
+                        <button type="submit" class="btn">Добавить категорию</button>
+                    </form>
+                </div>
+            </section>
+
+            <section id="history" class="tab-content">
+                <h2>История операций</h2>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Дата</th>
+                                <th>Тип</th>
+                                <th>Категория</th>
+                                <th>Сумма</th>
+                                <th>Комментарий</th>
+                                <th>Действие</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-table-body"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="settings" class="tab-content">
+                <h2>Интеграция с GitHub</h2>
+                <p class="help-text">Все данные шифруются и сохраняются исключительно локально в вашем браузере.</p>
+                <form id="settings-form">
+                    <div class="form-group">
+                        <label for="gh-token">GitHub Personal Access Token</label>
+                        <input type="password" id="gh-token" required placeholder="ghp_xxxxxxxxxxxx">
+                    </div>
+                    <div class="form-group">
+                        <label for="gh-repo">Репозиторий (в формате: имя_пользователя/имя_репозитория)</label>
+                        <input type="text" id="gh-repo" required placeholder="myusername/my-finance-tracker">
+                    </div>
+                    <button type="submit" class="btn btn-success">Сохранить конфигурацию</button>
+                </form>
+                <div style="margin-top:20px;">
+                    <button id="sync-btn" class="btn">Синхронизировать сейчас</button>
+                </div>
+            </section>
+        </main>
+    </div>
+    <script src="js/app.js"></script>
+</body>
+</html>
