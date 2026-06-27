@@ -13,6 +13,7 @@ let state = {
 let config = {
     token: localStorage.getItem('gh_token') || '',
     repo: localStorage.getItem('gh_repo') || '',
+    aiKey: localStorage.getItem('ai_key') || '', // Новый ключ
     filename: 'data.json'
 };
 
@@ -43,6 +44,7 @@ function initTabs() {
 function loadConfigInputs() {
     document.getElementById('gh-token').value = config.token;
     document.getElementById('gh-repo').value = config.repo;
+    document.getElementById('ai-key').value = config.aiKey; // Заполнение поля ИИ
     document.getElementById('tx-date').valueAsDate = new Date();
 }
 
@@ -315,6 +317,19 @@ function initForms() {
         document.getElementById('tx-amount').value = '';
         document.getElementById('tx-comment').value = '';
     });
+
+    document.getElementById('settings-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        config.token = document.getElementById('gh-token').value.trim();
+        config.repo = document.getElementById('gh-repo').value.trim();
+        config.aiKey = document.getElementById('ai-key').value.trim(); // Сохраняем ключ ИИ
+        
+        localStorage.setItem('gh_token', config.token);
+        localStorage.setItem('gh_repo', config.repo);
+        localStorage.setItem('ai_key', config.config.aiKey); // В localStorage
+        
+        fetchDataFromGitHub();
+    });
     
     document.getElementById('category-form').addEventListener('submit', (e) => {
         e.preventDefault();
@@ -337,4 +352,5 @@ function initForms() {
     });
     document.getElementById('sync-btn').addEventListener('click', fetchDataFromGitHub);
     document.getElementById('month-filter').addEventListener('change', renderApp);
+    document.getElementById('ai-analyze-btn').addEventListener('click', generateAIRecommendations);
 }
