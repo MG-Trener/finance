@@ -1,4 +1,5 @@
-let financeChart = null;
+let incomeChart = null;
+let expenseChart = null;
 
 let state = {
     categories: {
@@ -157,10 +158,9 @@ function renderDashboard() {
     const monthsSet = new Set();
     
     state.transactions.forEach(t => {
-        if (t.date) monthsSet.add(t.date.substring(0, 7)); // Получаем YYYY-MM
+        if (t.date) monthsSet.add(t.date.substring(0, 7));
     });
     
-    // Перерисовываем селект месяцев, только если количество изменилось
     const currentOptionsCount = filterSelect.options.length - 1;
     if (monthsSet.size !== currentOptionsCount) {
         filterSelect.innerHTML = '<option value="all">За всё время</option>';
@@ -170,10 +170,10 @@ function renderDashboard() {
             opt.textContent = m;
             filterSelect.appendChild(opt);
         });
-        filterSelect.value = selectedMonth; // сохраняем выбор
+        filterSelect.value = selectedMonth;
     }
 
-    // 2. Считаем основные карточки баланса (всегда за текущий месяц и общий)
+    // 2. Считаем основные карточки баланса
     state.transactions.forEach(t => {
         const amt = parseFloat(t.amount);
         if (t.type === 'income') {
@@ -189,66 +189,59 @@ function renderDashboard() {
     document.getElementById('month-income').textContent = `+${currentMonthInc.toLocaleString()} ₸`;
     document.getElementById('month-expense').textContent = `-${currentMonthExp.toLocaleString()} ₸`;
 
-    // 3. Подготовка данных для гистограммы с учетом фильтра времени
-    const chartData = {};
-    
+    // 3. Подготовка раздельных данных для графиков доходов и расходов
+    const incomeDataMap = {};
+    const expenseDataMap = {};
+
     state.transactions.forEach(t => {
-        // Если выбран конкретный месяц и транзакция не из него — пропускаем
         if (selectedMonth !== 'all' && !t.date.startsWith(selectedMonth)) return;
         
-        if (!chartData[t.category]) {
-            chartData[t.category] = { income: 0, expense: 0 };
+        const amt = parseFloat(t.amount);
+        if (t.type === 'income') {
+            incomeDataMap[t.category] = (incomeDataMap[t.category] || 0) + amt;
+        } else {
+            expenseDataMap[t.category] = (expenseDataMap[t.category] || 0) + amt;
         }
-        chartData[t.category][t.type] += parseFloat(t.amount);
     });
 
-    const labels = Object.keys(chartData);
-    const incomeData = labels.map(cat => chartData[cat].income);
-    const expenseData = labels.map(cat => chartData[cat].expense);
+    // 4. Функция-помощник для создания/обновления каждого графика
+    const buildChart = (canvasId, currentChartObj, labels, data, labelName, color) => {
+        const ctx = document.getElementById(canvasId).getContext('2d');
+        if (currentChartObj) currentChartObj.destroy();
 
-    // 4. Отрисовка или обновление графика Chart.js
-    const ctx = document.getElementById('analyticsChart').getContext('2d');
-    
-    if (financeChart) {
-        financeChart.destroy(); // Уничтожаем старый график перед перерисовкой
-    }
-
-    financeChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: labels,
-            datasets: [
-                {
-                    label: 'Доходы (₸)',
-                    data: incomeData,
-                    backgroundColor: '#2ecc71',
+        return new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: labelName,
+                    data: data,
+                    backgroundColor: color,
                     borderRadius: 4
-                },
-                {
-                    label: 'Расходы (₸)',
-                    data: expenseData,
-                    backgroundColor: '#e74c3c',
-                    borderRadius: 4
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    grid: { color: '#e1e4e8' }
-                },
-                x: {
-                    grid: { display: false }
-                }
+                }]
             },
-            plugins: {
-                legend: { position: 'top' }
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: { beginAtZero: true, grid: { color: '#e1e4e8' } },
+                    x: { grid: { display: false } }
+                },
+                plugins: {
+                    legend: { position: 'top' }
+                }
             }
-        }
-    });
+        });
+    };
+
+    // 5. Отрисовываем оба графика отдельно
+    const expenseLabels = Object.keys(expenseDataMap);
+    const expenseValues = Object.values(expenseDataMap);
+    expenseChart = buildChart('expenseChart', expenseChart, expenseLabels, expenseValues, 'Расходы (₸)', '#e74c3c');
+
+    const incomeLabels = Object.keys(incomeDataMap);
+    const incomeValues = Object.values(incomeDataMap);
+    incomeChart = buildChart('incomeChart', incomeChart, incomeLabels, incomeValues, 'Доходы (₸)', '#2ecc71');
 }
 
 function renderCategories() {
