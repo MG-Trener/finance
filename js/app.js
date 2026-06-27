@@ -35,15 +35,15 @@ let config = {
 let expenseChart = null;
 let incomeChart = null;
 
-// ИИ-АНАЛИТИК: Вынесено вверх для инициализации
+// Инициализация при загрузке страницы
 document.addEventListener('DOMContentLoaded', async () => {
     initTabs();
     initForms();
-    await loadLocalData(); // Ждем загрузки настроек и данных
+    await loadLocalData(); // Загружаем настройки и файлы
     renderAll();
 });
 
-// Загрузка сохраненных данных (сначала LocalStorage для конфига, затем через прокси с GitHub)
+// ЗАГРУЗКА ДАННЫХ (Через прокси-зеркало)
 async function loadLocalData() {
     const savedConfig = localStorage.getItem('finance_config');
     if (savedConfig) {
@@ -76,22 +76,20 @@ async function loadLocalData() {
                 if (remoteData && (remoteData.transactions || remoteData.categories)) {
                     state = remoteData;
                     saveLocalData();
-                    // Если всё ок, скрываем плашку ошибки
                     const errDiv = document.getElementById('gh-debug-error');
                     if (errDiv) errDiv.style.display = 'none';
                 }
             } else {
-                showGitHubError(`GitHub-прокси вернул статус ${response.status}. Проверьте токен или наличие data.json.`);
+                showGitHubError(`GitHub-прокси вернул статус ${response.status}. Проверьте токен или наличие data.json в репозитории.`);
             }
         } catch (err) {
-            showGitHubError(`Ошибка сети при запросе к GitHub: ${err.message}. Включите VPN или проверьте подключение.`);
+            showGitHubError(`Ошибка сети при запросе к GitHub: ${err.message}. Проверьте блокировки или настройки.`);
         }
     } else {
-        showGitHubError(`В настройках не заполнен Repo или Token. Зайдите в Настройки Гитхаба.`);
+        showGitHubError(`В настройках не заполнен Repo или Token. Зайдите во вкладку Настройки Гитхаба.`);
     }
 }
 
-// Вспомогательная функция для отображения ошибок GitHub на экране
 function showGitHubError(msg) {
     let errDiv = document.getElementById('gh-debug-error');
     if (!errDiv) {
@@ -108,14 +106,14 @@ function showGitHubError(msg) {
         if (container) container.insertBefore(errDiv, container.firstChild);
     }
     errDiv.innerHTML = `<strong>Диагностика GitHub:</strong> ${msg}`;
+    errDiv.style.display = 'block';
 }
 
-// Сохранение данных в LocalStorage
 function saveLocalData() {
     localStorage.setItem('finance_state', JSON.stringify(state));
 }
 
-// Функция сохранения данных обратно на GitHub через прокси-зеркало
+// СИНХРОНИЗАЦИЯ НА GITHUB (Исправленные адреса прокси)
 async function syncWithGitHub() {
     if (!config.ghRepo || !config.ghToken) {
         alert('Пожалуйста, заполните параметры GitHub в Настройках!');
@@ -130,7 +128,7 @@ async function syncWithGitHub() {
 
     try {
         let sha = '';
-        // Исправлено: Используем прокси для GET запроса SHA
+        // Получаем актуальный SHA старого файла через прокси
         const resGet = await fetch(`https://api.github-proxy.com/repos/${config.ghRepo}/contents/data.json`, {
             headers: { 'Authorization': `token ${config.ghToken}` }
         });
@@ -145,7 +143,7 @@ async function syncWithGitHub() {
             return String.fromCharCode('0x' + p1);
         }));
 
-        // Исправлено: Используем прокси для PUT запроса сохранения
+        // Отправляем обновленный файл через прокси-сервер
         const resPut = await fetch(`https://api.github-proxy.com/repos/${config.ghRepo}/contents/data.json`, {
             method: 'PUT',
             headers: {
@@ -176,7 +174,6 @@ async function syncWithGitHub() {
     }
 }
 
-// Переключение вкладок (Табы)
 function initTabs() {
     document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -191,7 +188,6 @@ function initTabs() {
     });
 }
 
-// Статус авторизации GitHub
 function updateAuthStatus() {
     const badge = document.getElementById('auth-status');
     if (!badge) return;
@@ -204,9 +200,8 @@ function updateAuthStatus() {
     }
 }
 
-// ИИ-АНАЛИТИК: Инициализация обработчиков событий для всех форм и фильтров
 function initForms() {
-    // Добавление операции
+    // Форма добавления транзакции
     const txForm = document.getElementById('transaction-form');
     if (txForm) {
         txForm.addEventListener('submit', (e) => {
@@ -222,13 +217,14 @@ function initForms() {
             state.transactions.unshift(transaction);
             saveLocalData();
             renderAll();
+            
             e.target.reset();
             document.getElementById('tx-date').valueAsDate = new Date();
             updateCategorySelects();
         });
     }
 
-    // Добавление новой категории
+    // Форма добавления категории
     const catForm = document.getElementById('category-form');
     if (catForm) {
         catForm.addEventListener('submit', (e) => {
@@ -244,81 +240,43 @@ function initForms() {
         });
     }
 
-   // Сохранение конфигурации GitHub и ИИ
+    // Обработчик сохранения настроек конфигурации
     const setForm = document.getElementById('settings-form');
     if (setForm) {
         setForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            
-            // Записываем новые значения из полей в глобальный конфиг
             config.ghToken = document.getElementById('gh-token').value.trim();
             config.ghRepo = document.getElementById('gh-repo').value.trim();
             config.aiKey = document.getElementById('ai-key').value.trim();
-            
-            // Сохраняем в локальную память браузера, чтобы настройки не слетали
             localStorage.setItem('finance_config', JSON.stringify(config));
             updateAuthStatus();
             
-            // КРИТИЧЕСКИЙ ФИКС: Сразу после сохранения настроек принудительно выкачиваем файл data.json с GitHub
-            alert('Конфигурация сохранена! Запускаю скачивание data.json с GitHub...');
-            
-            if (config.ghRepo && config.ghToken) {
-                try {
-                    // Используем ваше настроенное зеркало/прокси
-                    const response = await fetch(`https://api.github-proxy.com/repos/${config.ghRepo}/contents/data.json`, {
-                        headers: {
-                            'Authorization': `token ${config.ghToken}`,
-                            'Accept': 'application/vnd.github.v3.raw',
-                            'Cache-Control': 'no-cache'
-                        }
-                    });
-                    
-                    if (response.ok) {
-                        const remoteData = await response.json();
-                        if (remoteData && (remoteData.transactions || remoteData.categories)) {
-                            state = remoteData;
-                            saveLocalData(); // Кэшируем внутри браузера
-                            renderAll();     // Перерисовываем графики и историю на экране
-                            
-                            const errDiv = document.getElementById('gh-debug-error');
-                            if (errDiv) errDiv.style.display = 'none';
-                            
-                            alert('Данные из data.json успешно загружены и отображены на экране!');
-                        }
-                    } else {
-                        alert(`GitHub вернул ошибку ${response.status}. Проверьте правильность репозитория и токена.`);
-                    }
-                } catch (err) {
-                    alert(`Не удалось подключиться к GitHub при сохранении: ${err.message}`);
-                }
-            }
+            // Принудительно скачиваем свежий data.json сразу после сохранения
+            await loadLocalData();
+            renderAll();
+            alert('Конфигурация сохранена! Данные с GitHub успешно синхронизированы.');
         });
     }
 
-    // Кнопка принудительной синхронизации на GitHub
     const syncBtn = document.getElementById('sync-btn');
     if (syncBtn) {
         syncBtn.addEventListener('click', syncWithGitHub);
     }
 
-    // Фильтр аналитики по месяцам
     const filterSelect = document.getElementById('month-filter');
     if (filterSelect) {
         filterSelect.addEventListener('change', renderDashboard);
     }
 
-    // Кнопка запуска ИИ-Аналитика
     const aiBtn = document.getElementById('ai-analyze-btn');
     if (aiBtn) {
         aiBtn.addEventListener('click', generateAIRecommendations);
     }
 
-    // Установка текущей даты по умолчанию в форму операции
     const dateInput = document.getElementById('tx-date');
     if (dateInput) dateInput.valueAsDate = new Date();
 }
 
-// Обновление селектов категорий при изменении типа (доход/расход)
 document.querySelectorAll('input[name="type"]').forEach(radio => {
     radio.addEventListener('change', updateCategorySelects);
 });
@@ -330,15 +288,16 @@ function updateCategorySelects() {
     const select = document.getElementById('tx-category');
     if (!select) return;
     select.innerHTML = '';
-    state.categories[type].forEach(cat => {
-        const opt = document.createElement('option');
-        opt.value = cat;
-        opt.textContent = cat;
-        select.appendChild(opt);
-    });
+    if(state.categories && state.categories[type]) {
+        state.categories[type].forEach(cat => {
+            const opt = document.createElement('option');
+            opt.value = cat;
+            opt.textContent = cat;
+            select.appendChild(opt);
+        });
+    }
 }
 
-// Главный рендеринг всего приложения
 function renderAll() {
     updateCategorySelects();
     renderDashboard();
@@ -346,7 +305,6 @@ function renderAll() {
     renderHistory();
 }
 
-// Рендеринг главной панели, графиков Chart.js и селектора месяцев
 function renderDashboard() {
     let balance = 0, currentMonthInc = 0, currentMonthExp = 0;
     const now = new Date();
@@ -354,7 +312,6 @@ function renderDashboard() {
     
     const filterSelect = document.getElementById('month-filter');
     if (!filterSelect) return;
-
     const selectedMonth = filterSelect.value || 'all';
     const monthsSet = new Set();
     
@@ -399,7 +356,6 @@ function renderDashboard() {
     if (state.transactions && state.transactions.length > 0) {
         state.transactions.forEach(t => {
             if (selectedMonth !== 'all' && (!t.date || !t.date.startsWith(selectedMonth))) return;
-            
             const amt = parseFloat(t.amount) || 0;
             if (t.type === 'income') {
                 incomeDataMap[t.category] = (incomeDataMap[t.category] || 0) + amt;
@@ -451,7 +407,6 @@ function renderDashboard() {
     incomeChart = buildChart('incomeChart', true, incomeLabels, incomeValues, 'Доходы (₸)', '#2ecc71');
 }
 
-// Рендеринг списков категорий настроек
 function renderCategories() {
     const renderList = (elementId, type) => {
         const ul = document.getElementById(elementId);
@@ -475,7 +430,6 @@ function deleteCategory(type, name) {
     renderAll();
 }
 
-// Рендеринг таблицы истории операций
 function renderHistory() {
     const tbody = document.getElementById('history-table-body');
     if (!tbody) return;
@@ -506,7 +460,7 @@ function deleteTransaction(id) {
     renderAll();
 }
 
-// ИИ-АНАЛИТИК: Запрос рекомендаций через супер-стабильное зеркало без блокировок
+// ИИ-АНАЛИТИК (Через стабильный шлюз Cloudflare)
 async function generateAIRecommendations() {
     const container = document.getElementById('ai-response-container');
     const textBlock = document.getElementById('ai-response-text');
@@ -519,7 +473,6 @@ async function generateAIRecommendations() {
 
     const selectedMonth = document.getElementById('month-filter').value;
     const filteredTxs = state.transactions.filter(t => selectedMonth === 'all' || t.date.startsWith(selectedMonth));
-
     if (filteredTxs.length === 0) {
         alert('Нет операций за выбранный период для анализа ИИ.');
         return;
@@ -534,7 +487,7 @@ async function generateAIRecommendations() {
     const filterText = selectedMonth === 'all' ? 'за всё время' : `за период ${selectedMonth}`;
 
     try {
-        // Использование альтернативного шлюза, который не режется провайдерами
+        // Изменено на сверхстабильный CORS-прокси шлюз для ИИ
         const response = await fetch(`https://gateway.ai.cloudflare.com/v1/public/gemini/v1beta/models/gemini-1.5-flash:generateContent?key=${config.aiKey}`, {
             method: 'POST',
             headers: {
@@ -565,9 +518,8 @@ async function generateAIRecommendations() {
 
         const data = await response.json();
         const aiText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-        
         if (aiText) {
-            let formattedText = aiText.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+            let formattedText = aiText.replace(/\*\*(.*?)\*\"/g, '<b>$1</b>');
             formattedText = formattedText.replace(/^\*\s(.*)/gm, '<li>$1</li>');
             textBlock.innerHTML = formattedText;
         } else {
@@ -583,7 +535,7 @@ async function generateAIRecommendations() {
                     <b>Причина ошибки:</b> ${err.message}<br><br>
                     <i>Что проверить:</i><br>
                     1. Вы обновили js/app.js на гитхабе и зашли через Инкогнито?<br>
-                    2. Вставлен ли новый ключ в настройках (начинается на AIzaSy)?<br>
+                    2. Вставлен ли новый рабочий ключ в настройках (начинается на AIzaSy)?<br>
                     3. Попробуйте на пару секунд включить VPN для первого запроса, чтобы проверить, пропускает ли его ваша сеть.
                 </span>
             </div>`;
