@@ -25,7 +25,15 @@
       "category": "Зарплата",
       "amount": 118000,
       "comment": ""
+    },
+    {
+      "id": 1782587063790,
+      "date": "2026-06-27",
+      "type": "income",
+      "category": "Зарплата",
+      "amount": 19000,
+      "comment": ""
     }
   ],
-  "sha": "d3a28c50027e2a0ca673a42a78ccd960aa17db79"
+  "sha": "82b382831d9fc90b3e3e2c37ab869a5fda7504c5"
 }
