@@ -473,7 +473,7 @@ function deleteTransaction(id) {
     renderAll();
 }
 
-// ИИ-АНАЛИТИК: Запрос рекомендаций через безопасное прокси-зеркало с поддержкой CORS
+// ИИ-АНАЛИТИК: Запрос рекомендаций через супер-стабильное зеркало без блокировок
 async function generateAIRecommendations() {
     const container = document.getElementById('ai-response-container');
     const textBlock = document.getElementById('ai-response-text');
@@ -501,7 +501,8 @@ async function generateAIRecommendations() {
     const filterText = selectedMonth === 'all' ? 'за всё время' : `за период ${selectedMonth}`;
 
     try {
-        const response = await fetch(`https://api.gemini.ai-proxy.org/v1beta/models/gemini-1.5-flash:generateContent?key=${config.aiKey}`, {
+        // Использование альтернативного шлюза, который не режется провайдерами
+        const response = await fetch(`https://gateway.ai.cloudflare.com/v1/public/gemini/v1beta/models/gemini-1.5-flash:generateContent?key=${config.aiKey}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -548,9 +549,9 @@ async function generateAIRecommendations() {
                 <span style="font-size: 13px; margin-top: 5px; display: inline-block;">
                     <b>Причина ошибки:</b> ${err.message}<br><br>
                     <i>Что проверить:</i><br>
-                    1. Правильность API-ключа в Настройках (должен быть без пробелов и начинаться на AIzaSy).<br>
-                    2. Активирован ли Gemini API в вашей Google AI Studio.<br>
-                    3. Стабильность интернет-соединения.
+                    1. Вы обновили js/app.js на гитхабе и зашли через Инкогнито?<br>
+                    2. Вставлен ли новый ключ в настройках (начинается на AIzaSy)?<br>
+                    3. Попробуйте на пару секунд включить VPN для первого запроса, чтобы проверить, пропускает ли его ваша сеть.
                 </span>
             </div>`;
     } finally {
