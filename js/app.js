@@ -63,14 +63,16 @@ async function loadData() {
 
     if (config.ghRepo && config.ghToken) {
         try {
-            // ЗАПРОС НАПРЯМУЮ К GITHUB API БЕЗ ДЕФЕКТНОГО ПРОКСИ
-            const response = await fetch(`https://api.github.com/repos/${config.ghRepo}/contents/data.json`, {
-                headers: {
-                    'Authorization': `token ${config.ghToken}`,
-                    'Accept': 'application/vnd.github.v3.raw',
-                    'Cache-Control': 'no-cache'
-                }
-            });
+            // Было:
+// const response = await fetch(`https://api.github.com/repos/${config.ghRepo}/contents/data.json`, ...
+// СТАЛО:
+const response = await fetch(`https://cors.newt.ws/https://api.github.com/repos/${config.ghRepo}/contents/data.json`, {
+    headers: {
+        'Authorization': `token ${config.ghToken}`,
+        'Accept': 'application/vnd.github.v3.raw',
+        'Cache-Control': 'no-cache'
+    }
+});
             if (response.ok) {
                 const remoteData = await response.json();
                 if (remoteData && (remoteData.transactions || remoteData.categories)) {
@@ -118,45 +120,40 @@ function saveLocalData() {
 // СИНХРОНИЗАЦИЯ НА GITHUB C ЗАЩИТОЙ ОТ ЗАТИРАНИЯ (ОФИЦИАЛЬНЫЙ АДРЕС API)
 async function syncWithGitHub() {
     if (!config.ghRepo || !config.ghToken) {
-        alert('Пожалуйста, заполните параметры GitHub в Настройках!');
+        alert('Пожалуйста, сначала заполните данные GitHub в Настройках!');
         return;
+    }
+
+    const btn = document.getElementById('sync-btn');
+    if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'Синхронизация...';
     }
 
     try {
         let sha = '';
-        let remoteTransactionsCount = 0;
 
-        // 1. Проверяем файл на GitHub до отправки, используя прямой адрес API
-        const resGet = await fetch(`https://api.github.com/repos/${config.ghRepo}/contents/data.json`, {
-            headers: { 'Authorization': `token ${config.ghToken}` }
+        // 1. Получаем SHA файла через прокси (GET)
+        const resGet = await fetch(`https://cors.newt.ws/https://api.github.com/repos/${config.ghRepo}/contents/data.json`, {
+            headers: { 
+                'Authorization': `token ${config.ghToken}`,
+                'Cache-Control': 'no-cache'
+            }
         });
         
         if (resGet.ok) {
             const fileInfo = await resGet.json();
             sha = fileInfo.sha;
-            
-            try {
-                const contentText = decodeURIComponent(escape(atob(fileInfo.content)));
-                const remoteData = JSON.parse(contentText);
-                if (remoteData && remoteData.transactions) {
-                    remoteTransactionsCount = remoteData.transactions.length;
-                }
-            } catch(e) {}
         }
 
-        // 2. Защитный блок: не даем перезаписать сервер пустыми данными
-        if (remoteTransactionsCount > 0 && (!state.transactions || state.transactions.length === 0)) {
-            alert(`⚠️ СИНХРОНИЗАЦИЯ ОТМЕНЕНА!\n\nНа сервере GitHub есть данные (${remoteTransactionsCount} шт.), а у вас на экране сейчас пусто.\n\nВключите VPN или обновите страницу, чтобы сначала подтянуть существующие транзакции.`);
-            return;
-        }
-
-        // 3. Отправка данных на официальный адрес API
+        // Подготовка данных
         const jsonString = JSON.stringify(state, null, 2);
         const base64Content = btoa(encodeURIComponent(jsonString).replace(/%([0-9A-F]{2})/g, function(match, p1) {
             return String.fromCharCode('0x' + p1);
         }));
 
-        const resPut = await fetch(`https://api.github.com/repos/${config.ghRepo}/contents/data.json`, {
+        // 2. Отправляем обновление через прокси (PUT)
+        const resPut = await fetch(`https://cors.newt.ws/https://api.github.com/repos/${config.ghRepo}/contents/data.json`, {
             method: 'PUT',
             headers: {
                 'Authorization': `token ${config.ghToken}`,
@@ -171,13 +168,18 @@ async function syncWithGitHub() {
 
         if (resPut.ok) {
             alert('Данные успешно сохранены в репозитории на GitHub!');
-            const errDiv = document.getElementById('gh-debug-error');
-            if (errDiv) errDiv.style.display = 'none';
         } else {
-            throw new Error(`Статус ответа сервера: ${resPut.status}`);
+            const errorData = await resPut.json().catch(() => ({}));
+            throw new Error(`Ошибка ${resPut.status}: ${errorData.message || 'Не удалось записать файл'}`);
         }
     } catch (err) {
-        alert(`Ошибка синхронизации: ${err.message}`);
+        console.error(err);
+        alert(`Ошибка синхронизации: ${err.message}\n\nЕсли ошибка повторяется, проверьте корректность токена и репозитория.`);
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.textContent = 'Синхронизировать сейчас';
+        }
     }
 }
 
