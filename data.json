@@ -33,7 +33,15 @@
       "category": "Зарплата",
       "amount": 19000,
       "comment": ""
+    },
+    {
+      "id": 1782587102426,
+      "date": "2026-06-27",
+      "type": "expense",
+      "category": "Продукты",
+      "amount": 5000,
+      "comment": ""
     }
   ],
-  "sha": "82b382831d9fc90b3e3e2c37ab869a5fda7504c5"
+  "sha": "85564f6189ffcc36b2d414d7cca0b1031d09b3d2"
 }
