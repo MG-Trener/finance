@@ -126,5 +126,26 @@ function initForms() {
     });
 }
 
-function initTabs() { /* ваша логика табов */ }
+function initTabs() {
+    const tabs = document.querySelectorAll('.tab-btn');
+    const contents = document.querySelectorAll('.tab-content');
+
+    tabs.forEach(btn => {
+        btn.addEventListener('click', () => {
+            // Убираем активный класс у всех кнопок и контентов
+            tabs.forEach(b => b.classList.remove('active'));
+            contents.forEach(c => c.classList.remove('active'));
+            
+            // Добавляем активный класс текущей кнопке
+            btn.classList.add('active');
+            
+            // Находим нужный блок контента по data-tab
+            const tabId = btn.getAttribute('data-tab');
+            const target = document.getElementById(tabId);
+            if (target) {
+                target.classList.add('active');
+            }
+        });
+    });
+}
 function updateAuthStatus() { /* ваша логика статуса */ }
