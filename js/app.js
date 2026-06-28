@@ -84,16 +84,26 @@ function renderAll() {
 function updateCategorySelects() {
     const typeEl = document.querySelector('input[name="type"]:checked');
     const select = document.getElementById('tx-category');
-    if (!typeEl || !select) return;
     
-    const type = typeEl.value;
-    select.innerHTML = '';
-    state.categories[type].forEach(cat => {
-        const opt = document.createElement('option');
-        opt.value = cat;
-        opt.textContent = cat;
-        select.appendChild(opt);
-    });
+    // Если элементы не найдены, выходим
+    if (!select) {
+        console.error("Элемент #tx-category не найден в HTML!");
+        return;
+    }
+    
+    // Если ни одна радиокнопка не выбрана, берем 'expense' по умолчанию
+    const type = typeEl ? typeEl.value : 'expense';
+    
+    select.innerHTML = ''; // Очистка текущего списка
+    
+    if (state.categories && state.categories[type]) {
+        state.categories[type].forEach(cat => {
+            const opt = document.createElement('option');
+            opt.value = cat;
+            opt.textContent = cat;
+            select.appendChild(opt);
+        });
+    }
 }
 
 function initForms() {
