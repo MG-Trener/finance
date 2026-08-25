@@ -1,0 +1,66 @@
+/* Dedicated optimized backgrounds for the application and authentication screen. */
+body::before{
+  background-image:url('../../assets/backgrounds/site-bg.webp');
+  background-position:62% center;
+  background-size:cover;
+  background-repeat:no-repeat;
+  filter:brightness(1.14) saturate(1.08) contrast(1.03);
+}
+
+body::after{
+  background:
+    linear-gradient(180deg,rgba(2,7,12,.22),rgba(2,7,12,.48)),
+    linear-gradient(90deg,rgba(2,7,12,.58) 0%,rgba(2,7,12,.38) 34%,rgba(2,7,12,.16) 68%,rgba(2,7,12,.24) 100%);
+}
+
+/* Authentication gets its own artwork instead of inheriting the main background. */
+.auth-shell{
+  position:relative;
+  isolation:isolate;
+  overflow:hidden;
+  background:transparent;
+  grid-template-columns:minmax(0,.92fr) minmax(390px,.72fr);
+}
+.auth-shell::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:-2;
+  background:url('../../assets/backgrounds/auth-bg.webp') 58% center/cover no-repeat;
+  filter:brightness(1.13) saturate(1.06) contrast(1.02);
+  transform:scale(1.012);
+}
+.auth-shell::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:-1;
+  pointer-events:none;
+  background:
+    linear-gradient(90deg,rgba(2,8,14,.38) 0%,rgba(2,8,14,.30) 37%,rgba(2,8,14,.12) 63%,rgba(5,7,9,.18) 100%),
+    linear-gradient(180deg,rgba(0,5,10,.08),rgba(0,5,10,.30));
+}
+.auth-hero,.auth-card-wrap{position:relative;z-index:1}
+.auth-hero{padding-left:clamp(26px,4vw,70px);padding-right:clamp(24px,3vw,48px)}
+.auth-card-wrap{justify-items:start;padding-left:clamp(12px,2vw,34px);padding-right:clamp(24px,4vw,72px)}
+.auth-card{box-shadow:0 28px 80px #0008,inset 0 0 0 2px #fff4,inset 0 0 45px #6b421b24}
+
+/* Keep the artwork visible through the application chrome. */
+.app-shell{
+  background:linear-gradient(90deg,rgba(3,9,14,.94) 0 260px,rgba(4,12,19,.22) 260px,rgba(4,12,19,.10) 100%);
+}
+.main{background:transparent}
+
+@media(max-width:1100px){
+  .app-shell{background:linear-gradient(90deg,rgba(3,9,14,.94) 0 88px,rgba(4,12,19,.22) 88px,rgba(4,12,19,.10) 100%)}
+  .auth-shell{grid-template-columns:minmax(0,.82fr) minmax(360px,.68fr)}
+}
+
+@media(max-width:760px){
+  body::before{background-position:72% center;filter:brightness(1.06) saturate(1.04)}
+  body::after{background:linear-gradient(180deg,rgba(2,7,12,.28),rgba(2,7,12,.58))}
+  .auth-shell{grid-template-columns:1fr;min-height:100vh}
+  .auth-shell::before{background-position:68% center;filter:brightness(1.02) saturate(1.03)}
+  .auth-shell::after{background:linear-gradient(180deg,rgba(1,6,11,.30),rgba(1,6,11,.62))}
+  .auth-card-wrap{justify-items:center;padding:18px}
+}
