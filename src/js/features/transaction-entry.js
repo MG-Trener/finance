@@ -27,10 +27,7 @@ transactionForm=function(tx=null){
   const quick=phase3QuickPairs(type,person);
   return `<form id="txForm" class="quick-form quick-form-v3">
     <input type="hidden" id="txType" value="${type}">
-    <div class="full segmented">
-      <button type="button" data-type="expense" class="${type==='expense'?'active':''}">Расход</button>
-      <button type="button" data-type="income" class="${type==='income'?'active':''}">Доход</button>
-    </div>
+    <div class="full segmented"><button type="button" data-type="expense" class="${type==='expense'?'active':''}">Расход</button><button type="button" data-type="income" class="${type==='income'?'active':''}">Доход</button></div>
     <div class="field full amount-field"><label>Сумма, ₸</label><input class="amount-input amount-hero" id="amount" type="number" min="1" step="1" inputmode="decimal" value="${tx?Number(tx.amount):''}" placeholder="0" required autofocus></div>
     <div class="field full"><label>Кто</label>${personSwitch(person)}</div>
     <input type="hidden" id="personId" value="${person||''}">
@@ -48,10 +45,7 @@ function txRefreshSubcategories(form,preferred=''){
   const subcategory=form?.querySelector('#subcategoryId');
   if(!category||!subcategory)return;
   const subs=state.subcategories.filter(s=>s.category_id===category.value);
-  if(!subs.length){
-    subcategory.innerHTML='<option value="">Нет подкатегорий</option>';
-    subcategory.value='';subcategory.disabled=true;return;
-  }
+  if(!subs.length){subcategory.innerHTML='<option value="">Нет подкатегорий</option>';subcategory.value='';subcategory.disabled=true;return;}
   subcategory.disabled=false;
   subcategory.innerHTML=subs.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join('');
   subcategory.value=preferred&&subs.some(s=>s.id===preferred)?preferred:subs[0].id;
@@ -64,96 +58,85 @@ function txRefreshCategories(form,type,preferredCategory='',preferredSub=''){
   const cats=state.categories.filter(c=>c.type===type);
   category.innerHTML=cats.length?cats.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join(''):'<option value="">Нет категорий</option>';
   category.disabled=!cats.length;
-  if(!cats.length){
-    if(subcategory){subcategory.innerHTML='<option value="">Нет подкатегорий</option>';subcategory.disabled=true;}
-    return;
-  }
+  if(!cats.length){if(subcategory){subcategory.innerHTML='<option value="">Нет подкатегорий</option>';subcategory.disabled=true;}return;}
   category.value=preferredCategory&&cats.some(c=>c.id===preferredCategory)?preferredCategory:cats[0].id;
   txRefreshSubcategories(form,preferredSub);
 }
 
-// One delegated binding survives every renderApp() and modal re-render.
 if(!window.__financeTxDelegation){
   window.__financeTxDelegation=true;
   document.addEventListener('click',e=>{
-    const form=e.target.closest('#txForm');
-    if(!form)return;
-
+    const form=e.target.closest('#txForm');if(!form)return;
     const typeBtn=e.target.closest('.segmented [data-type]');
     if(typeBtn){
-      const type=typeBtn.dataset.type;
-      const typeInput=form.querySelector('#txType');
-      if(typeInput)typeInput.value=type;
+      const type=typeBtn.dataset.type;const typeInput=form.querySelector('#txType');if(typeInput)typeInput.value=type;
       if(!form.dataset.editId)state.txType=type;
       form.querySelectorAll('.segmented [data-type]').forEach(x=>x.classList.toggle('active',x===typeBtn));
-      const personId=form.querySelector('#personId')?.value||state.selectedPersonId;
-      const pref=phase3Prefs?.[personId]?.[type]||{};
-      txRefreshCategories(form,type,pref.category_id||'',pref.subcategory_id||'');
-      return;
+      const personId=form.querySelector('#personId')?.value||state.selectedPersonId;const pref=phase3Prefs?.[personId]?.[type]||{};
+      txRefreshCategories(form,type,pref.category_id||'',pref.subcategory_id||'');return;
     }
-
     const personBtn=e.target.closest('[data-group="personChoice"]');
-    if(personBtn){
-      form.querySelectorAll('[data-group="personChoice"]').forEach(x=>x.classList.remove('active'));
-      personBtn.classList.add('active');
-      const personInput=form.querySelector('#personId');
-      if(personInput)personInput.value=personBtn.dataset.person;
-      state.selectedPersonId=personBtn.dataset.person;
-      return;
-    }
-
+    if(personBtn){form.querySelectorAll('[data-group="personChoice"]').forEach(x=>x.classList.remove('active'));personBtn.classList.add('active');const personInput=form.querySelector('#personId');if(personInput)personInput.value=personBtn.dataset.person;state.selectedPersonId=personBtn.dataset.person;return;}
     const quickBtn=e.target.closest('.quick-pair');
-    if(quickBtn){
-      const category=form.querySelector('#categoryId');
-      if(!category)return;
-      if([...category.options].some(o=>o.value===quickBtn.dataset.qcat)){
-        category.value=quickBtn.dataset.qcat;
-        txRefreshSubcategories(form,quickBtn.dataset.qsub||'');
-      }
-    }
+    if(quickBtn){const category=form.querySelector('#categoryId');if(!category)return;if([...category.options].some(o=>o.value===quickBtn.dataset.qcat)){category.value=quickBtn.dataset.qcat;txRefreshSubcategories(form,quickBtn.dataset.qsub||'');}}
   });
-
-  document.addEventListener('change',e=>{
-    if(!e.target.matches('#txForm #categoryId'))return;
-    const form=e.target.closest('#txForm');
-    txRefreshSubcategories(form);
-  });
+  document.addEventListener('change',e=>{if(!e.target.matches('#txForm #categoryId'))return;txRefreshSubcategories(e.target.closest('#txForm'));});
 }
 
 bindTransactionForm=function(editId=null){
   const form=document.getElementById('modal')?.querySelector('#txForm')||document.querySelector('#txForm');
-  if(!form)return;
-  form.dataset.editId=editId||'';
-  form.onkeydown=e=>{
-    if(e.key==='Enter'&&e.target.tagName!=='TEXTAREA'&&e.target.tagName!=='BUTTON'&&e.target.tagName!=='SELECT'){
-      e.preventDefault();form.requestSubmit();
-    }
-  };
+  if(!form)return;form.dataset.editId=editId||'';
+  form.onkeydown=e=>{if(e.key==='Enter'&&e.target.tagName!=='TEXTAREA'&&e.target.tagName!=='BUTTON'&&e.target.tagName!=='SELECT'){e.preventDefault();form.requestSubmit();}};
   form.onsubmit=e=>saveTransaction(e,editId);
 };
 
 saveTransaction=async function(e,editId=null){
   e.preventDefault();
-  const form=e.currentTarget||e.target.closest('#txForm');
-  if(!form)return;
-  notice(editId?'editNotice':'txNotice','');
+  const form=e.currentTarget||e.target.closest('#txForm');if(!form)return;
+  const noticeId=editId?'editNotice':'txNotice';notice(noticeId,'');
   const personId=form.querySelector('#personId')?.value||'';
   const type=form.querySelector('#txType')?.value||state.txType;
   const categoryId=form.querySelector('#categoryId')?.value||'';
   const subcategoryId=form.querySelector('#subcategoryId')?.value||null;
   const amount=Number(form.querySelector('#amount')?.value||0);
-  if(!personId)return notice(editId?'editNotice':'txNotice','Выберите участника');
-  if(!categoryId)return notice(editId?'editNotice':'txNotice','Выберите категорию');
-  if(!(amount>0))return notice(editId?'editNotice':'txNotice','Введите сумму');
   const occurred=form.querySelector('#occurredAt')?.value;
-  const payload={family_id:state.family.id,person_id:personId,type,amount,category_id:categoryId,subcategory_id:subcategoryId,description:form.querySelector('#description')?.value.trim()||null,occurred_at:new Date(occurred).toISOString(),created_by:state.user.id,updated_at:new Date().toISOString()};
-  const result=editId?await sb.from('transactions').update(payload).eq('id',editId):await sb.from('transactions').insert(payload);
-  if(result.error)return notice(editId?'editNotice':'txNotice',result.error.message);
-  if(!editId){
-    phase3Prefs[personId]=phase3Prefs[personId]||{};
-    phase3Prefs[personId][type]={category_id:categoryId,subcategory_id:subcategoryId};
-    try{localStorage.setItem('finance.phase3.prefs',JSON.stringify(phase3Prefs))}catch(_){}
+  const description=form.querySelector('#description')?.value.trim()||null;
+  if(!personId)return notice(noticeId,'Выберите участника');
+  if(!categoryId)return notice(noticeId,'Выберите категорию');
+  if(!(amount>0))return notice(noticeId,'Введите сумму');
+  if(!occurred)return notice(noticeId,'Укажите дату и время');
+
+  const submit=form.querySelector('.save-operation');
+  if(submit){submit.disabled=true;submit.textContent='Сохраняю…';}
+  try{
+    let result;
+    if(editId){
+      const payload={family_id:state.family.id,person_id:personId,type,amount,category_id:categoryId,subcategory_id:subcategoryId,description,occurred_at:new Date(occurred).toISOString(),created_by:state.user.id,updated_at:new Date().toISOString()};
+      result=await sb.from('transactions').update(payload).eq('id',editId).select().single();
+    }else{
+      result=await sb.rpc('create_family_transaction',{
+        p_family_id:state.family.id,
+        p_person_id:personId,
+        p_type:type,
+        p_amount:amount,
+        p_category_id:categoryId,
+        p_subcategory_id:subcategoryId,
+        p_description:description,
+        p_occurred_at:new Date(occurred).toISOString()
+      });
+    }
+    if(result.error)return notice(noticeId,`Не удалось сохранить: ${result.error.message}`);
+    if(!result.data)return notice(noticeId,'Supabase не вернул созданную операцию. Запись не подтверждена.');
+
+    if(!editId){
+      phase3Prefs[personId]=phase3Prefs[personId]||{};phase3Prefs[personId][type]={category_id:categoryId,subcategory_id:subcategoryId};
+      try{localStorage.setItem('finance.phase3.prefs',JSON.stringify(phase3Prefs))}catch(_){}
+    }
+    if(typeof uiSound==='function')uiSound('success');
+    await loadData();
+  }catch(err){
+    notice(noticeId,`Ошибка сохранения: ${err?.message||String(err)}`);
+  }finally{
+    if(submit&&document.body.contains(submit)){submit.disabled=false;submit.textContent=editId?'Сохранить изменения':'Сохранить операцию';}
   }
-  if(typeof uiSound==='function')uiSound('success');
-  closeModal();await loadData();
 };
