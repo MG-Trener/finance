@@ -21,6 +21,7 @@
 @import url('./components/private-access.css');
 @import url('./components/ui-enhancements.css');
 @import url('./components/export.css');
+@import url('./components/family-crest.css');
 
 /* Optimized application and authorization artwork. */
 @import url('./backgrounds.css');
