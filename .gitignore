@@ -1,7 +1,8 @@
-node_modules
-.next
 .env
-.env.local
-coverage
+.env.*
+!.env.example
+node_modules/
+coverage/
 *.log
 .DS_Store
+Thumbs.db
