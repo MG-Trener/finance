@@ -4,7 +4,10 @@
   const clearInvite=()=>{localStorage.removeItem('finance.pendingInvite');const u=new URL(location.href);u.searchParams.delete('invite');history.replaceState({},'',u.pathname+u.search+u.hash)};
 
   const originalShell=shell;
-  shell=function(content){const html=originalShell(content);return html.replace('</nav>',`${nav('access','🔑','Доступ')}</nav>`)};
+  shell=function(content){
+    const html=originalShell(content);
+    return html.replace('</nav>',`${nav('access','🔑','Доступ')}<div class="family-crest" aria-label="Семейный герб"><img src="assets/gerb.png" alt="Герб семьи Гаврилычевых"></div></nav>`)
+  };
 
   const originalNav=nav;
   nav=function(view,icon,label){if(view!=='access')return originalNav(view,icon,label);return `<div class="nav-item pirate-nav ${state.view===view?'active':''}" data-view="access"><span class="nav-icon pirate-icon icon-key" aria-hidden="true"></span><span class="nav-label">Доступ</span></div>`};
