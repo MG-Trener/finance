@@ -4,10 +4,14 @@ const SUPABASE_KEY='sb_publishable_xLCywB_jYDuPJrTKflv5LQ_r8weOhFb';
 const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 const app=document.getElementById('app');
 const MONTHS=['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+const INITIAL_ACTIVE_TX_LIMIT=500;
+const INITIAL_TRASH_TX_LIMIT=100;
+const TX_HISTORY_BATCH=500;
 
 let state={
   user:null,family:null,people:[],categories:[],subcategories:[],
   transactions:[],trashTransactions:[],budgets:[],recurring:[],goals:[],goalContributions:[],
+  activeTransactionsHasMore:false,trashTransactionsHasMore:false,transactionHistoryLoading:false,
   view:'overview',txType:'expense',selectedPersonId:null,
   year:new Date().getFullYear(),month:new Date().getMonth()+1,
   filters:{person:'all',type:'all',category:'all',period:'month',sort:'newest',search:'',trash:false},
@@ -66,6 +70,45 @@ function syncTransactionState(row){
 }
 function renderStateChange(){if(typeof renderApp==='function')renderApp()}
 
+function appendUniqueTransactions(target,rows,orderField){
+  const known=new Set(target.map(x=>x.id));
+  for(const row of rows||[])if(!known.has(row.id)){target.push(row);known.add(row.id)}
+  target.sort((a,b)=>new Date(b[orderField]||0)-new Date(a[orderField]||0));
+}
+
+async function loadMoreTransactionHistory({trash=false,batch=TX_HISTORY_BATCH,render=true}={}){
+  if(state.transactionHistoryLoading||!state.family)return 0;
+  const hasMoreKey=trash?'trashTransactionsHasMore':'activeTransactionsHasMore';
+  if(!state[hasMoreKey])return 0;
+  const target=trash?state.trashTransactions:state.transactions;
+  const orderField=trash?'deleted_at':'occurred_at';
+  const from=target.length,to=from+batch-1;
+  state.transactionHistoryLoading=true;
+  try{
+    let query=sb.from('transactions').select('*').eq('family_id',state.family.id);
+    query=trash?query.not('deleted_at','is',null):query.is('deleted_at',null);
+    const {data,error}=await query.order(orderField,{ascending:false}).range(from,to);
+    if(error)throw error;
+    const rows=data||[];
+    appendUniqueTransactions(target,rows,orderField);
+    state[hasMoreKey]=rows.length===batch;
+    if(render&&typeof renderApp==='function')renderApp();
+    return rows.length;
+  }finally{
+    state.transactionHistoryLoading=false;
+  }
+}
+
+async function ensureAllActiveTransactionsLoaded(){
+  let added=0;
+  while(state.activeTransactionsHasMore){
+    const count=await loadMoreTransactionHistory({trash:false,batch:TX_HISTORY_BATCH,render:false});
+    added+=count;
+    if(!count)break;
+  }
+  return added;
+}
+
 async function loadData(){
   const {data:fu,error}=await sb.from('family_users').select('family_id,role,families(id,name,currency,created_by)').limit(1);
   if(error)return app.innerHTML=`<div class="boot">Ошибка: ${esc(error.message)}</div>`;
@@ -85,8 +128,8 @@ async function loadData(){
     sb.from('people').select('*').eq('family_id',familyId).order('label'),
     sb.from('categories').select('*').or(`family_id.is.null,family_id.eq.${familyId}`).order('sort_order'),
     sb.from('subcategories').select('*').order('sort_order'),
-    sb.from('transactions').select('*').eq('family_id',familyId).is('deleted_at',null).order('occurred_at',{ascending:false}).limit(1000),
-    sb.from('transactions').select('*').eq('family_id',familyId).not('deleted_at','is',null).order('deleted_at',{ascending:false}).limit(200),
+    sb.from('transactions').select('*').eq('family_id',familyId).is('deleted_at',null).order('occurred_at',{ascending:false}).limit(INITIAL_ACTIVE_TX_LIMIT),
+    sb.from('transactions').select('*').eq('family_id',familyId).not('deleted_at','is',null).order('deleted_at',{ascending:false}).limit(INITIAL_TRASH_TX_LIMIT),
     sb.from('budgets').select('*').eq('family_id',familyId),
     sb.from('recurring_payments').select('*').eq('family_id',familyId).order('day_of_month'),
     sb.from('financial_goals').select('*').eq('family_id',familyId).order('created_at',{ascending:false}),
@@ -97,6 +140,8 @@ async function loadData(){
 
   state.people=p.data||[];state.categories=c.data||[];state.subcategories=s.data||[];
   state.transactions=t.data||[];state.trashTransactions=trash.data||[];
+  state.activeTransactionsHasMore=state.transactions.length===INITIAL_ACTIVE_TX_LIMIT;
+  state.trashTransactionsHasMore=state.trashTransactions.length===INITIAL_TRASH_TX_LIMIT;
   state.budgets=b.data||[];state.recurring=r.data||[];state.goals=g.data||[];state.goalContributions=gc.data||[];
   if(!state.selectedPersonId&&state.people[0])state.selectedPersonId=state.people.find(x=>x.linked_user_id===state.user?.id)?.id||state.people[0].id;
   renderApp();
