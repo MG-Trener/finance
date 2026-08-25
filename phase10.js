@@ -1,6 +1,5 @@
 // Phase 10 - pirate date ribbon for transaction date selection.
 (function(){
-  const DAY=86400000;
   const dow=['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
   const mon=['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
 
@@ -12,8 +11,6 @@
     const next=new Date(date.getFullYear(),date.getMonth(),date.getDate(),old.getHours(),old.getMinutes(),0,0);
     const pad=n=>String(n).padStart(2,'0');
     input.value=`${next.getFullYear()}-${pad(next.getMonth()+1)}-${pad(next.getDate())}T${pad(next.getHours())}:${pad(next.getMinutes())}`;
-    state.year=next.getFullYear();
-    state.month=next.getMonth()+1;
   }
 
   function decorateDateRibbon(){
@@ -25,7 +22,7 @@
 
     const wrap=document.createElement('div');
     wrap.className='pirate-date-picker';
-    wrap.innerHTML=`<div class="pirate-date-head"><div class="pirate-date-title">Дата операции</div><button type="button" class="pirate-today">Сегодня</button></div><div class="pirate-date-shell"><div class="pirate-date-track"></div></div><div class="pirate-date-hint">Колесо мыши — сменить дату</div>`;
+    wrap.innerHTML=`<div class="pirate-date-head"><div class="pirate-date-title">Дата операции</div><button type="button" class="pirate-today">Сегодня</button></div><div class="pirate-date-shell"><div class="pirate-date-track"></div></div><div class="pirate-date-hint">Колесо мыши или перетаскивание — сменить дату</div>`;
     details.before(wrap);
     const track=wrap.querySelector('.pirate-date-track');
     const today=startOfDay(new Date());
