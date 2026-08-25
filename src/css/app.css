@@ -1,4 +1,4 @@
-/* Refactor stage 7: single CSS entrypoint.
+/* Refactor stage 8: single CSS entrypoint.
    No phase*.css files remain in the active stylesheet graph. */
 @import url('../../styles.css');
 @import url('../../hotfix.css');
@@ -18,4 +18,3 @@
 @import url('./components/date-ribbon.css');
 @import url('./components/private-access.css');
 @import url('./components/ui-enhancements.css');
-@import url('./components/access-overview.css');
