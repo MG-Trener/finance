@@ -1,0 +1,20 @@
+{
+  "name": "Семейная казна",
+  "short_name": "Казна",
+  "description": "Семейный учет доходов, расходов, бюджетов и регулярных платежей.",
+  "lang": "ru",
+  "start_url": "/finance/",
+  "scope": "/finance/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#071019",
+  "theme_color": "#071019",
+  "icons": [
+    {
+      "src": "assets/app-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
