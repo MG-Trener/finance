@@ -25,7 +25,7 @@ transactionForm=function(tx=null){
   let subId=tx?.subcategory_id||pref.subcategory_id||subs[0]?.id;
   if(!subs.some(s=>s.id===subId))subId=subs[0]?.id;
   const quick=phase3QuickPairs(type,person);
-  return `<form id="txForm" class="quick-form quick-form-v3">
+  return `<form id="txForm" class="quick-form quick-form-v3" data-edit-id="${tx?.id||''}">
     <input type="hidden" id="txType" value="${type}">
     <div class="full segmented"><button type="button" data-type="expense" class="${type==='expense'?'active':''}">Расход</button><button type="button" data-type="income" class="${type==='income'?'active':''}">Доход</button></div>
     <div class="field full amount-field"><label>Сумма, ₸</label><input class="amount-input amount-hero" id="amount" type="number" min="1" step="1" inputmode="decimal" value="${tx?Number(tx.amount):''}" placeholder="0" required autofocus></div>
@@ -36,7 +36,7 @@ transactionForm=function(tx=null){
     <div class="field"><label>Подкатегория</label><select id="subcategoryId" ${subs.length?'':'disabled'}>${subs.length?subs.map(s=>`<option value="${s.id}" ${s.id===subId?'selected':''}>${esc(s.name)}</option>`).join(''):'<option value="">Нет подкатегорий</option>'}</select></div>
     <div class="field full"><label>Комментарий</label><input id="description" value="${esc(tx?.description||'')}" placeholder="Необязательно"></div>
     <details class="time-details full" ${tx?'open':''}><summary><span>Дата и время</span><b>${tx?'Изменить':'Сейчас'}</b></summary><div class="field"><input id="occurredAt" type="datetime-local" value="${localDT(tx?.occurred_at)}" required></div></details>
-    <div class="full"><button class="btn btn-primary btn-wide save-operation">${tx?'Сохранить изменения':'Сохранить операцию'}</button></div>
+    <div class="full"><button type="submit" class="btn btn-primary btn-wide save-operation">${tx?'Сохранить изменения':'Сохранить операцию'}</button></div>
   </form>`;
 };
 
@@ -65,6 +65,7 @@ function txRefreshCategories(form,type,preferredCategory='',preferredSub=''){
 
 if(!window.__financeTxDelegation){
   window.__financeTxDelegation=true;
+
   document.addEventListener('click',e=>{
     const form=e.target.closest('#txForm');if(!form)return;
     const typeBtn=e.target.closest('.segmented [data-type]');
@@ -80,19 +81,38 @@ if(!window.__financeTxDelegation){
     const quickBtn=e.target.closest('.quick-pair');
     if(quickBtn){const category=form.querySelector('#categoryId');if(!category)return;if([...category.options].some(o=>o.value===quickBtn.dataset.qcat)){category.value=quickBtn.dataset.qcat;txRefreshSubcategories(form,quickBtn.dataset.qsub||'');}}
   });
-  document.addEventListener('change',e=>{if(!e.target.matches('#txForm #categoryId'))return;txRefreshSubcategories(e.target.closest('#txForm'));});
+
+  document.addEventListener('change',e=>{
+    if(!e.target.matches('#txForm #categoryId'))return;
+    txRefreshSubcategories(e.target.closest('#txForm'));
+  });
+
+  // Главный обработчик сохранения не зависит от bindOverview/renderApp.
+  document.addEventListener('submit',e=>{
+    const form=e.target;
+    if(!(form instanceof HTMLFormElement)||form.id!=='txForm')return;
+    e.preventDefault();
+    e.stopPropagation();
+    saveTransaction(e,form.dataset.editId||null);
+  },true);
+
+  document.addEventListener('keydown',e=>{
+    const form=e.target.closest?.('#txForm');
+    if(!form||e.key!=='Enter'||e.target.tagName==='TEXTAREA'||e.target.tagName==='BUTTON'||e.target.tagName==='SELECT')return;
+    e.preventDefault();form.requestSubmit();
+  });
 }
 
+// Оставлено для совместимости с существующими экранами. События уже делегированы глобально.
 bindTransactionForm=function(editId=null){
   const form=document.getElementById('modal')?.querySelector('#txForm')||document.querySelector('#txForm');
-  if(!form)return;form.dataset.editId=editId||'';
-  form.onkeydown=e=>{if(e.key==='Enter'&&e.target.tagName!=='TEXTAREA'&&e.target.tagName!=='BUTTON'&&e.target.tagName!=='SELECT'){e.preventDefault();form.requestSubmit();}};
-  form.onsubmit=e=>saveTransaction(e,editId);
+  if(form)form.dataset.editId=editId||form.dataset.editId||'';
 };
 
 saveTransaction=async function(e,editId=null){
   e.preventDefault();
-  const form=e.currentTarget||e.target.closest('#txForm');if(!form)return;
+  const form=e.currentTarget?.id==='txForm'?e.currentTarget:e.target?.closest?.('#txForm')||document.querySelector('#txForm');
+  if(!form)return;
   const noticeId=editId?'editNotice':'txNotice';notice(noticeId,'');
   const personId=form.querySelector('#personId')?.value||'';
   const type=form.querySelector('#txType')?.value||state.txType;
