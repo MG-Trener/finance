@@ -4,53 +4,56 @@ function personSwitch(selected=state.selectedPersonId,prefix='personChoice'){ret
 function transactionForm(tx=null){return '<form id="txForm"></form>'}
 function bindTransactionForm(){}
 function saveTransaction(){}
+
 function transactionList(tx,actions=false){
   if(!tx.length)return `<div class="empty">Пока нет операций за этот период</div>`;
-  return `<div class="list">${tx.map(x=>{
-    const amount=`${x.type==='income'?'+':'−'} ${money(x.amount)}`;
-    const amountMarkup=actions
-      ?`<button type="button" class="tx-amount amount-edit-trigger ${x.type==='income'?'positive':'negative'}" data-id="${x.id}" title="Исправить сумму"><span>${amount}</span><small>Исправить</small></button>`
-      :`<div class="tx-amount ${x.type==='income'?'positive':'negative'}">${amount}</div>`;
-    return `<div class="tx"><div class="tx-icon">${x.type==='income'?'↗':'↘'}</div><div><div class="tx-title">${esc(catName(x.category_id))}${subName(x.subcategory_id)?` · ${esc(subName(x.subcategory_id))}`:''}</div><div class="tx-meta">${esc(personName(x.person_id))} · ${new Date(x.occurred_at).toLocaleString('ru-RU',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})}${x.description?' · '+esc(x.description):''}</div></div>${amountMarkup}${actions?`<div class="tx-actions"><button class="icon-btn editTx" data-id="${x.id}" title="Изменить всю операцию">✎</button><button class="icon-btn deleteTx" data-id="${x.id}" title="Удалить">×</button></div>`:''}</div>`
-  }).join('')}</div>`
+  return `<div class="list">${tx.map(x=>{const amount=`${x.type==='income'?'+':'−'} ${money(x.amount)}`,amountMarkup=actions?`<button type="button" class="tx-amount amount-edit-trigger ${x.type==='income'?'positive':'negative'}" data-id="${x.id}" title="Исправить сумму"><span>${amount}</span><small>Исправить</small></button>`:`<div class="tx-amount ${x.type==='income'?'positive':'negative'}">${amount}</div>`;return `<div class="tx"><div class="tx-icon">${x.type==='income'?'↗':'↘'}</div><div><div class="tx-title">${esc(catName(x.category_id))}${subName(x.subcategory_id)?` · ${esc(subName(x.subcategory_id))}`:''}</div><div class="tx-meta">${esc(personName(x.person_id))} · ${new Date(x.occurred_at).toLocaleString('ru-RU',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})}${x.description?' · '+esc(x.description):''}</div></div>${amountMarkup}${actions?`<div class="tx-actions"><button class="btn btn-soft btn-small editTx" data-id="${x.id}">Изменить</button><button class="btn btn-danger btn-small deleteTx" data-id="${x.id}">В корзину</button></div>`:''}</div>`}).join('')}</div>`;
 }
+
 function bindTxButtons(){
   document.querySelectorAll('.editTx').forEach(b=>b.onclick=()=>openEditTransaction(b.dataset.id));
   document.querySelectorAll('.deleteTx').forEach(b=>b.onclick=()=>deleteTransaction(b.dataset.id));
+  document.querySelectorAll('.restoreTx').forEach(b=>b.onclick=()=>restoreTransaction(b.dataset.id));
+  document.querySelectorAll('.historyTx').forEach(b=>b.onclick=()=>openTransactionHistory(b.dataset.id));
   document.querySelectorAll('.amount-edit-trigger').forEach(b=>b.onclick=()=>openQuickAmountEdit(b.dataset.id));
 }
 function expenseBars(){const sums={};periodTx().filter(x=>x.type==='expense').forEach(x=>sums[x.category_id]=(sums[x.category_id]||0)+Number(x.amount));const arr=Object.entries(sums).sort((a,b)=>b[1]-a[1]).slice(0,7),max=arr[0]?.[1]||1;if(!arr.length)return `<div class="empty">После первых расходов здесь появится структура трат</div>`;return arr.map(([id,val])=>`<div class="bar-row"><span>${esc(catName(id))}</span><div class="bar-track"><div class="bar" style="width:${Math.max(3,val/max*100)}%"></div></div><b>${money(val)}</b></div>`).join('')}
-function openEditTransaction(id){const tx={...byId(state.transactions,id)};renderEditModal(tx)}
+function openEditTransaction(id){const source=byId(state.transactions,id)||byId(state.trashTransactions,id);if(!source)return;renderEditModal({...source})}
 function renderEditModal(tx){document.body.insertAdjacentHTML('beforeend',`<div class="modal-backdrop" id="modal"><div class="modal"><div class="modal-head"><h2>Редактировать операцию</h2><button class="icon-btn" id="closeModal">×</button></div><div id="editNotice"></div>${transactionForm(tx)}</div></div>`);document.getElementById('closeModal').onclick=closeModal;bindTransactionForm(tx.id)}
 
 function openQuickAmountEdit(id){
-  const tx=byId(state.transactions,id);if(!tx)return;
-  closeModal();
+  const tx=byId(state.transactions,id);if(!tx)return;closeModal();
   const context=[catName(tx.category_id),subName(tx.subcategory_id),personName(tx.person_id)].filter(Boolean).map(esc).join(' · ');
   document.body.insertAdjacentHTML('beforeend',`<div class="modal-backdrop" id="modal"><div class="modal quick-amount-modal"><div class="modal-head"><div><h2>Исправить сумму</h2><p class="quick-amount-context">${context}</p></div><button class="icon-btn" id="closeModal" aria-label="Закрыть">×</button></div><div id="quickAmountNotice"></div><form id="quickAmountForm"><div class="field"><label for="quickAmountInput">Сумма, ₸</label><input id="quickAmountInput" class="quick-amount-input" type="number" min="1" step="1" inputmode="decimal" value="${Number(tx.amount)||''}" required></div><div class="quick-amount-actions"><button type="button" class="btn btn-soft" id="cancelQuickAmount">Отмена</button><button type="submit" class="btn btn-primary" id="saveQuickAmount">Сохранить сумму</button></div></form></div></div>`);
-  const input=document.getElementById('quickAmountInput');
-  document.getElementById('closeModal').onclick=closeModal;
-  document.getElementById('cancelQuickAmount').onclick=closeModal;
-  document.getElementById('modal').onclick=e=>{if(e.target.id==='modal')closeModal()};
-  document.getElementById('quickAmountForm').onsubmit=async e=>{
-    e.preventDefault();
-    const amount=Number(input.value);
-    if(!(amount>0))return notice('quickAmountNotice','Введите корректную сумму');
-    const save=document.getElementById('saveQuickAmount');
-    save.disabled=true;save.textContent='Сохраняю…';
-    try{
-      const {data,error}=await sb.from('transactions').update({amount,updated_at:new Date().toISOString()}).eq('id',id).select().single();
-      if(error)return notice('quickAmountNotice',`Не удалось изменить сумму: ${error.message}`);
-      if(!data)return notice('quickAmountNotice','Изменение суммы не подтверждено.');
-      if(typeof uiSound==='function')uiSound('success');
-      closeModal();await loadData();
-    }catch(err){
-      notice('quickAmountNotice',`Ошибка: ${err?.message||String(err)}`);
-    }finally{
-      if(save&&document.body.contains(save)){save.disabled=false;save.textContent='Сохранить сумму'}
-    }
-  };
+  const input=document.getElementById('quickAmountInput'),save=document.getElementById('saveQuickAmount');document.getElementById('closeModal').onclick=closeModal;document.getElementById('cancelQuickAmount').onclick=closeModal;document.getElementById('modal').onclick=e=>{if(e.target.id==='modal')closeModal()};
+  document.getElementById('quickAmountForm').onsubmit=async e=>{e.preventDefault();const amount=Number(input.value);if(!(amount>0))return notice('quickAmountNotice','Введите корректную сумму');save.disabled=true;save.textContent='Сохраняю…';try{const {data,error}=await sb.from('transactions').update({amount}).eq('id',id).select().single();if(error)return notice('quickAmountNotice',`Не удалось изменить сумму: ${error.message}`);if(!data)return notice('quickAmountNotice','Изменение суммы не подтверждено.');syncTransactionState(data);if(typeof uiSound==='function')uiSound('success');closeModal();renderStateChange()}catch(err){notice('quickAmountNotice',`Ошибка: ${err?.message||String(err)}`)}finally{if(save&&document.body.contains(save)){save.disabled=false;save.textContent='Сохранить сумму'}}};
   requestAnimationFrame(()=>{input?.focus();input?.select()});
 }
 
-async function deleteTransaction(id){if(!confirm('Удалить эту операцию?'))return;const {error}=await sb.from('transactions').delete().eq('id',id);if(error)return alert(error.message);await loadData()}
+async function deleteTransaction(id){
+  if(!confirm('Переместить операцию в корзину? Её можно будет восстановить.'))return;
+  const {data,error}=await sb.from('transactions').update({deleted_at:new Date().toISOString()}).eq('id',id).select().single();
+  if(error)return alert(error.message);syncTransactionState(data);if(typeof uiSound==='function')uiSound('delete');renderStateChange();
+}
+async function restoreTransaction(id){
+  const {data,error}=await sb.from('transactions').update({deleted_at:null}).eq('id',id).select().single();
+  if(error)return alert(error.message);syncTransactionState(data);if(typeof uiSound==='function')uiSound('success');renderStateChange();
+}
+
+function historyActor(id){if(!id)return'Система';if(id===state.user?.id)return'Вы';return state.people.find(p=>p.linked_user_id===id)?.display_name||'Участник семьи'}
+function historyChanges(row){
+  if(row.action==='delete')return ['Операция перемещена в корзину'];if(row.action==='restore')return ['Операция восстановлена'];
+  const before=row.before_data||{},after=row.after_data||{},changes=[];
+  if(Number(before.amount)!==Number(after.amount))changes.push(`Сумма: ${money(before.amount)} → ${money(after.amount)}`);
+  if(before.type!==after.type)changes.push(`Тип: ${before.type==='income'?'Доход':'Расход'} → ${after.type==='income'?'Доход':'Расход'}`);
+  if(before.person_id!==after.person_id)changes.push(`Участник: ${personName(before.person_id)} → ${personName(after.person_id)}`);
+  if(before.category_id!==after.category_id)changes.push(`Категория: ${catName(before.category_id)} → ${catName(after.category_id)}`);
+  if(before.subcategory_id!==after.subcategory_id)changes.push(`Подкатегория: ${subName(before.subcategory_id)||'—'} → ${subName(after.subcategory_id)||'—'}`);
+  if((before.description||'')!==(after.description||''))changes.push(`Комментарий: ${before.description||'—'} → ${after.description||'—'}`);
+  if(before.occurred_at!==after.occurred_at)changes.push(`Дата: ${new Date(before.occurred_at).toLocaleString('ru-RU')} → ${new Date(after.occurred_at).toLocaleString('ru-RU')}`);
+  return changes.length?changes:['Служебное обновление записи'];
+}
+async function openTransactionHistory(id){
+  closeModal();document.body.insertAdjacentHTML('beforeend',`<div class="modal-backdrop" id="modal"><div class="modal history-modal"><div class="modal-head"><h2>История операции</h2><button class="icon-btn" id="closeModal">×</button></div><div id="historyBody"><div class="empty">Загружаю историю…</div></div></div></div>`);document.getElementById('closeModal').onclick=closeModal;document.getElementById('modal').onclick=e=>{if(e.target.id==='modal')closeModal()};
+  const {data,error}=await sb.from('transaction_history').select('*').eq('transaction_id',id).order('changed_at',{ascending:false}).limit(50),body=document.getElementById('historyBody');if(!body)return;if(error){body.innerHTML=`<div class="notice error">${esc(error.message)}</div>`;return}if(!data?.length){body.innerHTML='<div class="empty">Изменений этой операции пока не было</div>';return}body.innerHTML=`<div class="history-list">${data.map(row=>`<div class="history-row"><div class="history-row-head"><b>${row.action==='delete'?'Удаление':row.action==='restore'?'Восстановление':'Изменение'}</b><span>${new Date(row.changed_at).toLocaleString('ru-RU',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})}</span></div><small>${esc(historyActor(row.changed_by))}</small>${historyChanges(row).map(x=>`<p>${esc(x)}</p>`).join('')}</div>`).join('')}</div>`;
+}
