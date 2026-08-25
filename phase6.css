@@ -1,0 +1,207 @@
+/* Phase 6 - super pirate UI: graphical buttons, menu icons and alert seal */
+
+:root{
+  --pirate-gold:#d5ad64;
+  --pirate-gold-2:#8a5b2b;
+  --pirate-wood:#1b2630;
+  --pirate-wood-2:#0b1117;
+  --pirate-rope:#9b7746;
+  --pirate-red:#b7251f;
+}
+
+/* Buttons: wood + brass plaque feel */
+.btn{
+  position:relative;
+  isolation:isolate;
+  overflow:hidden;
+  border-radius:12px;
+  border:1px solid #8c6738;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.18),
+    inset 0 -2px 0 rgba(0,0,0,.35),
+    0 7px 18px rgba(0,0,0,.38);
+  text-shadow:0 1px 1px #000,0 0 10px rgba(255,211,128,.08);
+}
+.btn::before,
+.btn::after{
+  content:"";
+  position:absolute;
+  pointer-events:none;
+  z-index:-1;
+}
+.btn::before{
+  inset:3px;
+  border:1px solid rgba(230,190,116,.30);
+  border-radius:8px;
+}
+.btn::after{
+  left:10%;right:10%;top:0;height:1px;
+  background:linear-gradient(90deg,transparent,#ffe1a1,transparent);
+  opacity:.55;
+}
+.btn-primary{
+  background:
+    radial-gradient(circle at 14% 50%,rgba(255,218,139,.22),transparent 16%),
+    radial-gradient(circle at 86% 50%,rgba(255,218,139,.18),transparent 16%),
+    linear-gradient(180deg,#d8b56c 0%,#9e6c31 46%,#67411f 100%);
+  color:#fff1cf;
+  border-color:#e0bd75;
+  box-shadow:
+    inset 0 1px 0 #fff7,
+    inset 0 -2px 0 #3f260f,
+    0 8px 22px #0008,
+    0 0 0 1px rgba(84,48,18,.8);
+}
+.btn-primary:hover{
+  filter:brightness(1.08) saturate(1.08);
+  box-shadow:
+    inset 0 1px 0 #fff8,
+    inset 0 -2px 0 #3f260f,
+    0 10px 26px #0009,
+    0 0 18px rgba(213,173,100,.16);
+}
+.btn-primary:active{transform:translateY(1px) scale(.995)}
+
+.btn-soft{
+  background:
+    linear-gradient(90deg,rgba(169,113,48,.09),transparent 18%,transparent 82%,rgba(169,113,48,.09)),
+    repeating-linear-gradient(0deg,rgba(255,255,255,.018) 0 1px,rgba(0,0,0,.025) 1px 3px),
+    linear-gradient(180deg,#24303a,#121b23 56%,#0a1016);
+  color:#ead6aa;
+  border-color:#765a37;
+}
+.btn-soft:hover{border-color:#ad8347;color:#fff0cf;background-color:#1c2832}
+
+.btn-danger{
+  background:linear-gradient(180deg,#7e312c,#4f1816 60%,#2d0c0b);
+  border-color:#a94e43;
+  color:#ffd4c9;
+}
+
+/* tiny action buttons become coin-like */
+.icon-btn{
+  border-radius:50%;
+  width:36px;height:36px;
+  border:1px solid #8d6636;
+  background:
+    radial-gradient(circle at 35% 28%,#32414d,#17222b 55%,#0b1117 80%);
+  color:#e5c27d;
+  box-shadow:inset 0 0 0 2px rgba(212,174,101,.08),0 4px 12px #0006;
+}
+.icon-btn:hover{
+  color:#fff0c9;
+  border-color:#d3a65c;
+  box-shadow:inset 0 0 0 2px rgba(212,174,101,.16),0 0 13px rgba(213,173,100,.18);
+}
+
+/* Pirate navigation */
+.sidebar{
+  background:
+    linear-gradient(180deg,rgba(9,16,23,.985),rgba(3,8,13,.995)),
+    repeating-linear-gradient(90deg,transparent 0 28px,rgba(255,255,255,.015) 29px 30px);
+}
+.side-nav{gap:10px}
+.pirate-nav{
+  min-height:52px;
+  border-radius:13px;
+  border:1px solid rgba(122,88,46,.28);
+  padding:9px 12px;
+  color:#c8b692;
+  background:
+    linear-gradient(180deg,rgba(35,47,57,.34),rgba(9,16,22,.20));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.02);
+}
+.pirate-nav:hover{
+  color:#ffe8bd;
+  border-color:#76562f;
+  background:
+    radial-gradient(circle at 13% 50%,rgba(202,148,70,.12),transparent 24%),
+    linear-gradient(180deg,rgba(57,40,25,.52),rgba(24,23,22,.55));
+}
+.pirate-nav.active{
+  color:#fff1cf;
+  border-color:#b58748;
+  background:
+    linear-gradient(90deg,rgba(119,73,31,.78),rgba(68,42,25,.56) 58%,rgba(27,28,27,.46)),
+    repeating-linear-gradient(0deg,rgba(255,255,255,.025) 0 1px,rgba(0,0,0,.025) 1px 3px);
+  box-shadow:
+    inset 3px 0 0 #e0b86b,
+    inset 0 0 0 1px rgba(255,220,153,.07),
+    0 6px 18px #0005;
+}
+.pirate-nav.active::after{
+  content:"";
+  position:absolute;
+  left:12px;right:12px;bottom:3px;height:1px;
+  background:linear-gradient(90deg,transparent,#dbb46d,transparent);
+  opacity:.55;
+}
+
+.nav-icon.pirate-icon{
+  width:30px;height:30px;
+  flex:0 0 30px;
+  display:block;
+  background-size:contain;
+  background-position:center;
+  background-repeat:no-repeat;
+  filter:drop-shadow(0 2px 2px #000) drop-shadow(0 0 5px rgba(212,174,101,.10));
+  transition:.2s ease;
+}
+.pirate-nav:hover .pirate-icon,.pirate-nav.active .pirate-icon{
+  transform:scale(1.06) rotate(-1deg);
+  filter:drop-shadow(0 2px 2px #000) drop-shadow(0 0 7px rgba(222,179,93,.26));
+}
+
+/* lightweight original SVG icons */
+.icon-compass{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='26' fill='%23101a23' stroke='%23d4ad63' stroke-width='4'/%3E%3Ccircle cx='32' cy='32' r='20' fill='none' stroke='%23825d32' stroke-width='2'/%3E%3Cpath d='M39 18 35 35 18 39 29 29z' fill='%23e2bd70'/%3E%3Cpath d='M25 46 29 29 46 25 35 35z' fill='%238a3d2d'/%3E%3Ccircle cx='32' cy='32' r='4' fill='%23f3d38d' stroke='%23573b1f' stroke-width='2'/%3E%3C/svg%3E")}
+.icon-journal{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M14 10h30q7 0 7 7v34H20q-6 0-6-6z' fill='%23462c1d' stroke='%23c6934f' stroke-width='3'/%3E%3Cpath d='M20 10v41' stroke='%23896339' stroke-width='4'/%3E%3Cpath d='M27 22h16M27 30h14M27 38h12' stroke='%23e1bd79' stroke-width='3' stroke-linecap='round'/%3E%3Ccircle cx='45' cy='17' r='4' fill='%23a52520' stroke='%23f0c271' stroke-width='2'/%3E%3C/svg%3E")}
+.icon-map{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='m8 13 15-5 18 6 15-5v42l-15 5-18-6-15 5z' fill='%23c8a56b' stroke='%23634326' stroke-width='3'/%3E%3Cpath d='M23 8v42M41 14v42' stroke='%23785b35' stroke-width='2'/%3E%3Cpath d='m15 40 8-8 8 4 8-13 10 6' fill='none' stroke='%238e251f' stroke-width='3' stroke-dasharray='4 4'/%3E%3Cpath d='M45 42h4v8h-4zm-7-6h4v14h-4zm-7 5h4v9h-4z' fill='%233b2a1d'/%3E%3C/svg%3E")}
+.icon-chest{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M10 27h44v25H10z' fill='%23502f1c' stroke='%23c28e48' stroke-width='3'/%3E%3Cpath d='M12 27q2-16 20-16t20 16z' fill='%23633b21' stroke='%23c28e48' stroke-width='3'/%3E%3Cpath d='M31 27h7v13h-7z' fill='%23d8ae58'/%3E%3Ccircle cx='22' cy='43' r='6' fill='%23dcb757' stroke='%23815a29' stroke-width='2'/%3E%3Ccircle cx='47' cy='44' r='6' fill='%23c99a3f' stroke='%23815a29' stroke-width='2'/%3E%3C/svg%3E")}
+.icon-hourglass{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M18 10h28M18 54h28' stroke='%23c8954d' stroke-width='5' stroke-linecap='round'/%3E%3Cpath d='M22 12h20c0 11-4 14-10 20 6 6 10 9 10 20H22c0-11 4-14 10-20-6-6-10-9-10-20z' fill='%23131c23' stroke='%23d9ad5d' stroke-width='3'/%3E%3Cpath d='M27 18h10l-5 9zm0 28h10l-5-9z' fill='%23dfb65f'/%3E%3C/svg%3E")}
+.icon-tags{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='m12 18 19-8 21 21-19 19-21-21z' fill='%23b69057' stroke='%235d4227' stroke-width='3'/%3E%3Ccircle cx='24' cy='22' r='4' fill='%23151f28' stroke='%23e0be78' stroke-width='2'/%3E%3Cpath d='m24 22 16 16' stroke='%23634a2d' stroke-width='3'/%3E%3Cpath d='M28 47 44 31l8 8-16 16z' fill='%235d3521' stroke='%23c38d49' stroke-width='3'/%3E%3C/svg%3E")}
+
+/* recurring payments alarm becomes a wax seal */
+.pirate-alert{
+  position:relative;
+  min-width:27px;height:27px;
+  padding:0 7px;
+  display:grid;place-items:center;
+  border-radius:50% 46% 50% 44%;
+  background:
+    radial-gradient(circle at 35% 30%,#e7453b,#b51f1a 48%,#6d0d0b 78%);
+  color:#ffe6b0;
+  border:1px solid #e76a54;
+  font-family:Cinzel,serif;
+  font-weight:800;
+  box-shadow:0 0 0 2px rgba(75,7,5,.65),0 0 12px rgba(232,49,38,.36),inset 0 1px 2px #fff4;
+}
+.payment-alert .pirate-icon::after{
+  content:"";
+  position:absolute;
+  width:7px;height:7px;
+  border-radius:50%;
+  background:#ffc14e;
+  right:-2px;top:-2px;
+  box-shadow:0 0 8px #ff9c34,0 0 15px #ff7b22;
+}
+.payment-alert{animation:pirateNavAlarm 1.7s ease-in-out infinite}
+@keyframes pirateNavAlarm{
+  0%,100%{box-shadow:inset 0 0 0 1px rgba(255,195,93,.03)}
+  50%{box-shadow:inset 0 0 0 1px rgba(255,195,93,.18),0 0 18px rgba(187,39,30,.20)}
+}
+
+/* important action gets brass corner rivets */
+.save-operation{min-height:50px;font-family:Cinzel,serif;letter-spacing:.02em}
+.save-operation::before{box-shadow:inset 7px 0 0 -6px #f0c871,inset -7px 0 0 -6px #f0c871}
+
+@media(max-width:1100px){
+  .nav-icon.pirate-icon{width:34px;height:34px;flex-basis:34px}
+  .pirate-nav{padding:8px;justify-content:center}
+  .pirate-alert{position:absolute;right:2px;top:2px;min-width:20px;height:20px;font-size:10px;padding:0 4px}
+}
+
+@media(max-width:760px){
+  .nav-icon.pirate-icon{width:28px;height:28px;flex-basis:28px}
+  .pirate-nav{border-radius:10px;min-height:54px}
+  .pirate-nav.active{box-shadow:inset 0 -3px 0 #d1a75d}
+}
