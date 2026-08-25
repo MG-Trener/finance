@@ -1,9 +1,14 @@
-/* Refactor stage 5: single CSS entrypoint.
-   Legacy styles remain only for large modules not yet migrated. */
+/* Refactor stage 6: single CSS entrypoint.
+   Only phase4 remains as a legacy page stylesheet. */
 @import url('../../styles.css');
 @import url('../../hotfix.css');
-@import url('../../phase3.css');
 @import url('../../phase4.css');
+
+/* Refactored phase3 pages and components */
+@import url('./pages/overview.css');
+@import url('./components/transaction-entry.css');
+@import url('./components/reminders.css');
+@import url('./pages/recurring.css');
 
 /* Migrated pirate UI layers */
 @import url('./components/pirate-navigation.css');
