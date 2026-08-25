@@ -1,0 +1,18 @@
+@media(max-width:760px){
+  .side-nav{grid-template-columns:repeat(5,minmax(0,1fr))!important}
+  .side-nav>.nav-secondary{display:none!important}
+  .side-nav>.nav-more{display:flex!important}
+  html.mobile-more-open,html.mobile-more-open body{overflow:hidden!important}
+  .mobile-more-backdrop{position:fixed;inset:0;z-index:12000;display:flex;align-items:flex-end;padding:12px 10px calc(12px + env(safe-area-inset-bottom));background:rgba(1,5,8,.78);backdrop-filter:blur(7px)}
+  .mobile-more-backdrop[hidden]{display:none!important}
+  .mobile-more-sheet{width:100%;border:1px solid #8f6a3c;border-radius:18px;background:linear-gradient(180deg,#17232c,#081016);box-shadow:0 24px 70px #000d;overflow:hidden}
+  .mobile-more-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px;border-bottom:1px solid rgba(154,113,61,.4)}
+  .mobile-more-head>div{display:grid;gap:2px}.mobile-more-head b{font:700 17px/1.2 Cinzel,serif;color:#ecd4a6}.mobile-more-head small{font-size:10px;color:#93866f}
+  .mobile-more-close{width:36px;height:36px;border-radius:50%;border:1px solid #76562f;background:#101a21;color:#dfbd79;font-size:22px}
+  .mobile-more-list{display:grid;grid-template-columns:1fr 1fr;gap:7px;padding:10px}
+  .mobile-more-list .mobile-more-item{display:flex!important;min-height:58px!important;flex-direction:row!important;justify-content:flex-start!important;gap:10px!important;padding:9px 11px!important;border:1px solid rgba(122,88,46,.4)!important;border-radius:11px!important;background:linear-gradient(180deg,#1b2831,#0c151b)!important;color:#e6d0a7!important}
+  .mobile-more-list .mobile-more-item.active{border-color:#c89a53!important;background:linear-gradient(180deg,#5b3b20,#2a2119)!important}
+  .mobile-more-list .mobile-more-item .nav-icon{width:28px!important;height:28px!important;flex:0 0 28px!important}
+  .mobile-more-list .mobile-more-item .nav-label{font-size:11px!important;line-height:1.2!important;text-align:left!important;white-space:normal!important}
+}
+@media(max-width:380px){.mobile-more-list{grid-template-columns:1fr}}
