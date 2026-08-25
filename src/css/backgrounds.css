@@ -13,21 +13,21 @@ body::after{
     linear-gradient(90deg,rgba(2,7,12,.58) 0%,rgba(2,7,12,.38) 34%,rgba(2,7,12,.16) 68%,rgba(2,7,12,.24) 100%);
 }
 
-/* Authentication gets its own artwork instead of inheriting the main background. */
+/* Authentication layout: content lives on the left, ship remains visible on the right. */
 .auth-shell{
   position:relative;
   isolation:isolate;
   overflow:hidden;
   background:transparent;
-  grid-template-columns:minmax(0,.92fr) minmax(390px,.72fr);
+  grid-template-columns:minmax(360px,.62fr) minmax(360px,.78fr) 1fr;
 }
 .auth-shell::before{
   content:"";
   position:absolute;
   inset:0;
   z-index:-2;
-  background:url('../../assets/backgrounds/auth-bg.webp') 58% center/cover no-repeat;
-  filter:brightness(1.13) saturate(1.06) contrast(1.02);
+  background:url('../../assets/backgrounds/auth-bg.webp') 62% center/cover no-repeat;
+  filter:brightness(1.16) saturate(1.08) contrast(1.02);
   transform:scale(1.012);
 }
 .auth-shell::after{
@@ -37,13 +37,32 @@ body::after{
   z-index:-1;
   pointer-events:none;
   background:
-    linear-gradient(90deg,rgba(2,8,14,.38) 0%,rgba(2,8,14,.30) 37%,rgba(2,8,14,.12) 63%,rgba(5,7,9,.18) 100%),
-    linear-gradient(180deg,rgba(0,5,10,.08),rgba(0,5,10,.30));
+    linear-gradient(90deg,rgba(2,8,14,.30) 0%,rgba(2,8,14,.22) 38%,rgba(2,8,14,.07) 63%,rgba(5,7,9,.06) 100%),
+    linear-gradient(180deg,rgba(0,5,10,.04),rgba(0,5,10,.18));
 }
 .auth-hero,.auth-card-wrap{position:relative;z-index:1}
-.auth-hero{padding-left:clamp(26px,4vw,70px);padding-right:clamp(24px,3vw,48px)}
-.auth-card-wrap{justify-items:start;padding-left:clamp(12px,2vw,34px);padding-right:clamp(24px,4vw,72px)}
-.auth-card{box-shadow:0 28px 80px #0008,inset 0 0 0 2px #fff4,inset 0 0 45px #6b421b24}
+.auth-hero{
+  grid-column:1;
+  padding-left:clamp(26px,3vw,54px);
+  padding-right:clamp(18px,2vw,32px);
+  justify-content:center;
+  gap:28px;
+}
+.auth-hero .brand{position:absolute;top:24px;left:clamp(18px,2vw,32px)}
+.auth-hero small{position:absolute;left:clamp(24px,3vw,54px);bottom:24px}
+.auth-hero h1{font-size:clamp(38px,4vw,60px);max-width:520px}
+.auth-hero p{max-width:500px}
+.auth-card-wrap{
+  grid-column:2;
+  justify-items:start;
+  align-items:center;
+  padding-left:clamp(4px,1vw,18px);
+  padding-right:clamp(24px,3vw,50px);
+}
+.auth-card{
+  width:min(420px,100%);
+  box-shadow:0 28px 80px #0008,inset 0 0 0 2px #fff4,inset 0 0 45px #6b421b24;
+}
 
 /* Keep the artwork visible through the application chrome. */
 .app-shell{
@@ -53,7 +72,13 @@ body::after{
 
 @media(max-width:1100px){
   .app-shell{background:linear-gradient(90deg,rgba(3,9,14,.94) 0 88px,rgba(4,12,19,.22) 88px,rgba(4,12,19,.10) 100%)}
-  .auth-shell{grid-template-columns:minmax(0,.82fr) minmax(360px,.68fr)}
+  .auth-shell{grid-template-columns:minmax(320px,.62fr) minmax(340px,.76fr) .6fr}
+  .auth-hero h1{font-size:clamp(34px,4.2vw,52px)}
+}
+
+@media(max-width:860px){
+  .auth-shell{grid-template-columns:minmax(320px,.7fr) minmax(340px,.9fr)}
+  .auth-card-wrap{grid-column:2;padding-right:18px}
 }
 
 @media(max-width:760px){
@@ -62,5 +87,7 @@ body::after{
   .auth-shell{grid-template-columns:1fr;min-height:100vh}
   .auth-shell::before{background-position:68% center;filter:brightness(1.02) saturate(1.03)}
   .auth-shell::after{background:linear-gradient(180deg,rgba(1,6,11,.30),rgba(1,6,11,.62))}
-  .auth-card-wrap{justify-items:center;padding:18px}
+  .auth-hero{display:none}
+  .auth-card-wrap{grid-column:1;justify-items:center;padding:18px}
+  .auth-card{width:min(460px,100%)}
 }
