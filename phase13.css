@@ -1,5 +1,0 @@
-/* Phase 13 - always visible spouse access entry */
-.wife-access-btn{white-space:nowrap}
-.side-nav .nav-item[data-view='access']{margin-top:4px}
-.side-nav .nav-item[data-view='access'] .nav-icon{width:21px;height:21px;flex:0 0 21px;background-size:contain;background-position:center;background-repeat:no-repeat}
-@media(max-width:760px){.wife-access-btn{padding:7px 9px!important;font-size:11px}}
