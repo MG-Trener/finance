@@ -1,4 +1,4 @@
-// Refactored from phase12.js: tooltips, draggable date ribbon and overview current-date header.
+// Refactored from phase12.js: tooltips, draggable date ribbon, overview current-date header.
 (function(){
   const previousHeader=header;
 
@@ -32,6 +32,80 @@
     const year=document.getElementById('yearSelect');
     if(year)year.onchange=e=>{state.year=+e.target.value;renderApp()};
   };
+
+  /* Android/Yandex opens native <select> as a large light dialog. For the
+     transaction form we replace that popup on phones with our own themed sheet. */
+  let mobilePicker=null;
+  let mobilePickerSelect=null;
+  function isMobilePicker(){return window.matchMedia('(max-width:760px)').matches}
+  function closeMobilePicker(){
+    if(!mobilePicker)return;
+    mobilePicker.remove();mobilePicker=null;mobilePickerSelect=null;
+    document.documentElement.classList.remove('mobile-picker-open');
+  }
+  function openMobilePicker(select){
+    if(!select||!isMobilePicker())return;
+    closeMobilePicker();
+    mobilePickerSelect=select;
+    const label=select.closest('.field')?.querySelector('label')?.textContent?.trim()||'Выберите значение';
+    const options=[...select.options];
+    const backdrop=document.createElement('div');
+    backdrop.className='mobile-select-backdrop';
+    backdrop.setAttribute('role','presentation');
+    const sheet=document.createElement('div');
+    sheet.className='mobile-select-sheet';
+    sheet.setAttribute('role','dialog');
+    sheet.setAttribute('aria-modal','true');
+    sheet.setAttribute('aria-label',label);
+    const head=document.createElement('div');
+    head.className='mobile-select-head';
+    const title=document.createElement('div');
+    title.className='mobile-select-title';title.textContent=label;
+    const close=document.createElement('button');
+    close.type='button';close.className='mobile-select-close';close.setAttribute('aria-label','Закрыть');close.textContent='×';
+    head.append(title,close);
+    const list=document.createElement('div');
+    list.className='mobile-select-options';
+    options.forEach(opt=>{
+      const button=document.createElement('button');
+      button.type='button';
+      button.className='mobile-select-option'+(opt.value===select.value?' selected':'');
+      button.textContent=opt.textContent||'';
+      button.disabled=opt.disabled;
+      button.dataset.value=opt.value;
+      button.onclick=()=>{
+        if(button.disabled||!mobilePickerSelect)return;
+        mobilePickerSelect.value=button.dataset.value;
+        mobilePickerSelect.dispatchEvent(new Event('change',{bubbles:true}));
+        closeMobilePicker();
+      };
+      list.appendChild(button);
+    });
+    sheet.append(head,list);backdrop.appendChild(sheet);document.body.appendChild(backdrop);
+    mobilePicker=backdrop;
+    document.documentElement.classList.add('mobile-picker-open');
+    close.onclick=closeMobilePicker;
+    backdrop.addEventListener('click',e=>{if(e.target===backdrop)closeMobilePicker()});
+    requestAnimationFrame(()=>list.querySelector('.selected')?.scrollIntoView({block:'nearest'}));
+  }
+
+  function initMobileSelects(){
+    if(window.__financeMobileSelects)return;
+    window.__financeMobileSelects=true;
+    document.addEventListener('pointerdown',e=>{
+      const select=e.target.closest?.('#txForm select');
+      if(!select||!isMobilePicker())return;
+      e.preventDefault();e.stopPropagation();
+      openMobilePicker(select);
+    },true);
+    document.addEventListener('click',e=>{
+      const select=e.target.closest?.('#txForm select');
+      if(!select||!isMobilePicker())return;
+      e.preventDefault();e.stopPropagation();
+    },true);
+    document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMobilePicker()});
+    window.addEventListener('resize',()=>{if(mobilePicker&&!isMobilePicker())closeMobilePicker()});
+  }
 
   function initDateDrag(){
     document.querySelectorAll('.pirate-date-track:not([data-drag-ready])').forEach(track=>{
@@ -112,6 +186,7 @@
   function schedule(){if(queued)return;queued=true;requestAnimationFrame(()=>{queued=false;initDateDrag();decorateTooltips()})}
   const observer=new MutationObserver(schedule);
   observer.observe(document.getElementById('app'),{subtree:true,childList:true});
+  initMobileSelects();
   window.addEventListener('resize',()=>{if(current)showTip(current)});
   window.addEventListener('scroll',hideTip,true);
   window.addEventListener('load',schedule);
