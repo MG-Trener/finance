@@ -4,6 +4,7 @@ const PIRATE_NAV_ICONS={
   operations:'journal',
   analytics:'map',
   budgets:'chest',
+  goals:'chest',
   recurring:'hourglass',
   categories:'tags'
 };
