@@ -1,11 +1,13 @@
-/* Refactor stage 3: single CSS entrypoint.
+/* Refactor stage 4: single CSS entrypoint.
    Legacy styles remain only for modules not yet migrated. */
 @import url('../../styles.css');
 @import url('../../hotfix.css');
 @import url('../../phase3.css');
 @import url('../../phase4.css');
-@import url('../../phase6.css');
-@import url('../../phase7.css');
+
+/* Migrated pirate UI layers */
+@import url('./components/pirate-navigation.css');
+@import url('./components/pirate-transaction-controls.css');
 
 /* Migrated asset layer must stay before phase9, because phase9 intentionally overrides oversized image buttons. */
 @import url('./components/pirate-assets.css');
