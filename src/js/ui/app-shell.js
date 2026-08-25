@@ -42,11 +42,24 @@ function shell(content){
   return `<div class="app-shell"><aside class="sidebar"><div class="side-brand"><div class="brand"><div class="brand-badge">₸</div><span class="brand-text">Казна</span></div></div><nav class="side-nav">${NAV_ITEMS.map(x=>navMarkup(x)).join('')}<button type="button" class="nav-item pirate-nav nav-more" id="navMore"><span class="nav-icon nav-more-icon" aria-hidden="true">•••</span><span class="nav-label">Ещё</span></button></nav><div class="family-crest" aria-label="Семейный герб"><img src="assets/gerb.png" loading="lazy" decoding="async" alt="Герб семьи"></div><div class="side-footer"><div class="side-copy"><b>${esc(state.family.name)}</b><div>Данные в Supabase</div></div></div></aside><main class="main">${header()}${content}</main>${mobileMoreMarkup()}</div>`;
 }
 
+async function bindAnalyticsRoute(){
+  if(typeof ensureAllActiveTransactionsLoaded==='function'&&state.activeTransactionsHasMore){
+    try{
+      const added=await ensureAllActiveTransactionsLoaded();
+      if(added&&state.view==='analytics'){renderApp();return}
+    }catch(error){
+      console.error('Не удалось загрузить полную историю для аналитики',error);
+    }
+  }
+  if(typeof ensureChartJs==='function')await ensureChartJs();
+  drawAnalytics?.();
+}
+
 const ROUTES={
   overview:{page:()=>overviewPage(),bind:()=>bindOverview?.()},
   operations:{page:()=>operationsPage(),bind:()=>bindOperations?.()},
   categories:{page:()=>categoriesPage(),bind:()=>bindCategories?.()},
-  analytics:{page:()=>analyticsPage(),bind:()=>{if(typeof ensureChartJs==='function')ensureChartJs().then(()=>drawAnalytics?.());else setTimeout(()=>drawAnalytics?.(),0)}},
+  analytics:{page:()=>analyticsPage(),bind:()=>{bindAnalyticsRoute()}},
   budgets:{page:()=>budgetsPage(),bind:()=>bindBudgets?.()},
   goals:{page:()=>goalsPage(),bind:()=>bindGoals?.()},
   recurring:{page:()=>recurringPage(),bind:()=>bindRecurring?.()},
