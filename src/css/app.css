@@ -8,6 +8,7 @@
 @import url('./pages/recurring.css');
 @import url('./pages/journal.css?v=journal26');
 @import url('./pages/analytics.css');
+@import url('./pages/budgets.css?v=budgets29');
 @import url('./pages/goals.css');
 
 /* Refactored components */
