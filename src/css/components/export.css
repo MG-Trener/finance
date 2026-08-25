@@ -1,0 +1,8 @@
+/* Journal export controls */
+.journal-head-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+.journal-head-actions .btn{min-width:72px}
+@media(max-width:620px){
+  .journal-head-actions{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+  .journal-head-actions #newOperation{grid-column:1/-1;width:100%;margin-top:0}
+  .journal-head-actions .btn{width:100%;min-width:0}
+}
