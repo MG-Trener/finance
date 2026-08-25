@@ -1,24 +1,20 @@
-/* Refactor stage 6: single CSS entrypoint.
-   Only phase4 remains as a legacy page stylesheet. */
+/* Refactor stage 7: single CSS entrypoint.
+   No phase*.css files remain in the active stylesheet graph. */
 @import url('../../styles.css');
 @import url('../../hotfix.css');
-@import url('../../phase4.css');
 
-/* Refactored phase3 pages and components */
+/* Refactored pages */
 @import url('./pages/overview.css');
+@import url('./pages/recurring.css');
+@import url('./pages/journal.css');
+
+/* Refactored components */
 @import url('./components/transaction-entry.css');
 @import url('./components/reminders.css');
-@import url('./pages/recurring.css');
-
-/* Migrated pirate UI layers */
 @import url('./components/pirate-navigation.css');
 @import url('./components/pirate-transaction-controls.css');
-
-/* Generated asset decoration, followed by compact action overrides. */
 @import url('./components/pirate-assets.css');
 @import url('./components/compact-actions-recurring.css');
-
-/* Migrated components */
 @import url('./components/date-ribbon.css');
 @import url('./components/private-access.css');
 @import url('./components/ui-enhancements.css');
