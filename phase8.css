@@ -1,0 +1,149 @@
+/* Phase 8 - real uploaded pirate UI assets */
+
+/* Primary and secondary actions use the real generated plaques. */
+.btn-primary{
+  background-image:url('assets/pirate-primary-button.png') !important;
+  background-position:center !important;
+  background-repeat:no-repeat !important;
+  background-size:100% 100% !important;
+  background-color:transparent !important;
+  border-color:transparent !important;
+  color:#fff1cf !important;
+  text-shadow:0 2px 2px #000,0 0 5px #000 !important;
+  box-shadow:0 8px 18px rgba(0,0,0,.36) !important;
+}
+.btn-primary::before,.btn-primary::after{display:none !important}
+.btn-primary:hover{filter:brightness(1.10) saturate(1.05) !important;transform:translateY(-1px)}
+.btn-primary:active{transform:translateY(1px) scale(.995)}
+
+.btn-soft{
+  background-image:url('assets/pirate-secondary-button.png') !important;
+  background-position:center !important;
+  background-repeat:no-repeat !important;
+  background-size:100% 100% !important;
+  background-color:transparent !important;
+  border-color:transparent !important;
+  color:#f0d9aa !important;
+  text-shadow:0 1px 2px #000 !important;
+  box-shadow:0 6px 14px rgba(0,0,0,.28) !important;
+}
+.btn-soft::before,.btn-soft::after{display:none !important}
+.btn-soft:hover{filter:brightness(1.12) !important;transform:translateY(-1px)}
+
+/* The main save action keeps a large clickable area while using the ornate generated plaque. */
+.entry-card .save-operation{
+  min-height:66px !important;
+  padding:12px 72px !important;
+  background-image:url('assets/pirate-primary-button.png') !important;
+  background-size:100% 100% !important;
+  border:0 !important;
+  color:#fff3cf !important;
+  text-shadow:0 2px 2px #000,0 0 6px #000 !important;
+  box-shadow:0 10px 24px #0008 !important;
+}
+.entry-card .save-operation::before,.entry-card .save-operation::after{display:none !important}
+
+/* Round generated action medallions. */
+.icon-btn.asset-edit,
+.icon-btn.asset-delete,
+.icon-btn.asset-play,
+.icon-btn.asset-pause{
+  width:40px !important;
+  height:40px !important;
+  min-width:40px;
+  padding:0 !important;
+  border:0 !important;
+  border-radius:50% !important;
+  background-position:center !important;
+  background-repeat:no-repeat !important;
+  background-size:contain !important;
+  background-color:transparent !important;
+  color:transparent !important;
+  text-shadow:none !important;
+  box-shadow:none !important;
+  overflow:visible;
+  filter:drop-shadow(0 4px 5px rgba(0,0,0,.55));
+}
+.icon-btn.asset-edit{background-image:url('assets/pirate-edit.png') !important}
+.icon-btn.asset-delete{background-image:url('assets/pirate-delete.png') !important}
+.icon-btn.asset-play{background-image:url('assets/pirate-play.png') !important}
+.icon-btn.asset-pause{background-image:url('assets/pirate-pause.png') !important}
+.icon-btn.asset-edit:hover,.icon-btn.asset-delete:hover,.icon-btn.asset-play:hover,.icon-btn.asset-pause:hover{
+  transform:translateY(-2px) scale(1.08);
+  filter:drop-shadow(0 6px 8px rgba(0,0,0,.62)) brightness(1.08);
+}
+.icon-btn.asset-edit:active,.icon-btn.asset-delete:active,.icon-btn.asset-play:active,.icon-btn.asset-pause:active{transform:translateY(1px) scale(.98)}
+
+/* Exact active/pause statuses become generated pirate labels. */
+.status-chip.asset-status-active,
+.status-chip.asset-status-pause{
+  display:inline-block;
+  width:104px;
+  height:35px;
+  padding:0 !important;
+  border:0 !important;
+  border-radius:0 !important;
+  color:transparent !important;
+  text-shadow:none !important;
+  background-color:transparent !important;
+  background-position:center !important;
+  background-repeat:no-repeat !important;
+  background-size:100% 100% !important;
+  box-shadow:none !important;
+  vertical-align:middle;
+  filter:drop-shadow(0 3px 4px #0008);
+}
+.status-chip.asset-status-active{background-image:url('assets/status-active.png') !important}
+.status-chip.asset-status-pause{background-image:url('assets/status-pause.png') !important}
+
+/* Today has a dedicated generated banner. */
+.due-chip.asset-status-today{
+  width:105px;
+  height:35px;
+  display:inline-block;
+  padding:0 !important;
+  border:0 !important;
+  border-radius:0 !important;
+  font-size:0 !important;
+  color:transparent !important;
+  background:url('assets/status-today.png') center/100% 100% no-repeat !important;
+  box-shadow:none !important;
+  filter:drop-shadow(0 3px 5px #0008);
+}
+
+/* Upcoming reminders keep the exact number of days, while the generated SKORO asset acts as a subtle decorative plate. */
+.due-chip.asset-status-soon{
+  position:relative;
+  isolation:isolate;
+  min-width:92px;
+  min-height:31px;
+  display:inline-grid;
+  place-items:center;
+  padding:5px 13px !important;
+  border:0 !important;
+  background:transparent !important;
+  color:#ffe2a1 !important;
+  text-shadow:0 1px 2px #000,0 0 4px #000 !important;
+  overflow:visible;
+}
+.due-chip.asset-status-soon::before{
+  content:'';
+  position:absolute;
+  inset:-4px -10px;
+  z-index:-1;
+  background:url('assets/status-soon.png') center/100% 100% no-repeat;
+  opacity:.58;
+  filter:drop-shadow(0 3px 4px #0008);
+}
+
+/* Generated plaques need breathing room; avoid crushing their ornaments. */
+.btn.btn-small{min-height:38px;padding-left:18px;padding-right:18px}
+.postRecurring{min-height:42px;min-width:138px}
+
+@media(max-width:760px){
+  .entry-card .save-operation{min-height:58px !important;padding:10px 42px !important}
+  .btn-primary,.btn-soft{background-size:100% 100% !important}
+  .icon-btn.asset-edit,.icon-btn.asset-delete,.icon-btn.asset-play,.icon-btn.asset-pause{width:36px !important;height:36px !important;min-width:36px}
+  .status-chip.asset-status-active,.status-chip.asset-status-pause{width:90px;height:30px}
+  .due-chip.asset-status-today{width:90px;height:30px}
+}
