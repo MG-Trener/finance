@@ -17,12 +17,13 @@
 @import url('./components/pirate-navigation.css');
 @import url('./components/navigation-modern.css?v=nav32');
 @import url('./components/pirate-transaction-controls.css');
-@import url('./components/compact-actions-recurring.css');
+@import url('./components/compact-actions-recurring.css?v=layout32');
 @import url('./components/date-ribbon.css');
 @import url('./components/private-access.css');
 @import url('./components/ui-enhancements.css?v=amount25');
 @import url('./components/export.css');
 @import url('./components/family-crest.css');
+@import url('./components/buttons-modern.css?v=buttons32');
 
 /* Optimized application and authorization artwork. */
 @import url('./backgrounds.css');
