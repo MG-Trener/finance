@@ -1,0 +1,13 @@
+/* Refactored from phase11.css: private family access */
+.access-page{max-width:980px}
+.access-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:16px;align-items:start}
+.access-member{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px;border:1px solid #62492d;border-radius:12px;background:linear-gradient(180deg,rgba(18,27,34,.94),rgba(8,14,19,.94));margin-top:10px}
+.access-person{display:flex;align-items:center;gap:10px}.access-state{font-size:12px;color:#9d9079}.access-state.ok{color:#77d8a4}.access-state.wait{color:#e0b96b}
+.invite-box{margin-top:14px;padding:14px;border:1px dashed #8d6638;border-radius:12px;background:rgba(16,24,29,.72)}
+.invite-url{width:100%;margin-top:8px;font-size:12px}.invite-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.access-note{font-size:12px;line-height:1.55;color:#a89a83}.lock-badge{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;border:1px solid #a67d44;background:radial-gradient(circle at 35% 30%,#3a4b55,#111920 72%);font-size:22px;color:#e2bb72;box-shadow:inset 0 0 0 3px #0004,0 5px 12px #0006}
+.restricted-shell{min-height:100vh;display:grid;place-items:center;padding:24px;background:linear-gradient(rgba(2,8,13,.72),rgba(2,8,13,.88)),url('../../assets/pirate-bg.png') center/cover fixed}
+.restricted-card{width:min(100%,520px);padding:26px;border:1px solid #8e6939;border-radius:16px;background:rgba(6,14,20,.95);box-shadow:0 20px 60px #000a;text-align:center}.restricted-card .lock-badge{margin:0 auto 14px}.restricted-card h2{font-family:Cinzel,serif;color:#f0dfba}.restricted-card p{color:#a99c84;line-height:1.55}
+.invite-auth-note{padding:10px 12px;border:1px solid #806039;border-radius:10px;background:rgba(74,49,27,.35);color:#e4c893;font-size:12px;margin:12px 0}
+.icon-key{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='23' cy='30' r='12' fill='none' stroke='%23d4ad63' stroke-width='6'/%3E%3Cpath d='M34 30h22v8h-7v7h-8v-7h-7z' fill='%23c8954d'/%3E%3C/svg%3E")!important}
+@media(max-width:820px){.access-grid{grid-template-columns:1fr}}
