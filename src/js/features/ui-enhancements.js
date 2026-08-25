@@ -92,17 +92,63 @@
   function initMobileSelects(){
     if(window.__financeMobileSelects)return;
     window.__financeMobileSelects=true;
+
+    /* Do not open a category/subcategory selector on pointerdown. That used to
+       turn a normal vertical swipe across the field into an accidental menu open.
+       We now wait for pointerup and treat the gesture as a tap only when the finger
+       stayed almost still. */
+    let press=null;
+    let suppressClickUntil=0;
+    const TAP_DISTANCE=10;
+    const TAP_TIME=750;
+
     document.addEventListener('pointerdown',e=>{
       const select=e.target.closest?.('#txForm select');
       if(!select||!isMobilePicker())return;
-      e.preventDefault();e.stopPropagation();
-      openMobilePicker(select);
+      press={
+        select,
+        pointerId:e.pointerId,
+        x:e.clientX,
+        y:e.clientY,
+        startedAt:performance.now(),
+        moved:false
+      };
     },true);
+
+    document.addEventListener('pointermove',e=>{
+      if(!press||e.pointerId!==press.pointerId)return;
+      if(Math.hypot(e.clientX-press.x,e.clientY-press.y)>TAP_DISTANCE)press.moved=true;
+    },true);
+
+    document.addEventListener('pointerup',e=>{
+      if(!press||e.pointerId!==press.pointerId)return;
+      const current=press;press=null;
+      const elapsed=performance.now()-current.startedAt;
+      const moved=current.moved||Math.hypot(e.clientX-current.x,e.clientY-current.y)>TAP_DISTANCE;
+      suppressClickUntil=performance.now()+700;
+      if(moved||elapsed>TAP_TIME)return;
+      e.preventDefault();e.stopPropagation();
+      openMobilePicker(current.select);
+    },true);
+
+    document.addEventListener('pointercancel',e=>{
+      if(press&&e.pointerId===press.pointerId){
+        press=null;
+        suppressClickUntil=performance.now()+700;
+      }
+    },true);
+
+    /* Block the native Android/Yandex <select> popup. A click without a preceding
+       pointer gesture (for example accessibility/keyboard activation) still opens
+       our custom picker. */
     document.addEventListener('click',e=>{
       const select=e.target.closest?.('#txForm select');
       if(!select||!isMobilePicker())return;
       e.preventDefault();e.stopPropagation();
+      if(performance.now()<suppressClickUntil)return;
+      openMobilePicker(select);
     },true);
+
     document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMobilePicker()});
     window.addEventListener('resize',()=>{if(mobilePicker&&!isMobilePicker())closeMobilePicker()});
   }
