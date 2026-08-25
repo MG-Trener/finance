@@ -6,7 +6,7 @@
 /* Refactored pages */
 @import url('./pages/overview.css');
 @import url('./pages/recurring.css');
-@import url('./pages/journal.css');
+@import url('./pages/journal.css?v=journal26');
 @import url('./pages/analytics.css');
 @import url('./pages/goals.css');
 
@@ -15,7 +15,7 @@
 @import url('./components/reminders.css');
 @import url('./components/pirate-navigation.css');
 @import url('./components/pirate-transaction-controls.css');
-@import url('./components/pirate-assets.css');
+@import url('./components/pirate-assets.css?v=clear26');
 @import url('./components/compact-actions-recurring.css');
 @import url('./components/date-ribbon.css');
 @import url('./components/private-access.css');
