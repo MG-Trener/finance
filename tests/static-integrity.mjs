@@ -22,8 +22,9 @@ for(const ref of refs){
   assert(exists(local),`index.html references missing file: ${local}`);
 }
 
-// Check CSS import graph from the single application entrypoint.
+// Check the CSS import graph and every local url(...) asset used by active CSS.
 const seen=new Set();
+function resolveCssRef(base,ref){return path.normalize(path.join(base,ref.split('?')[0].split('#')[0])).replaceAll('\\','/')}
 function checkCss(file){
   if(seen.has(file))return;
   seen.add(file);
@@ -31,11 +32,18 @@ function checkCss(file){
   if(!exists(file))return;
   const css=fs.readFileSync(path.join(root,file),'utf8');
   const base=path.dirname(file);
+
   for(const match of css.matchAll(/@import\s+url\(['"]?([^)'"?]+)(?:\?[^)'" ]*)?['"]?\)/g)){
     const ref=match[1];
     if(/^(?:https?:|data:)/.test(ref))continue;
-    const target=path.normalize(path.join(base,ref)).replaceAll('\\','/');
-    checkCss(target);
+    checkCss(resolveCssRef(base,ref));
+  }
+
+  for(const match of css.matchAll(/url\(['"]?([^)'" ]+)['"]?\)/g)){
+    const ref=match[1];
+    if(/^(?:https?:|data:|#)/.test(ref))continue;
+    const target=resolveCssRef(base,ref);
+    assert(exists(target),`${file} references missing asset: ${target}`);
   }
 }
 checkCss('src/css/app.css');
