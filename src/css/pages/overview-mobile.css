@@ -1,0 +1,92 @@
+/* Mobile overview polish: key numbers are visible before the entry form. */
+@media(max-width:760px){
+  .overview-v4{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr)!important;
+    grid-template-areas:"kpis" "entry" "side"!important;
+    gap:8px!important
+  }
+  .overview-kpis{
+    grid-area:kpis!important;
+    display:grid!important;
+    grid-template-columns:1fr 1fr!important;
+    gap:6px!important
+  }
+  .overview-kpis .summary-kpi{
+    min-width:0!important;
+    padding:9px 10px!important;
+    border-radius:10px!important
+  }
+  .overview-kpis .summary-kpi.primary{
+    grid-column:1/-1!important;
+    padding:10px 11px!important
+  }
+  .overview-kpis .summary-kpi span{font-size:8px!important;line-height:1.15!important}
+  .overview-kpis .summary-kpi b{margin-top:4px!important;font-size:17px!important;line-height:1.05!important}
+  .overview-kpis .summary-kpi.primary b{font-size:24px!important}
+  .summary-kpi-top{gap:7px!important}
+  .summary-kpi-top em{font-size:8px!important;padding:3px 6px!important}
+
+  .overview-entry{grid-area:entry!important;margin:0!important}
+  .overview-side{grid-area:side!important;display:grid!important;gap:8px!important;min-width:0!important}
+
+  .overview-last{padding:10px!important}
+  .overview-last .entry-head{align-items:center!important;margin-bottom:7px!important;padding-bottom:0!important}
+  .overview-last .entry-head h3{font-size:15px!important;margin:0 0 2px!important}
+  .overview-last .entry-head p{display:block!important;font-size:9px!important;line-height:1.2!important}
+  .overview-last #allOperations{min-height:32px!important;padding:5px 8px!important;font-size:9px!important;white-space:nowrap}
+  .overview-last .list{display:grid!important;gap:6px!important;margin-top:0!important}
+  .overview-last .tx{
+    display:grid!important;
+    grid-template-columns:30px minmax(0,1fr) auto!important;
+    gap:5px 7px!important;
+    align-items:center!important;
+    padding:8px!important;
+    border:1px solid rgba(137,105,62,.30)!important;
+    border-radius:10px!important;
+    background:linear-gradient(180deg,rgba(13,22,28,.90),rgba(7,14,19,.90))!important
+  }
+  .overview-last .tx:nth-child(n+5){display:none!important}
+  .overview-last .tx-icon{
+    grid-column:1!important;grid-row:1!important;
+    width:30px!important;height:30px!important;font-size:13px!important
+  }
+  .overview-last .tx>div:nth-child(2){grid-column:2!important;grid-row:1!important;min-width:0!important}
+  .overview-last .tx-title{font-size:11px!important;line-height:1.2!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+  .overview-last .tx-meta{font-size:8.5px!important;line-height:1.2!important;margin-top:2px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+  .overview-last .amount-edit-trigger{
+    grid-column:3!important;grid-row:1!important;
+    align-self:center!important;justify-self:end!important;
+    padding:4px 5px!important;margin:-4px -5px!important
+  }
+  .overview-last .amount-edit-trigger>span{font-size:11px!important}
+  .overview-last .amount-edit-trigger>small{font-size:6.5px!important}
+  .overview-last .tx-actions{
+    grid-column:2/-1!important;grid-row:2!important;
+    display:flex!important;justify-content:flex-end!important;gap:5px!important;
+    padding-top:4px!important;margin-top:1px!important;
+    border-top:1px solid rgba(137,105,62,.14)!important
+  }
+  .overview-last .tx-actions .icon-btn{height:29px!important;padding:0 7px!important}
+  .overview-last .tx-actions .icon-btn::after{font-size:8px!important}
+
+  .overview-insights{grid-template-columns:1fr!important;gap:8px!important}
+  .overview-insights .card{padding:10px!important}
+  .overview-insights .entry-head h3{font-size:14px!important}
+  .overview-insights .entry-head p{font-size:9px!important}
+  .overview-insights .text-action{font-size:10px!important}
+  .mini-budget,.upcoming-row{padding:7px 0!important}
+  .mini-budget-head,.upcoming-row{font-size:11px!important}
+  .mini-budget small,.upcoming-row small,.upcoming-right span{font-size:9px!important}
+
+  .people-strip-card{margin-top:8px!important;padding:10px!important}
+  .people-strip-card>.entry-head h3{font-size:14px!important}
+  .people-strip-card>.entry-head p{font-size:9px!important}
+}
+
+@media(max-width:390px){
+  .overview-kpis .summary-kpi.primary b{font-size:22px!important}
+  .overview-kpis .summary-kpi b{font-size:15px!important}
+  .overview-last .tx{grid-template-columns:28px minmax(0,1fr) auto!important;padding:7px!important}
+  .overview-last .tx-icon{width:28px!important;height:28px!important}
+}
