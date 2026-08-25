@@ -14,9 +14,35 @@
 .ui-tooltip.show{opacity:1;transform:translateY(0)}
 .ui-tooltip::after{content:'';position:absolute;left:50%;bottom:-5px;width:8px;height:8px;background:rgba(5,12,17,.97);border-right:1px solid #8b6739;border-bottom:1px solid #8b6739;transform:translateX(-50%) rotate(45deg)}
 
+/* Amounts in recent operations can be corrected without reopening the whole form. */
+.amount-edit-trigger{
+  appearance:none;-webkit-appearance:none;min-width:0;padding:5px 7px;margin:-5px -7px;
+  border:1px solid transparent;border-radius:9px;background:transparent;
+  font:inherit;text-align:right;cursor:pointer;display:grid;justify-items:end;gap:1px;
+  transition:.16s ease;box-shadow:none;text-shadow:none
+}
+.amount-edit-trigger>span{font-weight:800;white-space:nowrap}
+.amount-edit-trigger>small{font-size:8px;line-height:1.1;text-transform:uppercase;letter-spacing:.05em;color:#8f8068;opacity:.75}
+.amount-edit-trigger:hover,.amount-edit-trigger:focus-visible{border-color:rgba(193,145,74,.52);background:rgba(139,91,38,.13);outline:none}
+.amount-edit-trigger:hover>small,.amount-edit-trigger:focus-visible>small{color:#d3ae70;opacity:1}
+.quick-amount-modal{width:min(460px,100%)}
+.quick-amount-modal .modal-head h2{margin-bottom:4px}
+.quick-amount-context{margin:0;color:#9f9076;font-size:12px;line-height:1.4}
+.quick-amount-input{min-height:62px!important;font-size:28px!important;font-weight:800!important;color:#f2ddb5!important;-webkit-text-fill-color:#f2ddb5!important}
+.quick-amount-actions{display:grid;grid-template-columns:.8fr 1.2fr;gap:9px;margin-top:14px}
+.quick-amount-actions .btn{width:100%;min-width:0}
+
 .mobile-select-backdrop{display:none}
 @media(max-width:760px){
   .current-date-info{padding:6px 8px;gap:7px}.current-date-info .date-medallion{width:26px;height:26px}.current-date-info b{font-size:10px}.ui-tooltip{display:none}
+  .overview-last .tx{grid-template-columns:34px minmax(0,1fr) auto!important;gap:7px 8px!important;align-items:center}
+  .overview-last .tx-actions{grid-column:2/-1!important;display:flex!important;justify-content:flex-end!important;gap:6px!important}
+  .overview-last .amount-edit-trigger{padding:5px 6px;margin:-5px -6px}
+  .overview-last .amount-edit-trigger>span{font-size:12px}
+  .overview-last .amount-edit-trigger>small{display:block!important;font-size:7px}
+  .quick-amount-modal{width:100%!important}
+  .quick-amount-input{min-height:58px!important;font-size:26px!important}
+  .quick-amount-actions{grid-template-columns:1fr 1.25fr;gap:7px}
   #txForm select{color-scheme:dark}
   #txForm select option{background:#0b141b;color:#f6e7c9;-webkit-text-fill-color:#f6e7c9}
   html.mobile-picker-open,html.mobile-picker-open body{overflow:hidden!important}
