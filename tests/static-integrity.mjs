@@ -13,6 +13,11 @@ assert(manifest.start_url==='/finance/','manifest: start_url must match GitHub P
 assert(manifest.scope==='/finance/','manifest: scope must match GitHub Pages path');
 for(const icon of manifest.icons||[])assert(exists(icon.src),`manifest icon is missing: ${icon.src}`);
 
+// The optimized artwork is the production background; the legacy PNG is only a tiny compatibility fallback.
+assert(exists('assets/backgrounds/site-bg.webp'),'optimized application background is missing');
+const hotfix=fs.readFileSync(path.join(root,'hotfix.css'),'utf8');
+assert(hotfix.includes("assets/backgrounds/site-bg.webp"),'hotfix.css must use the optimized WebP background');
+
 // Every local script/stylesheet/manifest/icon referenced by index.html must exist.
 const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
 const refs=[...html.matchAll(/(?:src|href)="([^"]+)"/g)].map(m=>m[1]);
