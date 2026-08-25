@@ -1,16 +1,16 @@
 /* Dedicated optimized backgrounds for the application and authentication screen. */
 body::before{
   background-image:url('../../assets/backgrounds/site-bg.webp');
-  background-position:62% center;
+  background-position:64% center;
   background-size:cover;
   background-repeat:no-repeat;
-  filter:brightness(1.14) saturate(1.08) contrast(1.03);
+  filter:brightness(1.28) saturate(1.12) contrast(1.05);
 }
 
 body::after{
   background:
-    linear-gradient(180deg,rgba(2,7,12,.22),rgba(2,7,12,.48)),
-    linear-gradient(90deg,rgba(2,7,12,.58) 0%,rgba(2,7,12,.38) 34%,rgba(2,7,12,.16) 68%,rgba(2,7,12,.24) 100%);
+    linear-gradient(180deg,rgba(2,7,12,.10),rgba(2,7,12,.28)),
+    linear-gradient(90deg,rgba(2,7,12,.34) 0%,rgba(2,7,12,.20) 28%,rgba(2,7,12,.05) 62%,rgba(2,7,12,.08) 100%);
 }
 
 /* Authentication layout: content lives on the left, ship remains visible on the right. */
@@ -66,12 +66,15 @@ body::after{
 
 /* Keep the artwork visible through the application chrome. */
 .app-shell{
-  background:linear-gradient(90deg,rgba(3,9,14,.94) 0 260px,rgba(4,12,19,.22) 260px,rgba(4,12,19,.10) 100%);
+  background:linear-gradient(90deg,rgba(3,9,14,.90) 0 260px,rgba(4,12,19,.10) 260px,rgba(4,12,19,.03) 100%);
 }
 .main{background:transparent}
+.sidebar{background:linear-gradient(180deg,rgba(9,16,23,.97),rgba(4,9,14,.98))}
+.topbar{background:linear-gradient(180deg,rgba(7,15,21,.72),rgba(6,12,18,.62))}
+.card{background:linear-gradient(180deg,rgba(11,20,27,.88),rgba(8,15,21,.87))}
 
 @media(max-width:1100px){
-  .app-shell{background:linear-gradient(90deg,rgba(3,9,14,.94) 0 88px,rgba(4,12,19,.22) 88px,rgba(4,12,19,.10) 100%)}
+  .app-shell{background:linear-gradient(90deg,rgba(3,9,14,.90) 0 88px,rgba(4,12,19,.10) 88px,rgba(4,12,19,.03) 100%)}
   .auth-shell{grid-template-columns:minmax(320px,.62fr) minmax(340px,.76fr) .6fr}
   .auth-hero h1{font-size:clamp(34px,4.2vw,52px)}
 }
@@ -82,8 +85,8 @@ body::after{
 }
 
 @media(max-width:760px){
-  body::before{background-position:72% center;filter:brightness(1.06) saturate(1.04)}
-  body::after{background:linear-gradient(180deg,rgba(2,7,12,.28),rgba(2,7,12,.58))}
+  body::before{background-position:72% center;filter:brightness(1.14) saturate(1.06)}
+  body::after{background:linear-gradient(180deg,rgba(2,7,12,.18),rgba(2,7,12,.38))}
   .auth-shell{grid-template-columns:1fr;min-height:100vh}
   .auth-shell::before{background-position:68% center;filter:brightness(1.02) saturate(1.03)}
   .auth-shell::after{background:linear-gradient(180deg,rgba(1,6,11,.30),rgba(1,6,11,.62))}
