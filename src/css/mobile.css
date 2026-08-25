@@ -1,0 +1,123 @@
+/* Mobile-first refinements for phones and small tablets. */
+@media(max-width:760px){
+  html{scroll-padding-bottom:92px}
+  body{padding-bottom:84px}
+  .app-shell{display:block!important;min-height:100vh}
+  .main{padding:12px 12px 18px!important;width:100%;min-width:0}
+
+  /* Bottom navigation: scrollable, labeled and thumb-friendly. */
+  .sidebar{
+    position:fixed!important;
+    left:0!important;right:0!important;bottom:0!important;top:auto!important;
+    z-index:100!important;
+    width:100%!important;height:auto!important;min-height:72px!important;
+    padding:7px max(8px,env(safe-area-inset-right)) calc(7px + env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left))!important;
+    display:block!important;
+    border-right:0!important;border-top:1px solid #76562f!important;
+    background:linear-gradient(180deg,rgba(10,17,23,.96),rgba(3,8,12,.99))!important;
+    box-shadow:0 -10px 28px rgba(0,0,0,.58)!important;
+    backdrop-filter:blur(12px)
+  }
+  .side-brand,.side-footer{display:none!important}
+  .side-nav{
+    display:flex!important;gap:6px!important;overflow-x:auto!important;overflow-y:hidden!important;
+    scrollbar-width:none;padding:0 1px!important;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch
+  }
+  .side-nav::-webkit-scrollbar{display:none}
+  .side-nav .nav-item{
+    flex:0 0 68px!important;min-width:68px!important;min-height:58px!important;
+    display:flex!important;flex-direction:column!important;justify-content:center!important;align-items:center!important;
+    gap:3px!important;padding:5px 4px!important;border-radius:11px!important;scroll-snap-align:center
+  }
+  .side-nav .nav-item .nav-icon,.side-nav .nav-item .pirate-icon{width:27px!important;height:27px!important;flex:0 0 27px!important}
+  .side-nav .nav-item .nav-label,.side-nav .nav-item>span:not(.nav-icon):not(.nav-badge){
+    display:block!important;max-width:64px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+    font-size:9px!important;line-height:11px!important;color:inherit;text-align:center
+  }
+  .side-nav .nav-item.active{box-shadow:inset 0 -3px 0 #d3aa61,0 3px 10px rgba(0,0,0,.28)!important}
+  .side-nav .nav-badge,.side-nav .pirate-alert{right:2px!important;top:1px!important}
+
+  /* Header is compact and does not consume the whole first screen. */
+  .topbar{
+    margin-bottom:12px!important;padding:10px 11px!important;border-radius:12px!important;
+    align-items:flex-start!important;gap:8px!important;flex-wrap:wrap!important
+  }
+  .title{min-width:0;flex:1 1 190px}
+  .title h1{font-size:20px!important;line-height:1.12}
+  .title p{margin-top:3px!important;font-size:11px!important}
+  .top-actions{margin-left:auto;gap:6px!important;flex-wrap:wrap!important;justify-content:flex-end}
+  .top-actions .pill{padding:7px 8px!important;font-size:11px!important}
+  .top-actions .btn{min-height:36px!important;padding:7px 10px!important;font-size:11px!important}
+  .current-date-info{max-width:190px!important}
+  .current-date-info b{white-space:normal!important;line-height:1.2}
+
+  /* Cards and page sections */
+  .card{padding:14px!important;border-radius:12px!important}
+  .page-head{margin-bottom:12px!important;gap:10px!important}
+  .page-title{font-size:21px!important}
+  .page-subtitle{font-size:11px!important;line-height:1.45}
+  .overview-v3,.overview-summary,.overview-insights,.summary-kpis,.analytics-grid,.people-compact{grid-template-columns:1fr!important}
+  .overview-entry{position:static!important}
+  .summary-kpi{padding:12px 13px!important}
+  .summary-kpi b{font-size:19px!important}
+
+  /* Primary transaction entry: one-handed and readable. */
+  .entry-card .entry-head{margin-bottom:2px!important;padding-bottom:12px!important}
+  .entry-card .entry-head p{display:none}
+  .quick-form-v3{grid-template-columns:1fr!important;gap:9px!important}
+  .quick-form-v3>.field,.quick-form-v3>.full{grid-column:1!important}
+  .amount-hero{height:60px!important;font-size:30px!important;padding:8px 12px!important}
+  .entry-card .segmented button{min-height:46px!important}
+  .person-switch{grid-template-columns:1fr 1fr!important;gap:7px!important}
+  .entry-card .person-choice{min-height:58px!important;padding:8px!important}
+  .entry-card .person-choice .avatar{width:34px!important;height:34px!important;min-width:34px!important}
+  .field input,.field select,.field textarea{min-height:46px!important;font-size:16px!important;padding:11px 12px!important}
+  .save-operation{width:100%!important;min-height:50px!important;font-size:14px!important}
+  .quick-pair-list{margin-left:-2px;margin-right:-2px;padding:1px 2px 6px!important;scroll-snap-type:x proximity}
+  .quick-pair{min-height:38px;scroll-snap-align:start}
+
+  /* Date ribbon keeps the selected day usable on touch. */
+  .pirate-date-head{margin-bottom:5px!important}
+  .pirate-date-shell{margin:0 -2px;padding-left:16px!important;padding-right:16px!important}
+  .pirate-day{flex-basis:60px!important;min-height:58px!important}
+  .pirate-today{min-height:38px;padding:7px 12px!important}
+
+  /* Journal becomes a true card list. */
+  .journal-toolbar{padding:12px!important}
+  .journal-search{margin-bottom:9px!important}
+  .journal-search input{font-size:16px!important}
+  .journal-filters{display:grid!important;grid-template-columns:1fr 1fr!important;gap:7px!important}
+  .journal-filters select,.journal-filters .btn{min-width:0!important;width:100%!important}
+  .journal-filters .btn{grid-column:1/-1}
+  .journal-meta{font-size:11px!important;gap:8px!important}
+  .journal-card{padding:0!important;background:transparent!important;border:0!important;box-shadow:none!important;overflow:visible!important}
+  .journal-table{display:grid;gap:9px}
+  .journal-row:not(.journal-header){
+    grid-template-columns:minmax(0,1fr) auto!important;gap:7px 10px!important;
+    padding:12px!important;border:1px solid rgba(151,111,59,.45)!important;border-radius:11px!important;
+    background:linear-gradient(180deg,rgba(12,21,27,.94),rgba(7,14,19,.94))
+  }
+  .journal-actions{opacity:1!important;gap:5px}
+
+  /* Recurring / budgets / access controls */
+  .recurring-row-v3,.budget-row,.access-member{padding:12px!important}
+  .recurring-row-v3 .tx-actions{gap:6px!important}
+  .postRecurring{flex:1 1 140px!important}
+  .access-grid{grid-template-columns:1fr!important}
+  .invite-actions{display:grid!important;grid-template-columns:1fr!important}
+  .invite-actions .btn{width:100%!important}
+
+  /* Modal is effectively a mobile sheet. */
+  .modal-backdrop{align-items:end!important;padding:0!important}
+  .modal{width:100%!important;max-height:92vh!important;border-radius:18px 18px 0 0!important;padding:18px 14px calc(18px + env(safe-area-inset-bottom))!important}
+}
+
+@media(max-width:420px){
+  .main{padding-left:9px!important;padding-right:9px!important}
+  .side-nav .nav-item{flex-basis:64px!important;min-width:64px!important}
+  .top-actions{width:100%;justify-content:space-between!important;margin-left:0}
+  .current-date-info{max-width:none!important;flex:1}
+  .journal-filters{grid-template-columns:1fr!important}
+  .journal-filters .btn{grid-column:1}
+  .person-switch{grid-template-columns:1fr!important}
+}
