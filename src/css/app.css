@@ -22,5 +22,8 @@
 @import url('./components/ui-enhancements.css');
 @import url('./components/export.css');
 
+/* Optimized application and authorization artwork. */
+@import url('./backgrounds.css');
+
 /* Mobile overrides must be last. */
 @import url('./mobile.css');
