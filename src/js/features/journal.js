@@ -16,15 +16,19 @@ function journalFilteredTx(){
 }
 
 function journalActiveFilterCount(f){let count=0;if((f.period||'month')!=='month')count++;if(f.person&&f.person!=='all')count++;if(f.type&&f.type!=='all')count++;if(f.category&&f.category!=='all')count++;if((f.sort||'newest')!=='newest')count++;return count}
+function journalHasRemoteHistory(){return state.filters?.trash?!!state.trashTransactionsHasMore:!!state.activeTransactionsHasMore}
 
 function operationsPage(){
   const f=state.filters||(state.filters={});
   if(!f.period)f.period='month';if(!f.sort)f.sort='newest';if(f.search==null)f.search='';if(f.trash==null)f.trash=false;
   const tx=journalFilteredTx(),shown=tx.slice(0,state.journalLimit||50),expense=tx.filter(x=>x.type==='expense').reduce((a,x)=>a+Number(x.amount),0),income=tx.filter(x=>x.type==='income').reduce((a,x)=>a+Number(x.amount),0),activeFilters=journalActiveFilterCount(f),filtersOpen=!!f.filtersOpen;
+  const localMore=tx.length>shown.length,remoteMore=journalHasRemoteHistory();
+  const moreLabel=localMore?`Показать ещё ${Math.min(50,tx.length-shown.length)}`:(remoteMore?'Загрузить более ранние операции':'');
+  const loadedTotal=f.trash?state.trashTransactions.length:state.transactions.length;
   return `<div class="page-head journal-head"><div><h2 class="page-title">${f.trash?'Корзина операций':'Журнал операций'}</h2><div class="page-subtitle">${f.trash?'Удалённые операции можно восстановить. Данные не теряются при случайном удалении.':'Полная история доходов и расходов. Сумму можно исправить прямо в журнале.'}</div></div><div class="journal-head-actions">${f.trash?'':`<button class="btn btn-soft" id="exportCsv">CSV</button><button class="btn btn-soft" id="exportExcel">Excel</button><button class="btn btn-primary" id="newOperation">+ Новая операция</button>`}</div></div>
-  <div class="journal-mode-switch"><button class="btn ${!f.trash?'btn-primary':'btn-soft'}" id="showActiveJournal">Операции</button><button class="btn ${f.trash?'btn-primary':'btn-soft'}" id="showTrashJournal">Корзина${state.trashTransactions.length?` (${state.trashTransactions.length})`:''}</button></div>
+  <div class="journal-mode-switch"><button class="btn ${!f.trash?'btn-primary':'btn-soft'}" id="showActiveJournal">Операции</button><button class="btn ${f.trash?'btn-primary':'btn-soft'}" id="showTrashJournal">Корзина${state.trashTransactions.length?` (${state.trashTransactions.length}${state.trashTransactionsHasMore?'+':''})`:''}</button></div>
   <div class="card journal-toolbar"><div class="journal-toolbar-top"><div class="journal-search"><span>⌕</span><input id="journalSearch" value="${esc(f.search)}" placeholder="Поиск по категории, комментарию, человеку или сумме"></div><button type="button" class="btn btn-soft journal-filter-toggle" id="toggleJournalFilters" aria-expanded="${filtersOpen?'true':'false'}">Фильтры${activeFilters?` <span class="journal-filter-count">${activeFilters}</span>`:''}</button></div><div class="journal-filters ${filtersOpen?'is-open':''}" id="journalFilters"><select id="filterPeriod"><option value="month" ${f.period==='month'?'selected':''}>${MONTHS[state.month-1]} ${state.year}</option><option value="year" ${f.period==='year'?'selected':''}>Весь ${state.year} год</option><option value="all" ${f.period==='all'?'selected':''}>За всё время</option></select><select id="filterPerson"><option value="all">Все участники</option>${state.people.map(p=>`<option value="${p.id}" ${f.person===p.id?'selected':''}>${esc(p.display_name)}</option>`).join('')}</select><select id="filterType"><option value="all">Доходы и расходы</option><option value="expense" ${f.type==='expense'?'selected':''}>Только расходы</option><option value="income" ${f.type==='income'?'selected':''}>Только доходы</option></select><select id="filterCategory"><option value="all">Все категории</option>${state.categories.map(c=>`<option value="${c.id}" ${f.category===c.id?'selected':''}>${esc(c.name)}</option>`).join('')}</select><select id="filterSort"><option value="newest" ${f.sort==='newest'?'selected':''}>Сначала новые</option><option value="oldest" ${f.sort==='oldest'?'selected':''}>Сначала старые</option><option value="amount-desc" ${f.sort==='amount-desc'?'selected':''}>Сумма: больше → меньше</option><option value="amount-asc" ${f.sort==='amount-asc'?'selected':''}>Сумма: меньше → больше</option></select><button class="btn btn-soft btn-small" id="resetJournal">Сбросить</button></div></div>
-  <div class="journal-meta"><span>Найдено: <b>${tx.length}</b>${tx.length>shown.length?` · показано ${shown.length}`:''}</span><span class="positive">Доходы ${money(income)}</span><span class="negative">Расходы ${money(expense)}</span></div><div class="card journal-card">${journalTable(shown,f.trash)}</div>${tx.length>shown.length?`<div class="journal-more-wrap"><button class="btn btn-soft" id="loadMoreJournal">Показать ещё ${Math.min(50,tx.length-shown.length)}</button></div>`:''}`;
+  <div class="journal-meta"><span>Найдено в загруженной истории: <b>${tx.length}</b>${tx.length>shown.length?` · показано ${shown.length}`:''}${remoteMore?` · загружено ${loadedTotal}+`:''}</span><span class="positive">Доходы ${money(income)}</span><span class="negative">Расходы ${money(expense)}</span></div><div class="card journal-card">${journalTable(shown,f.trash)}</div>${moreLabel?`<div class="journal-more-wrap"><button class="btn btn-soft" id="loadMoreJournal" ${state.transactionHistoryLoading?'disabled':''}>${state.transactionHistoryLoading?'Загружаю…':moreLabel}</button></div>`:''}`;
 }
 
 function journalTable(tx,trash=false){
@@ -47,6 +51,18 @@ function bindOperations(){
   document.getElementById('resetJournal').onclick=()=>{const trash=!!state.filters.trash;state.filters={person:'all',type:'all',category:'all',period:trash?'all':'month',sort:'newest',search:'',filtersOpen:false,trash};rerender()};
   const newOperation=document.getElementById('newOperation');if(newOperation)newOperation.onclick=()=>{state.view='overview';renderApp();setTimeout(()=>{document.querySelector('.entry-card')?.scrollIntoView({behavior:'smooth'});document.getElementById('amount')?.focus()},0)};
   const csv=document.getElementById('exportCsv');if(csv)csv.onclick=()=>window.FinanceExport?.exportCSV();const xlsx=document.getElementById('exportExcel');if(xlsx)xlsx.onclick=()=>window.FinanceExport?.exportExcel();
-  const more=document.getElementById('loadMoreJournal');if(more)more.onclick=()=>{state.journalLimit=(state.journalLimit||50)+50;renderApp()};
+  const more=document.getElementById('loadMoreJournal');if(more)more.onclick=async()=>{
+    const filtered=journalFilteredTx(),limit=state.journalLimit||50;
+    if(filtered.length>limit){state.journalLimit=limit+50;return renderApp()}
+    more.disabled=true;more.textContent='Загружаю…';
+    try{
+      const added=await loadMoreTransactionHistory({trash:!!state.filters.trash,render:false});
+      if(added)state.journalLimit=limit+50;
+      renderApp();
+    }catch(error){
+      more.disabled=false;more.textContent='Повторить загрузку';
+      alert(`Не удалось загрузить старые операции: ${error?.message||error}`);
+    }
+  };
   bindTxButtons();
 }
