@@ -1,0 +1,14 @@
+/* Refactor stage 1: single CSS entrypoint. Preserve legacy order while modules are migrated. */
+@import url('../../styles.css');
+@import url('../../hotfix.css');
+@import url('../../phase3.css');
+@import url('../../phase4.css');
+@import url('../../phase6.css');
+@import url('../../phase7.css');
+@import url('../../phase8.css');
+@import url('../../phase9.css');
+@import url('../../phase10.css');
+@import url('../../phase11.css');
+@import url('../../phase12.css');
+@import url('../../phase13.css');
+@import url('./components/access-overview.css');
