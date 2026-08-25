@@ -1,5 +1,5 @@
-/* Refactor stage 4: single CSS entrypoint.
-   Legacy styles remain only for modules not yet migrated. */
+/* Refactor stage 5: single CSS entrypoint.
+   Legacy styles remain only for large modules not yet migrated. */
 @import url('../../styles.css');
 @import url('../../hotfix.css');
 @import url('../../phase3.css');
@@ -9,9 +9,9 @@
 @import url('./components/pirate-navigation.css');
 @import url('./components/pirate-transaction-controls.css');
 
-/* Migrated asset layer must stay before phase9, because phase9 intentionally overrides oversized image buttons. */
+/* Generated asset decoration, followed by compact action overrides. */
 @import url('./components/pirate-assets.css');
-@import url('../../phase9.css');
+@import url('./components/compact-actions-recurring.css');
 
 /* Migrated components */
 @import url('./components/date-ribbon.css');
