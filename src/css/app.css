@@ -1,4 +1,5 @@
-/* Refactor stage 1: single CSS entrypoint. Preserve legacy order while modules are migrated. */
+/* Refactor stage 2: single CSS entrypoint.
+   Legacy styles remain only for modules not yet migrated. */
 @import url('../../styles.css');
 @import url('../../hotfix.css');
 @import url('../../phase3.css');
@@ -7,8 +8,9 @@
 @import url('../../phase7.css');
 @import url('../../phase8.css');
 @import url('../../phase9.css');
-@import url('../../phase10.css');
-@import url('../../phase11.css');
-@import url('../../phase12.css');
-@import url('../../phase13.css');
+
+/* Migrated components */
+@import url('./components/date-ribbon.css');
+@import url('./components/private-access.css');
+@import url('./components/ui-enhancements.css');
 @import url('./components/access-overview.css');
