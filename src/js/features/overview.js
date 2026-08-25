@@ -1,46 +1,20 @@
 // Overview composition: key numbers first, fast entry second, details after.
-shell=function(content){return `<div class="app-shell"><aside class="sidebar"><div class="side-brand"><div class="brand"><div class="brand-badge">₸</div><span class="brand-text">Казна</span></div></div><nav class="side-nav">${nav('overview','⌂','Обзор')}${nav('operations','☷','Операции')}${nav('analytics','⌁','Аналитика')}${nav('budgets','◎','Бюджеты')}${nav('recurring','↻','Регулярные')}${nav('categories','▦','Категории')}</nav><div class="side-footer"><div class="side-copy"><b>${esc(state.family.name)}</b><div>Данные в Supabase</div></div></div></aside><main class="main">${header()}${content}</main></div>`}
-
 function phase3BudgetPreview(){const current=state.budgets.filter(b=>b.year===+state.year&&b.month===+state.month);if(!current.length)return `<div class="empty compact-empty">Лимиты пока не заданы</div>`;return current.map(b=>{const spent=periodTx().filter(x=>x.type==='expense'&&x.category_id===b.category_id).reduce((a,x)=>a+Number(x.amount),0);const limit=Number(b.limit_amount)||0;const pct=limit?Math.round(spent/limit*100):0;return{b,spent,limit,pct}}).sort((a,b)=>b.pct-a.pct).slice(0,4).map(x=>`<div class="mini-budget"><div class="mini-budget-head"><span>${esc(catName(x.b.category_id))}</span><b class="${x.pct>100?'negative':x.pct>=80?'warning-text':''}">${x.pct}%</b></div><div class="budget-progress"><div class="budget-fill ${x.pct>100?'over':''}" style="width:${Math.min(100,x.pct)}%"></div></div><small>${money(x.spent)} из ${money(x.limit)}</small></div>`).join('')}
 
 function phase3UpcomingPreview(){const rows=phase3UpcomingAll(10).slice(0,4);if(!rows.length)return `<div class="empty compact-empty">В ближайшие 10 дней платежей нет</div>`;return rows.map(({r,info})=>`<div class="upcoming-row ${phase3DueClass(info)}"><div><b>${esc(r.description||catName(r.category_id))}</b><small>${esc(personName(r.person_id))} · ${info.date.toLocaleDateString('ru-RU',{day:'2-digit',month:'short'})}</small></div><div class="upcoming-right"><b class="${r.type==='expense'?'negative':'positive'}">${money(r.amount)}</b><span>${phase3DueText(info)}</span></div></div>`).join('')}
 
 function phase3PeopleStrip(){return `<div class="people-compact">${state.people.map(p=>{const s=stats(p.id);return `<div class="person-compact"><div class="person-compact-name"><span class="avatar small-avatar">${p.label==='husband'?'М':'Ж'}</span><div><b>${esc(p.display_name)}</b><small>${p.label==='husband'?'Муж':'Жена'}</small></div></div><div class="person-compact-stat"><span>Доход</span><b class="positive">${money(s.income)}</b></div><div class="person-compact-stat"><span>Расход</span><b class="negative">${money(s.expense)}</b></div><div class="person-compact-stat balance-stat"><span>Баланс</span><b class="${s.balance>=0?'positive':'negative'}">${money(s.balance)}</b></div></div>`}).join('')}</div>`}
 
-function overviewKpis(s,saved){
-  return `<div class="summary-kpis overview-kpis">
-    <div class="summary-kpi primary">
-      <div class="summary-kpi-top"><span>Баланс семьи</span><em>Сбережено ${saved}%</em></div>
-      <b class="${s.balance>=0?'positive':'negative'}">${money(s.balance)}</b>
-    </div>
-    <div class="summary-kpi income-kpi"><span>Доходы</span><b class="positive">${money(s.income)}</b></div>
-    <div class="summary-kpi expense-kpi"><span>Расходы</span><b class="negative">${money(s.expense)}</b></div>
-  </div>`
+function overviewKpis(s,saved){return `<div class="summary-kpis overview-kpis"><div class="summary-kpi primary"><div class="summary-kpi-top"><span>Баланс семьи</span><em>Сбережено ${saved}%</em></div><b class="${s.balance>=0?'positive':'negative'}">${money(s.balance)}</b></div><div class="summary-kpi income-kpi"><span>Доходы</span><b class="positive">${money(s.income)}</b></div><div class="summary-kpi expense-kpi"><span>Расходы</span><b class="negative">${money(s.expense)}</b></div></div>`}
+
+function overviewPage(){
+  const s=stats(),saved=s.income?Math.max(0,Math.round(s.balance/s.income*100)):0,tx=periodTx();
+  return `<section class="overview-v4">${overviewKpis(s,saved)}<div class="overview-entry card entry-card"><div class="entry-head"><div><h3>Добавить операцию</h3><p>Сумма, человек и категория. Дата и время уже выставлены автоматически.</p></div><span class="entry-shortcut">Enter — сохранить</span></div><div id="txNotice"></div>${transactionForm()}</div><div class="overview-side"><div class="card overview-last"><div class="entry-head"><div><h3>Последние операции</h3><p>${tx.length} записей за ${MONTHS[state.month-1].toLowerCase()}</p></div><button class="btn btn-soft btn-small" id="allOperations">Все операции</button></div>${transactionList(tx.slice(0,7),true)}</div><div class="overview-insights"><div class="card"><div class="entry-head"><div><h3>Бюджеты месяца</h3><p>Самые заполненные лимиты</p></div><button class="text-action" data-go="budgets">Открыть</button></div>${phase3BudgetPreview()}</div><div class="card"><div class="entry-head"><div><h3>Ближайшие платежи</h3><p>Регулярные обязательства</p></div><button class="text-action" data-go="recurring">Открыть</button></div>${phase3UpcomingPreview()}</div></div></div></section><section class="card people-strip-card"><div class="entry-head"><div><h3>Муж и жена</h3><p>Сводка за выбранный месяц</p></div></div>${phase3PeopleStrip()}</section>`;
 }
 
-overviewPage=function(){
-  const s=stats();
-  const saved=s.income?Math.max(0,Math.round(s.balance/s.income*100)):0;
-  const tx=periodTx();
-  return `<section class="overview-v4">
-    ${overviewKpis(s,saved)}
-    <div class="overview-entry card entry-card">
-      <div class="entry-head"><div><h3>Добавить операцию</h3><p>Сумма, человек и категория. Дата и время уже выставлены автоматически.</p></div><span class="entry-shortcut">Enter — сохранить</span></div>
-      <div id="txNotice"></div>${transactionForm()}
-    </div>
-    <div class="overview-side">
-      <div class="card overview-last">
-        <div class="entry-head"><div><h3>Последние операции</h3><p>${tx.length} записей за ${MONTHS[state.month-1].toLowerCase()}</p></div><button class="btn btn-soft btn-small" id="allOperations">Все операции</button></div>
-        ${transactionList(tx.slice(0,7),true)}
-      </div>
-      <div class="overview-insights">
-        <div class="card"><div class="entry-head"><div><h3>Бюджеты месяца</h3><p>Самые заполненные лимиты</p></div><button class="text-action" data-go="budgets">Открыть</button></div>${phase3BudgetPreview()}</div>
-        <div class="card"><div class="entry-head"><div><h3>Ближайшие платежи</h3><p>Регулярные обязательства</p></div><button class="text-action" data-go="recurring">Открыть</button></div>${phase3UpcomingPreview()}</div>
-      </div>
-    </div>
-  </section>
-  <section class="card people-strip-card"><div class="entry-head"><div><h3>Муж и жена</h3><p>Сводка за выбранный месяц</p></div></div>${phase3PeopleStrip()}</section>`
+function bindOverview(){
+  bindTransactionForm?.();
+  bindTxButtons?.();
+  const all=document.getElementById('allOperations');if(all)all.onclick=()=>{state.view='operations';state.journalLimit=50;renderApp()};
+  document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{state.view=b.dataset.go;renderApp()});
 }
-
-const refactorOriginalBindOverview=bindOverview;
-bindOverview=function(){refactorOriginalBindOverview();bindTxButtons();document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{state.view=b.dataset.go;renderApp()})}
