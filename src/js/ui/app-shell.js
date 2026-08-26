@@ -34,8 +34,8 @@ function availableYears(){
 }
 
 function header(){
-  const overview=state.view==='overview',connection=window.FinanceOffline?.statusMarkup?.()||'';
-  return `<header class="topbar"><div class="title"><h1>Семейный бюджет</h1><p>${overview?'Текущий обзор семейной казны':`${MONTHS[state.month-1]} ${state.year}`}</p></div><div class="top-actions">${overview?currentDateMarkup():`<select class="pill" id="monthSelect">${MONTHS.map((m,i)=>`<option value="${i+1}" ${i+1===+state.month?'selected':''}>${m}</option>`).join('')}</select><select class="pill" id="yearSelect">${availableYears().map(y=>`<option ${y===+state.year?'selected':''}>${y}</option>`).join('')}</select>`}${connection}${soundToggleMarkup()}<button class="btn btn-soft" id="logout">Выйти</button></div></header>`;
+  const overview=state.view==='overview',connection=window.FinanceOffline?.statusMarkup?.()||'',authState=window.FinanceOfflineSession?.statusMarkup?.()||'';
+  return `<header class="topbar"><div class="title"><h1>Семейный бюджет</h1><p>${overview?'Текущий обзор семейной казны':`${MONTHS[state.month-1]} ${state.year}`}</p></div><div class="top-actions">${overview?currentDateMarkup():`<select class="pill" id="monthSelect">${MONTHS.map((m,i)=>`<option value="${i+1}" ${i+1===+state.month?'selected':''}>${m}</option>`).join('')}</select><select class="pill" id="yearSelect">${availableYears().map(y=>`<option ${y===+state.year?'selected':''}>${y}</option>`).join('')}</select>`}${authState}${connection}${soundToggleMarkup()}<button class="btn btn-soft" id="logout">Выйти</button></div></header>`;
 }
 
 function mobileMoreMarkup(){
@@ -44,11 +44,12 @@ function mobileMoreMarkup(){
 }
 
 function shell(content){
-  return `<div class="app-shell"><aside class="sidebar"><div class="side-brand"><div class="brand"><div class="brand-badge">₸</div><span class="brand-text">Казна</span></div></div><nav class="side-nav">${NAV_ITEMS.map(x=>navMarkup(x)).join('')}<button type="button" class="nav-item pirate-nav nav-more" id="navMore"><span class="nav-icon nav-more-icon" aria-hidden="true">•••</span><span class="nav-label">Ещё</span></button></nav><div class="family-crest" aria-label="Семейный герб"><img src="assets/gerb.png" loading="lazy" decoding="async" alt="Герб семьи"></div><div class="side-footer"><div class="side-copy"><b>${esc(state.family.name)}</b><div>Данные в Supabase</div></div></div></aside><main class="main">${header()}${content}</main>${mobileMoreMarkup()}</div>`;
+  const local=window.FinanceOfflineSession?.isLocalSession?.();
+  return `<div class="app-shell"><aside class="sidebar"><div class="side-brand"><div class="brand"><div class="brand-badge">₸</div><span class="brand-text">Казна</span></div></div><nav class="side-nav">${NAV_ITEMS.map(x=>navMarkup(x)).join('')}<button type="button" class="nav-item pirate-nav nav-more" id="navMore"><span class="nav-icon nav-more-icon" aria-hidden="true">•••</span><span class="nav-label">Ещё</span></button></nav><div class="family-crest" aria-label="Семейный герб"><img src="assets/gerb.png" loading="lazy" decoding="async" alt="Герб семьи"></div><div class="side-footer"><div class="side-copy"><b>${esc(state.family.name)}</b><div>${local?'Локальная копия · нужна авторизация для синхронизации':'Данные в Supabase'}</div></div></div></aside><main class="main">${header()}${content}</main>${mobileMoreMarkup()}</div>`;
 }
 
 async function bindAnalyticsRoute(){
-  if(typeof ensureAllActiveTransactionsLoaded==='function'&&state.activeTransactionsHasMore){
+  if(typeof ensureAllActiveTransactionsLoaded==='function'&&state.activeTransactionsHasMore&&!state.user?._offlineLocal){
     try{
       const added=await ensureAllActiveTransactionsLoaded();
       if(added&&state.view==='analytics'){renderApp();return}
@@ -79,6 +80,7 @@ function renderApp(){
   route.bind?.();
   focusAmountDesktop?.();
   window.FinanceOffline?.updateStatus?.();
+  window.FinanceOfflineSession?.bindStatus?.();
   window.FinanceOffline?.persistSnapshotSoon?.();
 }
 
@@ -90,7 +92,12 @@ function bindCommon(){
     }
     state.view=next;state.journalLimit=50;renderApp();
   });
-  const logout=document.getElementById('logout');if(logout)logout.onclick=()=>sb.auth.signOut();
+  const logout=document.getElementById('logout');if(logout)logout.onclick=async()=>{
+    if(window.FinanceOfflineSession?.isLocalSession?.()){
+      window.FinanceOfflineSession.clear();window.FinanceLocalLock?.reset?.();state.user=null;state.family=null;renderAuth();return;
+    }
+    await sb.auth.signOut();
+  };
   const month=document.getElementById('monthSelect');if(month)month.onchange=e=>{state.month=+e.target.value;state.journalLimit=50;renderApp()};
   const year=document.getElementById('yearSelect');if(year)year.onchange=e=>{state.year=+e.target.value;state.journalLimit=50;renderApp()};
 
