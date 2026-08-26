@@ -28,9 +28,14 @@ function currentDateMarkup(){
   return `<div class="current-date-info" aria-label="Текущая дата"><div class="date-medallion">${day}</div><div><span>Сегодня</span><b>${esc(text)}</b></div></div>`;
 }
 
+function availableYears(){
+  const first=2026,current=new Date().getFullYear(),last=Math.max(first+6,current+5,+state.year||first);
+  return Array.from({length:last-first+1},(_,i)=>first+i);
+}
+
 function header(){
   const overview=state.view==='overview';
-  return `<header class="topbar"><div class="title"><h1>Семейный бюджет</h1><p>${overview?'Текущий обзор семейной казны':`${MONTHS[state.month-1]} ${state.year}`}</p></div><div class="top-actions">${overview?currentDateMarkup():`<select class="pill" id="monthSelect">${MONTHS.map((m,i)=>`<option value="${i+1}" ${i+1===+state.month?'selected':''}>${m}</option>`).join('')}</select><select class="pill" id="yearSelect">${[2026,2027,2028,2029,2030,2031,2032].map(y=>`<option ${y===+state.year?'selected':''}>${y}</option>`).join('')}</select>`}${soundToggleMarkup()}<button class="btn btn-soft" id="logout">Выйти</button></div></header>`;
+  return `<header class="topbar"><div class="title"><h1>Семейный бюджет</h1><p>${overview?'Текущий обзор семейной казны':`${MONTHS[state.month-1]} ${state.year}`}</p></div><div class="top-actions">${overview?currentDateMarkup():`<select class="pill" id="monthSelect">${MONTHS.map((m,i)=>`<option value="${i+1}" ${i+1===+state.month?'selected':''}>${m}</option>`).join('')}</select><select class="pill" id="yearSelect">${availableYears().map(y=>`<option ${y===+state.year?'selected':''}>${y}</option>`).join('')}</select>`}${soundToggleMarkup()}<button class="btn btn-soft" id="logout">Выйти</button></div></header>`;
 }
 
 function mobileMoreMarkup(){
