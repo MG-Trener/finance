@@ -1,4 +1,4 @@
-const CACHE='family-finance-shell-v3';
+const CACHE='family-finance-shell-v4';
 const PRECACHE=[
   './',
   './index.html',
@@ -35,12 +35,24 @@ self.addEventListener('fetch',event=>{
 
   if(req.mode==='navigate'){
     event.respondWith(
-      fetch(req)
+      fetch(req,{cache:'no-store'})
+        .then(res=>{
+          if(res.ok){const copy=res.clone();caches.open(CACHE).then(cache=>cache.put('./index.html',copy));}
+          return res;
+        })
+        .catch(async()=>await caches.match('./index.html')||caches.match('./'))
+    );
+    return;
+  }
+
+  if(['script','style','manifest'].includes(req.destination)){
+    event.respondWith(
+      fetch(req,{cache:'no-store'})
         .then(res=>{
           if(res.ok){const copy=res.clone();caches.open(CACHE).then(cache=>cache.put(req,copy));}
           return res;
         })
-        .catch(async()=>await caches.match(req)||caches.match('./index.html'))
+        .catch(()=>caches.match(req))
     );
     return;
   }
@@ -48,7 +60,7 @@ self.addEventListener('fetch',event=>{
   event.respondWith(
     caches.match(req).then(cached=>{
       const network=fetch(req).then(res=>{
-        if(res.ok&&['script','style','image','manifest'].includes(req.destination)){
+        if(res.ok&&req.destination==='image'){
           const copy=res.clone();caches.open(CACHE).then(cache=>cache.put(req,copy));
         }
         return res;
