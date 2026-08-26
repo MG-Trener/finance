@@ -110,6 +110,7 @@ function bindCommon(){
   };
   const month=document.getElementById('monthSelect');if(month)month.onchange=e=>{state.month=+e.target.value;state.journalLimit=50;renderApp()};
   const year=document.getElementById('yearSelect');if(year)year.onchange=e=>{state.year=+e.target.value;state.journalLimit=50;renderApp()};
+  const updateLink=document.querySelector('[data-app-update-link]');if(updateLink&&window.__FINANCE_NATIVE__)updateLink.onclick=e=>window.FinanceAppUpdate?.openDownload?.(e);
 
   const more=document.getElementById('mobileMore'),open=document.getElementById('navMore'),close=document.getElementById('mobileMoreClose');
   if(open&&more)open.onclick=()=>{more.hidden=false;document.documentElement.classList.add('mobile-more-open');window.FinanceAppUpdate?.check?.()};
