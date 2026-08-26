@@ -33,6 +33,7 @@ function closeModal(){document.getElementById('modal')?.remove()}
 function pendingInviteToken(){return new URLSearchParams(location.search).get('invite')||localStorage.getItem('finance.pendingInvite')||''}
 function clearPendingInvite(){localStorage.removeItem('finance.pendingInvite');const u=new URL(location.href);u.searchParams.delete('invite');history.replaceState({},'',u.pathname+u.search+u.hash)}
 function authConfirmationUrl(invite){const base=window.__FINANCE_NATIVE__?'https://mg-trener.github.io/finance/':location.origin+location.pathname;return `${base}?invite=${encodeURIComponent(invite)}`}
+function hasDeletionIntent(){return new URLSearchParams(location.search).get('delete-account')==='1'}
 
 function renderRestrictedAccess(msg='Этот аккаунт не приглашён в семейную казну.'){
   app.innerHTML=`<div class="restricted-shell"><div class="restricted-card"><div class="lock-badge">🔒</div><h2>Доступ закрыт</h2><p>${esc(msg)}</p><button class="btn btn-soft" id="restrictedLogout">Выйти</button></div></div>`;
@@ -41,7 +42,7 @@ function renderRestrictedAccess(msg='Этот аккаунт не приглаш
 
 function renderAuth(signup=false){
   const invite=pendingInviteToken();if(!invite)signup=false;
-  app.innerHTML=`<div class="auth-shell"><section class="auth-hero"><div class="brand"><div class="brand-badge">₸</div><span>Семейная казна</span></div><div><h1>Семейные деньги под вашим флагом.</h1><p>Доступ только для участников этой семьи.</p></div><small style="color:#b7a88d">Закрытая семейная казна</small></section><section class="auth-card-wrap"><div class="auth-card"><h2>${signup?'Создать доступ по приглашению':'Вход в казну'}</h2>${invite?'<div class="invite-auth-note">У вас персональное приглашение в семейную казну.</div>':''}<div id="authNotice"></div><form id="authForm"><div class="field"><label>Email</label><input id="email" type="email" required autocomplete="email"></div><div class="field"><label>Пароль</label><input id="password" type="password" required minlength="8" autocomplete="${signup?'new-password':'current-password'}"></div><button class="btn btn-primary btn-wide">${signup?'Создать доступ':'Войти'}</button></form>${invite?`<div class="auth-switch">${signup?'Уже есть аккаунт?':'Нет аккаунта?'} <button class="link-btn" id="switchAuth">${signup?'Войти':'Создать по приглашению'}</button></div>`:''}</div></section></div>`;
+  app.innerHTML=`<div class="auth-shell"><section class="auth-hero"><div class="brand"><div class="brand-badge">₸</div><span>Семейная казна</span></div><div><h1>Семейные деньги под вашим флагом.</h1><p>Доступ только для участников этой семьи.</p></div><small style="color:#b7a88d">Закрытая семейная казна</small></section><section class="auth-card-wrap"><div class="auth-card"><h2>${signup?'Создать доступ по приглашению':'Вход в казну'}</h2>${invite?'<div class="invite-auth-note">У вас персональное приглашение в семейную казну.</div>':''}<div id="authNotice"></div><form id="authForm"><div class="field"><label>Email</label><input id="email" type="email" required autocomplete="email"></div><div class="field"><label>Пароль</label><input id="password" type="password" required minlength="8" autocomplete="${signup?'new-password':'current-password'}"></div><button class="btn btn-primary btn-wide">${signup?'Создать доступ':'Войти'}</button></form>${invite?`<div class="auth-switch">${signup?'Уже есть аккаунт?':'Нет аккаунта?'} <button class="link-btn" id="switchAuth">${signup?'Войти':'Создать по приглашению'}</button></div>`:''}<div class="auth-switch"><a href="privacy.html" target="_blank" rel="noopener">Конфиденциальность</a> · <a href="delete-account.html" target="_blank" rel="noopener">Удаление аккаунта</a></div></div></section></div>`;
   if(invite)document.getElementById('switchAuth').onclick=()=>renderAuth(!signup);
   document.getElementById('authForm').onsubmit=async e=>{
     e.preventDefault();notice('authNotice','');
@@ -158,6 +159,7 @@ async function loadData(){
   state.budgets=b.data||[];state.recurring=r.data||[];state.goals=g.data||[];state.goalContributions=gc.data||[];
   if(!state.selectedPersonId&&state.people[0])state.selectedPersonId=state.people.find(x=>x.linked_user_id===state.user?.id)?.id||state.people[0].id;
   await window.FinanceOffline?.reapplyPendingToState?.();
+  if(hasDeletionIntent())state.view='access';
   renderApp();
   window.FinanceOffline?.persistSnapshotSoon?.();
   if(navigator.onLine)window.FinanceOffline?.flushQueue?.();
