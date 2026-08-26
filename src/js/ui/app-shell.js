@@ -77,6 +77,7 @@ function renderApp(){
   app.innerHTML=shell(route.page());
   bindCommon();
   route.bind?.();
+  focusAmountDesktop?.();
 }
 
 function bindCommon(){
