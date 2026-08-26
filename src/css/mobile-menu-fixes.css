@@ -1,0 +1,13 @@
+/* Final mobile menu overrides. Root legacy CSS hides .nav-item spans below 1100px;
+   the More sheet must explicitly restore its text and update indicators. */
+@media (max-width:760px), (max-device-width:760px) and (min-width:761px), (pointer:coarse) and (min-width:761px) and (max-width:1400px){
+  .mobile-more-list .mobile-more-item{position:relative!important;align-items:center!important;min-height:64px!important;text-decoration:none!important}
+  .mobile-more-list .mobile-more-item .nav-label{display:block!important;visibility:visible!important;opacity:1!important;flex:1 1 auto!important;min-width:0!important;font-size:12px!important;font-weight:700!important;line-height:1.2!important;text-align:left!important;white-space:normal!important;color:#e6d0a7!important;-webkit-text-fill-color:#e6d0a7!important}
+  .apk-update-copy{display:grid!important;visibility:visible!important;opacity:1!important;gap:3px!important;min-width:0!important;flex:1 1 auto!important}
+  .apk-update-copy .nav-label{display:block!important}
+  .apk-update-copy small{display:block!important;visibility:visible!important;opacity:1!important;font-size:9px!important;line-height:1.25!important;color:#948873!important;-webkit-text-fill-color:#948873!important}
+  .apk-download-item.has-update{border-color:#d4a95f!important;background:linear-gradient(180deg,#4f3b22,#231b14)!important;box-shadow:inset 0 0 0 1px rgba(255,214,139,.08),0 0 18px rgba(211,163,82,.12)!important}
+  .app-update-badge{display:inline-flex!important;align-items:center!important;justify-content:center!important;flex:0 0 auto!important;padding:4px 7px!important;border-radius:999px!important;background:#8e2d23!important;border:1px solid #d86955!important;color:#ffe3b2!important;-webkit-text-fill-color:#ffe3b2!important;font-size:8px!important;font-weight:900!important;text-transform:uppercase!important;letter-spacing:.04em!important}
+  .app-update-badge[hidden],.app-update-nav-badge[hidden]{display:none!important}
+  .app-update-nav-badge{position:absolute!important;right:5px!important;top:4px!important;display:grid!important;place-items:center!important;width:18px!important;height:18px!important;border-radius:50%!important;background:#b33327!important;border:1px solid #f0a069!important;color:#fff2d2!important;-webkit-text-fill-color:#fff2d2!important;font-size:9px!important;font-weight:900!important;box-shadow:0 0 10px rgba(232,81,55,.55)!important}
+}
