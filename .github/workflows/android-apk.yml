@@ -16,7 +16,7 @@ on:
       - 'assets/**'
       - 'package.json'
       - 'capacitor.config.json'
-      - 'scripts/prepare-mobile.mjs'
+      - 'scripts/**'
       - 'mobile-assets/**'
       - '.github/workflows/android-apk.yml'
 
@@ -71,6 +71,9 @@ jobs:
 
       - name: Sync Capacitor
         run: npx cap sync android
+
+      - name: Add native background updater
+        run: node scripts/inject-native-updater.mjs
 
       - name: Verify Android target API
         shell: bash
@@ -141,7 +144,7 @@ jobs:
             Build: ${{ github.run_number }}
             Version: 1.0.${{ github.run_number }}
             Файл `family-treasury.apk` можно устанавливать поверх предыдущей версии.
-            Приложение само проверяет эту сборку и показывает уведомление, когда доступно обновление.
+            Приложение само проверяет эту сборку. Начиная с версии с нативным обновлятором, APK загружается на телефоне в фоне, а Android показывает только системное подтверждение установки.
           prerelease: true
           make_latest: false
           files: family-treasury.apk
