@@ -101,7 +101,8 @@
   function decorate(){
     if(!offerLock())return;
     const list=document.querySelector('.mobile-more-list');if(!list||list.querySelector('#localLockSettings'))return;
-    const button=document.createElement('button');button.type='button';button.id='localLockSettings';button.className='nav-item pirate-nav mobile-more-item';button.innerHTML=`<span class="nav-icon nav-more-icon" aria-hidden="true">${enabled()?'🔒':'🔓'}</span><span class="nav-label">Блокировка PIN</span>`;button.onclick=openSettings;list.appendChild(button);
+    const active=enabled();
+    const button=document.createElement('button');button.type='button';button.id='localLockSettings';button.className='nav-item pirate-nav mobile-more-item';button.innerHTML=`<span class="nav-icon nav-more-icon" aria-hidden="true">${active?'🔒':'🔓'}</span><span class="apk-update-copy"><span class="nav-label">Защита приложения</span><small>${active?'PIN включён на этом устройстве':'PIN при открытии и офлайн-доступе'}</small></span>`;button.onclick=openSettings;list.appendChild(button);
   }
 
   async function handleVisibility(){
