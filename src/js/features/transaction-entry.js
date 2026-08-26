@@ -34,17 +34,16 @@ async function saveTransaction(e,editId=null){
   const noticeId=editId?'editNotice':'txNotice';notice(noticeId,'');
   const personId=form.querySelector('#personId')?.value||'',type=form.querySelector('#txType')?.value||state.txType,categoryId=form.querySelector('#categoryId')?.value||'',subcategoryId=form.querySelector('#subcategoryId')?.value||null,amount=Number(form.querySelector('#amount')?.value||0),occurred=form.querySelector('#occurredAt')?.value,description=form.querySelector('#description')?.value.trim()||null;
   if(!personId)return notice(noticeId,'Выберите участника');if(!categoryId)return notice(noticeId,'Выберите категорию');if(!(amount>0))return notice(noticeId,'Введите сумму');if(!occurred)return notice(noticeId,'Укажите дату и время');
-  const submit=form.querySelector('.save-operation');if(submit){submit.disabled=true;submit.textContent='Сохраняю…'}
+  const submit=form.querySelector('.save-operation');if(submit){submit.disabled=true;submit.textContent=navigator.onLine?'Сохраняю…':'Сохраняю офлайн…'}
   try{
+    const payload={person_id:personId,type,amount,category_id:categoryId,subcategory_id:subcategoryId,description,occurred_at:new Date(occurred).toISOString()};
+    const createArgs={p_family_id:state.family.id,p_person_id:personId,p_type:type,p_amount:amount,p_category_id:categoryId,p_subcategory_id:subcategoryId,p_description:description,p_occurred_at:payload.occurred_at};
     let result;
-    if(editId){
-      const payload={person_id:personId,type,amount,category_id:categoryId,subcategory_id:subcategoryId,description,occurred_at:new Date(occurred).toISOString()};
-      result=await sb.from('transactions').update(payload).eq('id',editId).select().single();
-    }else{
-      result=await sb.rpc('create_family_transaction',{p_family_id:state.family.id,p_person_id:personId,p_type:type,p_amount:amount,p_category_id:categoryId,p_subcategory_id:subcategoryId,p_description:description,p_occurred_at:new Date(occurred).toISOString()});
-    }
-    if(result.error)return notice(noticeId,`Не удалось сохранить: ${result.error.message}`);
-    const row=Array.isArray(result.data)?result.data[0]:result.data;if(!row)return notice(noticeId,'Supabase не вернул созданную операцию. Запись не подтверждена.');
+    if(window.FinanceOffline?.saveTransaction)result=await window.FinanceOffline.saveTransaction({editId,payload,createArgs});
+    else if(editId)result=await sb.from('transactions').update(payload).eq('id',editId).select().single();
+    else result=await sb.rpc('create_family_transaction',createArgs);
+    if(result.error)return notice(noticeId,`Не удалось сохранить: ${result.error.message||result.error}`);
+    const row=Array.isArray(result.data)?result.data[0]:result.data;if(!row)return notice(noticeId,'Операция не была сохранена.');
     if(!editId){phase3Prefs[personId]=phase3Prefs[personId]||{};phase3Prefs[personId][type]={category_id:categoryId,subcategory_id:subcategoryId};try{localStorage.setItem('finance.phase3.prefs',JSON.stringify(phase3Prefs))}catch(_){}}
     syncTransactionState(row);if(typeof uiSound==='function')uiSound('success');if(editId)closeModal();renderStateChange();
   }catch(err){notice(noticeId,`Ошибка сохранения: ${err?.message||String(err)}`)}finally{if(submit&&document.body.contains(submit)){submit.disabled=false;submit.textContent=editId?'Сохранить изменения':'Сохранить операцию'}}
