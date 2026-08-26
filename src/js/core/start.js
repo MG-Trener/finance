@@ -5,9 +5,10 @@
   let renderedUserId=null;
 
   function runAfterAuthCallback(fn){setTimeout(()=>Promise.resolve().then(fn).catch(error=>console.error('Ошибка запуска приложения',error)),0)}
+  function browserUsesLocalLock(){return Boolean(window.__FINANCE_NATIVE__||window.matchMedia?.('(display-mode: standalone)').matches)}
   async function openUserSession(user){
     if(!user)return false;
-    const unlocked=await window.FinanceLocalLock?.unlockIfNeeded?.(user);
+    const unlocked=browserUsesLocalLock()?await window.FinanceLocalLock?.unlockIfNeeded?.(user):true;
     if(unlocked===false)return false;
     await loadData();return true;
   }
