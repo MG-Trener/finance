@@ -1,7 +1,9 @@
-const CACHE='family-finance-shell-v2';
+const CACHE='family-finance-shell-v3';
 const PRECACHE=[
   './',
   './index.html',
+  './privacy.html',
+  './delete-account.html',
   './manifest.webmanifest',
   './assets/app-icon.svg',
   './assets/icon-192.png',
@@ -35,10 +37,10 @@ self.addEventListener('fetch',event=>{
     event.respondWith(
       fetch(req)
         .then(res=>{
-          if(res.ok){const copy=res.clone();caches.open(CACHE).then(cache=>cache.put('./index.html',copy));}
+          if(res.ok){const copy=res.clone();caches.open(CACHE).then(cache=>cache.put(req,copy));}
           return res;
         })
-        .catch(()=>caches.match('./index.html'))
+        .catch(async()=>await caches.match(req)||caches.match('./index.html'))
     );
     return;
   }
