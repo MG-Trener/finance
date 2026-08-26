@@ -33,7 +33,9 @@
 /* Mobile overrides */
 @import url('./mobile.css?v=mobile23');
 @import url('./pages/overview-mobile.css?v=overview-mobile28');
-@import url('./mobile-nav-more.css?v=nav32');
+@import url('./mobile-nav-more.css?v=nav46');
 @import url('./mobile-tweaks.css?v=mobile36');
 /* Android embedded browsers sometimes expose a desktop-size CSS viewport. */
 @import url('./mobile-device-fallback.css?v=mobile35');
+/* Keep this last: it restores labels hidden by legacy <=1100px rules. */
+@import url('./mobile-menu-fixes.css?v=menu46');
