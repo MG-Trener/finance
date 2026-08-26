@@ -64,8 +64,17 @@
     }
     return available;
   }
+  async function openDownload(event){
+    event?.preventDefault?.();
+    try{
+      const browser=window.Capacitor?.Plugins?.Browser;
+      if(native&&browser?.open){await browser.open({url:DOWNLOAD_URL});return true}
+    }catch(error){console.warn('Не удалось открыть системный браузер для обновления',error)}
+    window.open(DOWNLOAD_URL,'_blank','noopener');
+    return true;
+  }
 
-  window.FinanceAppUpdate={check,refreshUi,downloadUrl:DOWNLOAD_URL,get native(){return native},get currentBuild(){return currentBuild},get latestBuild(){return latestBuild},get checked(){return checked},get checking(){return checking},get available(){return available},get label(){return label()},get detail(){return detail()}};
+  window.FinanceAppUpdate={check,refreshUi,openDownload,downloadUrl:DOWNLOAD_URL,get native(){return native},get currentBuild(){return currentBuild},get latestBuild(){return latestBuild},get checked(){return checked},get checking(){return checking},get available(){return available},get label(){return label()},get detail(){return detail()}};
   applyCached();
   window.addEventListener('online',()=>check({force:true}));
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)check()});
