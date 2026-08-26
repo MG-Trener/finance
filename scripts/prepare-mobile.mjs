@@ -3,6 +3,7 @@ import path from 'node:path';
 
 const root=process.cwd();
 const out=path.join(root,'www');
+const buildNumber=Number(process.env.FINANCE_BUILD_NUMBER||0);
 
 await rm(out,{recursive:true,force:true});
 await mkdir(out,{recursive:true});
@@ -41,7 +42,7 @@ html=html.replace(/<script src="https:\/\/cdn\.jsdelivr\.net\/npm\/@supabase\/su
 html=html.replace(/\s*<link rel="preconnect" href="https:\/\/fonts\.googleapis\.com">/g,'');
 html=html.replace(/\s*<link rel="preconnect" href="https:\/\/fonts\.gstatic\.com" crossorigin>/g,'');
 html=html.replace(/\s*<link href="https:\/\/fonts\.googleapis\.com\/css2[^>]+>/g,'');
-html=html.replace('<body>','<body class="native-app">\n  <script>window.__FINANCE_NATIVE__=true;</script>');
+html=html.replace('<body>',`<body class="native-app">\n  <script>window.__FINANCE_NATIVE__=true;window.__FINANCE_BUILD__=${buildNumber};</script>`);
 await writeFile(path.join(out,'index.html'),html,'utf8');
 
 const analyticsPath=path.join(out,'src/js/features/analytics.js');
@@ -54,4 +55,4 @@ let exporter=await readFile(exportPath,'utf8');
 exporter=exporter.replace('https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js','vendor/xlsx.full.min.js');
 await writeFile(exportPath,exporter,'utf8');
 
-console.log('Android web assets prepared in www/ with local runtime libraries and policy pages');
+console.log(`Android web assets prepared in www/; embedded build ${buildNumber}`);
