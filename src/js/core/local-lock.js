@@ -83,10 +83,22 @@
   function setLockAfter(seconds){const id=userId(),cfg=readConfig(id);if(!cfg)return;cfg.lockAfter=Math.max(0,Number(seconds)||0);writeConfig(id,cfg)}
   function delayOptions(selected){return [[0,'Сразу'],[30,'Через 30 секунд'],[60,'Через 1 минуту'],[300,'Через 5 минут']].map(([value,label])=>`<option value="${value}" ${value===selected?'selected':''}>${label}</option>`).join('')}
 
+  function closeMoreBeforeSettings(){
+    const more=document.getElementById('mobileMore');
+    if(more)more.hidden=true;
+    document.documentElement.classList.remove('mobile-more-open');
+  }
+
   function openSettings(){
-    closeModal();const active=enabled(),delay=lockAfter();
-    document.body.insertAdjacentHTML('beforeend',`<div class="modal-backdrop" id="modal"><div class="modal local-lock-settings"><div class="modal-head"><div><h2>Блокировка приложения</h2><p class="quick-amount-context">PIN хранится только на этом устройстве</p></div><button class="icon-btn" id="closeModal" aria-label="Закрыть">×</button></div><div id="lockSettingsNotice"></div>${active?`<div class="field"><label>Блокировать после сворачивания</label><select id="lockDelay">${delayOptions(delay)}</select></div><form id="lockChangeForm"><div class="field"><label>Текущий PIN</label><input id="lockCurrentPin" type="password" inputmode="numeric" maxlength="6" required></div><div class="field"><label>Новый PIN</label><input id="lockNewPin" type="password" inputmode="numeric" maxlength="6" placeholder="6 цифр" required></div><button class="btn btn-primary btn-wide">Изменить PIN</button></form><div class="local-lock-setting-actions"><button type="button" class="btn btn-soft" id="lockNowBtn">Заблокировать сейчас</button><button type="button" class="btn btn-danger" id="disableLockBtn">Отключить PIN</button></div>`:`<form id="lockEnableForm"><div class="field"><label>Новый PIN</label><input id="lockNewPin" type="password" inputmode="numeric" maxlength="6" placeholder="6 цифр" required></div><div class="field"><label>Повторите PIN</label><input id="lockRepeatPin" type="password" inputmode="numeric" maxlength="6" placeholder="6 цифр" required></div><button class="btn btn-primary btn-wide">Включить PIN</button></form>`}</div></div>`);
-    document.getElementById('closeModal').onclick=closeModal;document.getElementById('modal').onclick=e=>{if(e.target.id==='modal')closeModal()};
+    // The More sheet lives at a very high z-index and locks page scrolling. Close it
+    // synchronously before creating the PIN modal so the response to a tap is immediate.
+    closeMoreBeforeSettings();
+    closeModal?.();
+    const active=enabled(),delay=lockAfter();
+    document.body.insertAdjacentHTML('beforeend',`<div class="modal-backdrop local-lock-backdrop" id="modal"><div class="modal local-lock-settings"><div class="modal-head"><div><h2>Защита приложения</h2><p class="quick-amount-context">PIN хранится только на этом устройстве</p></div><button class="icon-btn" id="closeModal" aria-label="Закрыть">×</button></div><div id="lockSettingsNotice"></div>${active?`<div class="field"><label>Блокировать после сворачивания</label><select id="lockDelay">${delayOptions(delay)}</select></div><form id="lockChangeForm"><div class="field"><label>Текущий PIN</label><input id="lockCurrentPin" type="password" inputmode="numeric" maxlength="6" required></div><div class="field"><label>Новый PIN</label><input id="lockNewPin" type="password" inputmode="numeric" maxlength="6" placeholder="6 цифр" required></div><button class="btn btn-primary btn-wide">Изменить PIN</button></form><div class="local-lock-setting-actions"><button type="button" class="btn btn-soft" id="lockNowBtn">Заблокировать сейчас</button><button type="button" class="btn btn-danger" id="disableLockBtn">Отключить PIN</button></div>`:`<form id="lockEnableForm"><div class="field"><label>Новый PIN</label><input id="lockNewPin" type="password" inputmode="numeric" maxlength="6" placeholder="6 цифр" required></div><div class="field"><label>Повторите PIN</label><input id="lockRepeatPin" type="password" inputmode="numeric" maxlength="6" placeholder="6 цифр" required></div><button class="btn btn-primary btn-wide">Включить PIN</button></form>`}</div></div>`);
+    const modal=document.getElementById('modal');
+    document.getElementById('closeModal').onclick=closeModal;
+    modal.onclick=e=>{if(e.target===modal)closeModal()};
     document.querySelectorAll('#modal input[inputmode="numeric"]').forEach(i=>i.addEventListener('input',()=>{i.value=i.value.replace(/\D/g,'').slice(0,6)}));
     if(!active){
       document.getElementById('lockEnableForm').onsubmit=async e=>{e.preventDefault();const pin=document.getElementById('lockNewPin').value,repeat=document.getElementById('lockRepeatPin').value;if(pin!==repeat)return notice('lockSettingsNotice','PIN-коды не совпадают');try{await setPin(pin);notice('lockSettingsNotice','PIN включён','success');setTimeout(()=>{closeModal();renderApp()},350)}catch(err){notice('lockSettingsNotice',err.message)}};
