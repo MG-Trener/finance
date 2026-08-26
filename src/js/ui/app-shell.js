@@ -47,6 +47,10 @@ function apkDownloadMarkup(){
   return `<a class="nav-item pirate-nav mobile-more-item apk-download-item ${available?'has-update':''}" href="${updater?.downloadUrl||APK_DOWNLOAD_URL}" target="_blank" rel="noopener" data-app-update-link><span class="nav-icon nav-more-icon" aria-hidden="true">${available?'⬆️':'📱'}</span><span class="apk-update-copy"><span class="nav-label" data-app-update-label>${esc(label)}</span><small data-app-update-detail>${esc(detail)}</small></span><span class="app-update-badge" data-app-update-badge ${available?'':'hidden'}>Новая версия</span></a>`;
 }
 
+function desktopApkDownloadMarkup(){
+  return `<a class="crest-apk-download" href="${APK_DOWNLOAD_URL}" target="_blank" rel="noopener" aria-label="Скачать последнюю версию Семейной казны для Android"><span class="crest-apk-icon" aria-hidden="true">📱</span><span><b>Скачать Android</b><small>Последняя версия APK</small></span></a>`;
+}
+
 function mobileMoreMarkup(){
   const secondary=NAV_ITEMS.filter(x=>!x.primary);
   return `<div class="mobile-more-backdrop" id="mobileMore" hidden><div class="mobile-more-sheet"><div class="mobile-more-head"><div><b>Ещё</b><small>Дополнительные разделы</small></div><button type="button" class="mobile-more-close" id="mobileMoreClose" aria-label="Закрыть">×</button></div><div class="mobile-more-list">${secondary.map(x=>navMarkup(x,'mobile-more-item')).join('')}${apkDownloadMarkup()}</div></div></div>`;
@@ -54,7 +58,7 @@ function mobileMoreMarkup(){
 
 function shell(content){
   const local=window.FinanceOfflineSession?.isLocalSession?.(),updateAvailable=Boolean(window.FinanceAppUpdate?.available);
-  return `<div class="app-shell"><aside class="sidebar"><div class="side-brand"><div class="brand"><div class="brand-badge">₸</div><span class="brand-text">Казна</span></div></div><nav class="side-nav">${NAV_ITEMS.map(x=>navMarkup(x)).join('')}<button type="button" class="nav-item pirate-nav nav-more ${updateAvailable?'has-update':''}" id="navMore" aria-label="${updateAvailable?'Ещё. Доступно обновление приложения':'Ещё'}"><span class="nav-icon nav-more-icon" aria-hidden="true">•••</span><span class="nav-label">Ещё</span><span class="app-update-nav-dot" data-app-update-dot ${updateAvailable?'':'hidden'} aria-hidden="true"></span></button></nav><div class="family-crest" aria-label="Семейный герб"><img src="assets/gerb.png" loading="lazy" decoding="async" alt="Герб семьи"></div><div class="side-footer"><div class="side-copy"><b>${esc(state.family.name)}</b><div>${local?'Локальная копия · нужна авторизация для синхронизации':'Данные в Supabase'}</div></div></div></aside><main class="main">${header()}${content}</main>${mobileMoreMarkup()}</div>`;
+  return `<div class="app-shell"><aside class="sidebar"><div class="side-brand"><div class="brand"><div class="brand-badge">₸</div><span class="brand-text">Казна</span></div></div><nav class="side-nav">${NAV_ITEMS.map(x=>navMarkup(x)).join('')}<button type="button" class="nav-item pirate-nav nav-more ${updateAvailable?'has-update':''}" id="navMore" aria-label="${updateAvailable?'Ещё. Доступно обновление приложения':'Ещё'}"><span class="nav-icon nav-more-icon" aria-hidden="true">•••</span><span class="nav-label">Ещё</span><span class="app-update-nav-dot" data-app-update-dot ${updateAvailable?'':'hidden'} aria-hidden="true"></span></button></nav><div class="family-crest" aria-label="Семейный герб"><img src="assets/gerb.png" loading="lazy" decoding="async" alt="Герб семьи"></div>${desktopApkDownloadMarkup()}<div class="side-footer"><div class="side-copy"><b>${esc(state.family.name)}</b><div>${local?'Локальная копия · нужна авторизация для синхронизации':'Данные в Supabase'}</div></div></div></aside><main class="main">${header()}${content}</main>${mobileMoreMarkup()}</div>`;
 }
 
 async function bindAnalyticsRoute(){
