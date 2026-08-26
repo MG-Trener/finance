@@ -15,16 +15,26 @@ for(const file of ['styles.css','hotfix.css','manifest.webmanifest','sw.js']){
 }
 
 await mkdir(path.join(out,'vendor'),{recursive:true});
-const supabaseCandidates=[
+async function copyFirst(candidates,destination,label){
+  for(const candidate of candidates){
+    const source=path.join(root,candidate);
+    try{await access(source);await copyFile(source,path.join(out,'vendor',destination));return}catch(_){ }
+  }
+  throw new Error(`Не найден локальный bundle ${label}`);
+}
+
+await copyFirst([
   'node_modules/@supabase/supabase-js/dist/umd/supabase.js',
   'node_modules/@supabase/supabase-js/dist/umd/supabase.min.js'
-];
-let supabaseSource='';
-for(const candidate of supabaseCandidates){
-  try{await access(path.join(root,candidate));supabaseSource=path.join(root,candidate);break}catch(_){ }
-}
-if(!supabaseSource)throw new Error('Не найден UMD bundle @supabase/supabase-js');
-await copyFile(supabaseSource,path.join(out,'vendor','supabase.js'));
+],'supabase.js','@supabase/supabase-js');
+await copyFirst([
+  'node_modules/chart.js/dist/chart.umd.min.js',
+  'node_modules/chart.js/dist/chart.umd.js'
+],'chart.umd.js','Chart.js');
+await copyFirst([
+  'node_modules/xlsx/dist/xlsx.full.min.js',
+  'node_modules/xlsx/dist/xlsx.full.js'
+],'xlsx.full.min.js','XLSX');
 
 let html=await readFile(path.join(root,'index.html'),'utf8');
 html=html.replace(/<script src="https:\/\/cdn\.jsdelivr\.net\/npm\/@supabase\/supabase-js@2"><\/script>/,'<script src="vendor/supabase.js"></script>');
@@ -34,4 +44,14 @@ html=html.replace(/\s*<link href="https:\/\/fonts\.googleapis\.com\/css2[^>]+>/g
 html=html.replace('<body>','<body class="native-app">\n  <script>window.__FINANCE_NATIVE__=true;</script>');
 await writeFile(path.join(out,'index.html'),html,'utf8');
 
-console.log('Android web assets prepared in www/');
+const analyticsPath=path.join(out,'src/js/features/analytics.js');
+let analytics=await readFile(analyticsPath,'utf8');
+analytics=analytics.replace('https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js','vendor/chart.umd.js');
+await writeFile(analyticsPath,analytics,'utf8');
+
+const exportPath=path.join(out,'src/js/features/export.js');
+let exporter=await readFile(exportPath,'utf8');
+exporter=exporter.replace('https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js','vendor/xlsx.full.min.js');
+await writeFile(exportPath,exporter,'utf8');
+
+console.log('Android web assets prepared in www/ with local runtime libraries');
