@@ -32,6 +32,7 @@ function closeModal(){document.getElementById('modal')?.remove()}
 
 function pendingInviteToken(){return new URLSearchParams(location.search).get('invite')||localStorage.getItem('finance.pendingInvite')||''}
 function clearPendingInvite(){localStorage.removeItem('finance.pendingInvite');const u=new URL(location.href);u.searchParams.delete('invite');history.replaceState({},'',u.pathname+u.search+u.hash)}
+function authConfirmationUrl(invite){const base=window.__FINANCE_NATIVE__?'https://mg-trener.github.io/finance/':location.origin+location.pathname;return `${base}?invite=${encodeURIComponent(invite)}`}
 
 function renderRestrictedAccess(msg='Этот аккаунт не приглашён в семейную казну.'){
   app.innerHTML=`<div class="restricted-shell"><div class="restricted-card"><div class="lock-badge">🔒</div><h2>Доступ закрыт</h2><p>${esc(msg)}</p><button class="btn btn-soft" id="restrictedLogout">Выйти</button></div></div>`;
@@ -47,7 +48,7 @@ function renderAuth(signup=false){
     const email=document.getElementById('email').value.trim(),password=document.getElementById('password').value;
     if(signup){
       localStorage.setItem('finance.pendingInvite',invite);
-      const res=await sb.auth.signUp({email,password,options:{emailRedirectTo:location.origin+location.pathname+`?invite=${encodeURIComponent(invite)}`}});
+      const res=await sb.auth.signUp({email,password,options:{emailRedirectTo:authConfirmationUrl(invite)}});
       if(res.error)return notice('authNotice',res.error.message);
       if(res.data.session){state.user=res.data.user;await loadData()}else notice('authNotice','Аккаунт создан. Подтвердите email, затем откройте ссылку приглашения снова.','success');
       return;
@@ -67,8 +68,9 @@ function syncTransactionState(row){
   if(row.deleted_at)upsertById(state.trashTransactions,row);else upsertById(state.transactions,row);
   state.transactions.sort((a,b)=>new Date(b.occurred_at)-new Date(a.occurred_at));
   state.trashTransactions.sort((a,b)=>new Date(b.deleted_at)-new Date(a.deleted_at));
+  window.FinanceOffline?.persistSnapshotSoon?.();
 }
-function renderStateChange(){if(typeof renderApp==='function')renderApp()}
+function renderStateChange(){window.FinanceOffline?.persistSnapshotSoon?.();if(typeof renderApp==='function')renderApp()}
 
 function appendUniqueTransactions(target,rows,orderField){
   const known=new Set(target.map(x=>x.id));
@@ -92,6 +94,7 @@ async function loadMoreTransactionHistory({trash=false,batch=TX_HISTORY_BATCH,re
     const rows=data||[];
     appendUniqueTransactions(target,rows,orderField);
     state[hasMoreKey]=rows.length===batch;
+    window.FinanceOffline?.persistSnapshotSoon?.();
     if(render&&typeof renderApp==='function')renderApp();
     return rows.length;
   }finally{
@@ -109,9 +112,16 @@ async function ensureAllActiveTransactionsLoaded(){
   return added;
 }
 
+async function restoreOfflineOrShowError(message){
+  const restored=await window.FinanceOffline?.restoreSnapshot?.(state.user?.id);
+  if(restored)return true;
+  app.innerHTML=`<div class="boot">${esc(message)}</div>`;return false;
+}
+
 async function loadData(){
-  const {data:fu,error}=await sb.from('family_users').select('family_id,role,families(id,name,currency,created_by)').limit(1);
-  if(error)return app.innerHTML=`<div class="boot">Ошибка: ${esc(error.message)}</div>`;
+  let fu,error;
+  try{const res=await sb.from('family_users').select('family_id,role,families(id,name,currency,created_by)').limit(1);fu=res.data;error=res.error}catch(err){error=err}
+  if(error){await restoreOfflineOrShowError(`Ошибка: ${error.message||error}`);return}
   if(!fu?.length){
     const token=pendingInviteToken();
     if(token){
@@ -124,19 +134,22 @@ async function loadData(){
 
   state.family=fu[0].families;
   const familyId=state.family.id;
-  const [p,c,s,t,trash,b,r,g,gc]=await Promise.all([
-    sb.from('people').select('*').eq('family_id',familyId).order('label'),
-    sb.from('categories').select('*').or(`family_id.is.null,family_id.eq.${familyId}`).order('sort_order'),
-    sb.from('subcategories').select('*').order('sort_order'),
-    sb.from('transactions').select('*').eq('family_id',familyId).is('deleted_at',null).order('occurred_at',{ascending:false}).limit(INITIAL_ACTIVE_TX_LIMIT),
-    sb.from('transactions').select('*').eq('family_id',familyId).not('deleted_at','is',null).order('deleted_at',{ascending:false}).limit(INITIAL_TRASH_TX_LIMIT),
-    sb.from('budgets').select('*').eq('family_id',familyId),
-    sb.from('recurring_payments').select('*').eq('family_id',familyId).order('day_of_month'),
-    sb.from('financial_goals').select('*').eq('family_id',familyId).order('created_at',{ascending:false}),
-    sb.from('goal_contributions').select('*').eq('family_id',familyId).order('contributed_at',{ascending:false})
-  ]);
-  const firstError=[p,c,s,t,trash,b,r,g,gc].find(x=>x.error)?.error;
-  if(firstError)return app.innerHTML=`<div class="boot">Ошибка загрузки: ${esc(firstError.message)}</div>`;
+  let responses;
+  try{
+    responses=await Promise.all([
+      sb.from('people').select('*').eq('family_id',familyId).order('label'),
+      sb.from('categories').select('*').or(`family_id.is.null,family_id.eq.${familyId}`).order('sort_order'),
+      sb.from('subcategories').select('*').order('sort_order'),
+      sb.from('transactions').select('*').eq('family_id',familyId).is('deleted_at',null).order('occurred_at',{ascending:false}).limit(INITIAL_ACTIVE_TX_LIMIT),
+      sb.from('transactions').select('*').eq('family_id',familyId).not('deleted_at','is',null).order('deleted_at',{ascending:false}).limit(INITIAL_TRASH_TX_LIMIT),
+      sb.from('budgets').select('*').eq('family_id',familyId),
+      sb.from('recurring_payments').select('*').eq('family_id',familyId).order('day_of_month'),
+      sb.from('financial_goals').select('*').eq('family_id',familyId).order('created_at',{ascending:false}),
+      sb.from('goal_contributions').select('*').eq('family_id',familyId).order('contributed_at',{ascending:false})
+    ]);
+  }catch(err){await restoreOfflineOrShowError(`Ошибка загрузки: ${err?.message||err}`);return}
+  const [p,c,s,t,trash,b,r,g,gc]=responses,firstError=responses.find(x=>x.error)?.error;
+  if(firstError){await restoreOfflineOrShowError(`Ошибка загрузки: ${firstError.message}`);return}
 
   state.people=p.data||[];state.categories=c.data||[];state.subcategories=s.data||[];
   state.transactions=t.data||[];state.trashTransactions=trash.data||[];
@@ -144,7 +157,10 @@ async function loadData(){
   state.trashTransactionsHasMore=state.trashTransactions.length===INITIAL_TRASH_TX_LIMIT;
   state.budgets=b.data||[];state.recurring=r.data||[];state.goals=g.data||[];state.goalContributions=gc.data||[];
   if(!state.selectedPersonId&&state.people[0])state.selectedPersonId=state.people.find(x=>x.linked_user_id===state.user?.id)?.id||state.people[0].id;
+  await window.FinanceOffline?.reapplyPendingToState?.();
   renderApp();
+  window.FinanceOffline?.persistSnapshotSoon?.();
+  if(navigator.onLine)window.FinanceOffline?.flushQueue?.();
 }
 
 async function bootstrap(){const {data:{session}}=await sb.auth.getSession();state.user=session?.user||null;if(!state.user)return renderAuth();await loadData()}
