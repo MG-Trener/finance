@@ -5,5 +5,10 @@ www/
 android/
 coverage/
 *.log
+*.jks
+*.keystore
+*.p12
+*.pem
+play-upload-key*.b64
 .DS_Store
 Thumbs.db
