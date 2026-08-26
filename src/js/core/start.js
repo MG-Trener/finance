@@ -11,10 +11,19 @@
     if(unlocked===false)return false;
     await loadData();return true;
   }
+  async function openWithoutServerSession(){
+    if(!navigator.onLine){
+      const restored=await window.FinanceOfflineSession?.tryOpen?.();
+      if(restored){renderedUserId=state.user?.id||null;return true}
+    }
+    renderAuth();return false;
+  }
 
   sb.auth.onAuthStateChange((event,session)=>{
     const user=session?.user||null;
-    state.user=user;
+    // Do not erase a PIN-unlocked local identity merely because Supabase has no
+    // network session while Android is offline.
+    if(user||!state.user?._offlineLocal)state.user=user;
 
     if(event==='INITIAL_SESSION'){
       if(initialResolved)return;
@@ -22,14 +31,16 @@
       if(user){
         renderedUserId=user.id;
         runAfterAuthCallback(()=>openUserSession(user));
-      }else runAfterAuthCallback(()=>renderAuth());
+      }else runAfterAuthCallback(()=>openWithoutServerSession());
       return;
     }
 
     if(event==='SIGNED_IN'){
       initialResolved=true;
       if(!user)return;
-      if(renderedUserId===user.id&&state.family)return;
+      const wasLocal=Boolean(state.user?._offlineLocal);
+      state.user=user;
+      if(renderedUserId===user.id&&state.family&&!wasLocal)return;
       renderedUserId=user.id;
       runAfterAuthCallback(()=>openUserSession(user));
       return;
@@ -40,7 +51,7 @@
       renderedUserId=null;
       window.FinanceLocalLock?.reset?.();
       state.user=null;state.family=null;
-      runAfterAuthCallback(()=>renderAuth());
+      runAfterAuthCallback(()=>navigator.onLine?renderAuth():openWithoutServerSession());
       return;
     }
 
