@@ -1,0 +1,91 @@
+/* Final portrait-mobile navigation: every section lives in one swipeable bottom rail. */
+.mobile-update-notice{display:none}
+@media (max-width:760px), (max-device-width:760px) and (min-width:761px), (pointer:coarse) and (min-width:761px) and (max-width:1400px){
+  .side-nav{
+    display:flex!important;
+    grid-template-columns:none!important;
+    flex-wrap:nowrap!important;
+    gap:4px!important;
+    width:100%!important;
+    min-width:0!important;
+    overflow-x:auto!important;
+    overflow-y:hidden!important;
+    padding:0 4px 1px!important;
+    scrollbar-width:none!important;
+    -ms-overflow-style:none!important;
+    -webkit-overflow-scrolling:touch!important;
+    overscroll-behavior-x:contain!important;
+    scroll-snap-type:x proximity!important;
+    touch-action:pan-x!important
+  }
+  .side-nav::-webkit-scrollbar{display:none!important;width:0!important;height:0!important}
+  .side-nav>.nav-primary,.side-nav>.nav-secondary{display:flex!important}
+  .side-nav>.nav-more{display:none!important}
+  .side-nav .nav-item{
+    flex:0 0 76px!important;
+    width:76px!important;
+    min-width:76px!important;
+    max-width:76px!important;
+    min-height:57px!important;
+    scroll-snap-align:center!important;
+    scroll-snap-stop:normal!important;
+    position:relative!important
+  }
+  .side-nav .nav-item .nav-label{
+    display:block!important;
+    width:100%!important;
+    max-width:100%!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+    white-space:nowrap!important;
+    font-size:8.5px!important;
+    line-height:10px!important;
+    text-align:center!important;
+    visibility:visible!important;
+    opacity:1!important
+  }
+  .side-nav .nav-item.active{
+    box-shadow:inset 0 -3px 0 #d3aa61,0 3px 10px rgba(0,0,0,.28)!important;
+    background:linear-gradient(180deg,rgba(80,56,29,.42),rgba(19,26,31,.86))!important
+  }
+  .side-nav .nav-badge,.side-nav .pirate-alert{right:3px!important;top:2px!important}
+
+  .mobile-more-backdrop{display:none!important}
+  html.mobile-more-open,html.mobile-more-open body{overflow:auto!important}
+
+  .mobile-update-notice{
+    position:fixed!important;
+    right:10px!important;
+    bottom:calc(82px + env(safe-area-inset-bottom))!important;
+    z-index:140!important;
+    align-items:center!important;
+    gap:8px!important;
+    max-width:min(330px,calc(100vw - 20px))!important;
+    min-height:42px!important;
+    padding:7px 9px!important;
+    border-radius:12px!important;
+    border:1px solid rgba(164,119,61,.55)!important;
+    background:linear-gradient(180deg,rgba(24,35,43,.98),rgba(8,15,20,.99))!important;
+    box-shadow:0 9px 28px rgba(0,0,0,.5),inset 0 0 0 1px rgba(244,204,134,.04)!important;
+    color:#ead5aa!important;
+    text-decoration:none!important;
+    backdrop-filter:blur(10px)!important
+  }
+  .mobile-update-notice.web-apk-download{display:flex!important}
+  html.app-update-available .mobile-update-notice.native-update{display:flex!important}
+  .mobile-update-notice.native-update{display:none!important}
+  html.app-update-available .mobile-update-notice.native-update{display:flex!important}
+  .mobile-update-icon{display:grid!important;place-items:center!important;width:28px!important;height:28px!important;flex:0 0 28px!important;font-size:17px!important}
+  .mobile-update-copy{display:grid!important;gap:2px!important;min-width:0!important;flex:1 1 auto!important}
+  .mobile-update-copy b{display:block!important;font-size:10px!important;line-height:1.2!important;color:#f0d29a!important;-webkit-text-fill-color:#f0d29a!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+  .mobile-update-copy small{display:block!important;font-size:8.5px!important;line-height:1.25!important;color:#948873!important;-webkit-text-fill-color:#948873!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+  .mobile-update-pill{display:inline-flex!important;align-items:center!important;justify-content:center!important;flex:0 0 auto!important;padding:3px 5px!important;border-radius:999px!important;background:#7b4b22!important;border:1px solid #c7954c!important;color:#ffe0aa!important;-webkit-text-fill-color:#ffe0aa!important;font-size:7px!important;font-weight:900!important;letter-spacing:.06em!important}
+  .mobile-update-pill[hidden]{display:none!important}
+  html.app-update-downloading .mobile-update-notice.native-update{animation:mobileUpdateGlow 1.5s ease-in-out infinite!important}
+}
+@media(max-width:380px){
+  .side-nav .nav-item{flex-basis:70px!important;width:70px!important;min-width:70px!important;max-width:70px!important}
+  .side-nav .nav-item .nav-label{font-size:8px!important}
+  .mobile-update-notice{left:8px!important;right:8px!important;max-width:none!important}
+}
+@keyframes mobileUpdateGlow{0%,100%{box-shadow:0 9px 28px rgba(0,0,0,.5),0 0 0 rgba(210,165,87,0)}50%{box-shadow:0 9px 28px rgba(0,0,0,.5),0 0 16px rgba(210,165,87,.24)}}

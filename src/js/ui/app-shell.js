@@ -39,26 +39,20 @@ function header(){
   return `<header class="topbar"><div class="title"><h1>Семейный бюджет</h1><p>${overview?'Текущий обзор семейной казны':`${MONTHS[state.month-1]} ${state.year}`}</p></div><div class="top-actions">${overview?currentDateMarkup():`<select class="pill" id="monthSelect">${MONTHS.map((m,i)=>`<option value="${i+1}" ${i+1===+state.month?'selected':''}>${m}</option>`).join('')}</select><select class="pill" id="yearSelect">${availableYears().map(y=>`<option ${y===+state.year?'selected':''}>${y}</option>`).join('')}</select>`}${authState}${connection}${soundToggleMarkup()}<button class="btn btn-soft" id="logout">Выйти</button></div></header>`;
 }
 
-function apkDownloadMarkup(){
-  const updater=window.FinanceAppUpdate,native=Boolean(window.__FINANCE_NATIVE__);
-  const label=updater?.label||(native?'Версия приложения':'Скачать Android APK');
-  const detail=updater?.detail||(native?'Проверка обновлений выполняется автоматически':'Установочный файл Android');
-  const available=Boolean(updater?.available);
-  return `<a class="nav-item pirate-nav mobile-more-item apk-download-item ${available?'has-update':''}" href="${updater?.downloadUrl||APK_DOWNLOAD_URL}" target="_blank" rel="noopener" data-app-update-link><span class="nav-icon nav-more-icon" aria-hidden="true">${available?'⬆️':'📱'}</span><span class="apk-update-copy"><span class="nav-label" data-app-update-label>${esc(label)}</span><small data-app-update-detail>${esc(detail)}</small></span><span class="app-update-badge" data-app-update-badge ${available?'':'hidden'}>Новая версия</span></a>`;
-}
-
 function desktopApkDownloadMarkup(){
   return `<a class="crest-apk-download" href="${APK_DOWNLOAD_URL}" target="_blank" rel="noopener" aria-label="Скачать последнюю версию Семейной казны для Android"><span class="crest-apk-icon" aria-hidden="true">📱</span><span><b>Скачать Android</b><small>Последняя версия APK</small></span></a>`;
 }
 
-function mobileMoreMarkup(){
-  const secondary=NAV_ITEMS.filter(x=>!x.primary);
-  return `<div class="mobile-more-backdrop" id="mobileMore" hidden><div class="mobile-more-sheet"><div class="mobile-more-head"><div><b>Ещё</b><small>Дополнительные разделы</small></div><button type="button" class="mobile-more-close" id="mobileMoreClose" aria-label="Закрыть">×</button></div><div class="mobile-more-list">${secondary.map(x=>navMarkup(x,'mobile-more-item')).join('')}${apkDownloadMarkup()}</div></div></div>`;
+function mobileUpdateMarkup(){
+  const updater=window.FinanceAppUpdate,native=Boolean(window.__FINANCE_NATIVE__),available=Boolean(updater?.available);
+  const label=updater?.label||(native?'Версия приложения':'Скачать Android APK');
+  const detail=updater?.detail||(native?'Проверка обновлений выполняется автоматически':'Последняя версия приложения');
+  return `<a class="mobile-update-notice ${native?'native-update':'web-apk-download'} ${available?'has-update':''}" href="${updater?.downloadUrl||APK_DOWNLOAD_URL}" target="_blank" rel="noopener" data-app-update-link aria-label="${esc(label)}. ${esc(detail)}"><span class="mobile-update-icon" aria-hidden="true">${available?'⬆️':'📱'}</span><span class="mobile-update-copy"><b data-app-update-label>${esc(label)}</b><small data-app-update-detail>${esc(detail)}</small></span><span class="mobile-update-pill" data-app-update-badge ${available?'':'hidden'}>NEW</span></a>`;
 }
 
 function shell(content){
-  const local=window.FinanceOfflineSession?.isLocalSession?.(),updateAvailable=Boolean(window.FinanceAppUpdate?.available);
-  return `<div class="app-shell"><aside class="sidebar"><div class="side-brand"><div class="brand"><div class="brand-badge">₸</div><span class="brand-text">Казна</span></div></div><nav class="side-nav">${NAV_ITEMS.map(x=>navMarkup(x)).join('')}<button type="button" class="nav-item pirate-nav nav-more ${updateAvailable?'has-update':''}" id="navMore" aria-label="${updateAvailable?'Ещё. Доступно обновление приложения':'Ещё'}"><span class="nav-icon nav-more-icon" aria-hidden="true">•••</span><span class="nav-label">Ещё</span><span class="app-update-nav-dot" data-app-update-dot ${updateAvailable?'':'hidden'} aria-hidden="true"></span></button></nav><div class="family-crest" aria-label="Семейный герб"><img src="assets/gerb.png" loading="lazy" decoding="async" alt="Герб семьи"></div>${desktopApkDownloadMarkup()}<div class="side-footer"><div class="side-copy"><b>${esc(state.family.name)}</b><div>${local?'Локальная копия · нужна авторизация для синхронизации':'Данные в Supabase'}</div></div></div></aside><main class="main">${header()}${content}</main>${mobileMoreMarkup()}</div>`;
+  const local=window.FinanceOfflineSession?.isLocalSession?.();
+  return `<div class="app-shell"><aside class="sidebar"><div class="side-brand"><div class="brand"><div class="brand-badge">₸</div><span class="brand-text">Казна</span></div></div><nav class="side-nav" aria-label="Разделы приложения">${NAV_ITEMS.map(x=>navMarkup(x)).join('')}</nav><div class="family-crest" aria-label="Семейный герб"><img src="assets/gerb.png" loading="lazy" decoding="async" alt="Герб семьи"></div>${desktopApkDownloadMarkup()}<div class="side-footer"><div class="side-copy"><b>${esc(state.family.name)}</b><div>${local?'Локальная копия · нужна авторизация для синхронизации':'Данные в Supabase'}</div></div></div></aside><main class="main">${header()}${content}</main>${mobileUpdateMarkup()}</div>`;
 }
 
 async function bindAnalyticsRoute(){
@@ -91,6 +85,16 @@ function releaseMobileScrollLock(){
   if(more)more.hidden=true;
 }
 
+function keepActiveMobileNavVisible(){
+  const nav=document.querySelector('.side-nav'),active=nav?.querySelector('.nav-item.active[data-view]');
+  if(!nav||!active)return;
+  requestAnimationFrame(()=>{
+    if(nav.scrollWidth<=nav.clientWidth)return;
+    const left=active.offsetLeft-(nav.clientWidth-active.offsetWidth)/2;
+    nav.scrollTo({left:Math.max(0,left),behavior:'smooth'});
+  });
+}
+
 function renderApp(){
   releaseMobileScrollLock();
   destroyCharts?.();
@@ -102,6 +106,7 @@ function renderApp(){
   window.FinanceOffline?.updateStatus?.();
   window.FinanceOfflineSession?.bindStatus?.();
   window.FinanceAppUpdate?.refreshUi?.();
+  keepActiveMobileNavVisible();
   window.FinanceOffline?.persistSnapshotSoon?.();
 }
 
@@ -122,11 +127,7 @@ function bindCommon(){
   };
   const month=document.getElementById('monthSelect');if(month)month.onchange=e=>{state.month=+e.target.value;state.journalLimit=50;renderApp()};
   const year=document.getElementById('yearSelect');if(year)year.onchange=e=>{state.year=+e.target.value;state.journalLimit=50;renderApp()};
-  const updateLink=document.querySelector('[data-app-update-link]');if(updateLink&&window.__FINANCE_NATIVE__)updateLink.onclick=e=>window.FinanceAppUpdate?.openDownload?.(e);
-
-  const more=document.getElementById('mobileMore'),open=document.getElementById('navMore'),close=document.getElementById('mobileMoreClose');
-  if(open&&more)open.onclick=()=>{more.hidden=false;document.documentElement.classList.add('mobile-more-open');window.FinanceAppUpdate?.check?.()};
-  const closeMore=()=>{if(more)more.hidden=true;document.documentElement.classList.remove('mobile-more-open')};
-  if(close)close.onclick=closeMore;
-  if(more)more.onclick=e=>{if(e.target===more)closeMore()};
+  document.querySelectorAll('[data-app-update-link]').forEach(updateLink=>{
+    if(window.__FINANCE_NATIVE__)updateLink.onclick=e=>window.FinanceAppUpdate?.openDownload?.(e);
+  });
 }
