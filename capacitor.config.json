@@ -1,0 +1,13 @@
+{
+  "appId": "kz.mgtrener.familyfinance",
+  "appName": "Семейная казна",
+  "webDir": "www",
+  "backgroundColor": "#071019",
+  "server": {
+    "androidScheme": "https"
+  },
+  "android": {
+    "allowMixedContent": false,
+    "webContentsDebuggingEnabled": false
+  }
+}
