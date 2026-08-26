@@ -34,8 +34,8 @@ function availableYears(){
 }
 
 function header(){
-  const overview=state.view==='overview';
-  return `<header class="topbar"><div class="title"><h1>Семейный бюджет</h1><p>${overview?'Текущий обзор семейной казны':`${MONTHS[state.month-1]} ${state.year}`}</p></div><div class="top-actions">${overview?currentDateMarkup():`<select class="pill" id="monthSelect">${MONTHS.map((m,i)=>`<option value="${i+1}" ${i+1===+state.month?'selected':''}>${m}</option>`).join('')}</select><select class="pill" id="yearSelect">${availableYears().map(y=>`<option ${y===+state.year?'selected':''}>${y}</option>`).join('')}</select>`}${soundToggleMarkup()}<button class="btn btn-soft" id="logout">Выйти</button></div></header>`;
+  const overview=state.view==='overview',connection=window.FinanceOffline?.statusMarkup?.()||'';
+  return `<header class="topbar"><div class="title"><h1>Семейный бюджет</h1><p>${overview?'Текущий обзор семейной казны':`${MONTHS[state.month-1]} ${state.year}`}</p></div><div class="top-actions">${overview?currentDateMarkup():`<select class="pill" id="monthSelect">${MONTHS.map((m,i)=>`<option value="${i+1}" ${i+1===+state.month?'selected':''}>${m}</option>`).join('')}</select><select class="pill" id="yearSelect">${availableYears().map(y=>`<option ${y===+state.year?'selected':''}>${y}</option>`).join('')}</select>`}${connection}${soundToggleMarkup()}<button class="btn btn-soft" id="logout">Выйти</button></div></header>`;
 }
 
 function mobileMoreMarkup(){
@@ -78,6 +78,8 @@ function renderApp(){
   bindCommon();
   route.bind?.();
   focusAmountDesktop?.();
+  window.FinanceOffline?.updateStatus?.();
+  window.FinanceOffline?.persistSnapshotSoon?.();
 }
 
 function bindCommon(){
