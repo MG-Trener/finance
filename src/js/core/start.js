@@ -21,9 +21,10 @@
 
   sb.auth.onAuthStateChange((event,session)=>{
     const user=session?.user||null;
+    const wasLocalSession=Boolean(state.user?._offlineLocal);
     // Do not erase a PIN-unlocked local identity merely because Supabase has no
     // network session while Android is offline.
-    if(user||!state.user?._offlineLocal)state.user=user;
+    if(user||!wasLocalSession)state.user=user;
 
     if(event==='INITIAL_SESSION'){
       if(initialResolved)return;
@@ -38,9 +39,8 @@
     if(event==='SIGNED_IN'){
       initialResolved=true;
       if(!user)return;
-      const wasLocal=Boolean(state.user?._offlineLocal);
       state.user=user;
-      if(renderedUserId===user.id&&state.family&&!wasLocal)return;
+      if(renderedUserId===user.id&&state.family&&!wasLocalSession)return;
       renderedUserId=user.id;
       runAfterAuthCallback(()=>openUserSession(user));
       return;
