@@ -1,20 +1,14 @@
-// Refactored from phase5.js: autofocus amount on Overview.
+// Desktop-only focus helper. Mobile browsers should not open the keyboard
+// automatically when the overview is rendered.
 (function(){
-  function focusAmount(){
+  window.focusAmountDesktop=function(){
     if(state?.view!=='overview')return;
+    if(!window.matchMedia('(hover:hover) and (pointer:fine)').matches)return;
     requestAnimationFrame(()=>requestAnimationFrame(()=>{
       const input=document.getElementById('amount');
-      if(!input)return;
+      if(!input||document.activeElement===input)return;
       input.focus({preventScroll:true});
       try{input.select()}catch(_){ }
     }));
-  }
-
-  const previousRenderApp=renderApp;
-  renderApp=function(){
-    previousRenderApp();
-    focusAmount();
   };
-
-  window.addEventListener('pageshow',focusAmount);
 })();
