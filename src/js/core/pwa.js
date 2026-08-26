@@ -1,5 +1,6 @@
 // Progressive Web App registration and optional install action in the mobile More sheet.
 (function(){
+  if(window.__FINANCE_NATIVE__)return;
   let installPrompt=null;
   if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}))}
 
