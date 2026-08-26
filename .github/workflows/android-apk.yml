@@ -5,6 +5,13 @@ on:
   push:
     branches: [main]
     paths:
+      - 'index.html'
+      - 'styles.css'
+      - 'hotfix.css'
+      - 'manifest.webmanifest'
+      - 'sw.js'
+      - 'src/**'
+      - 'assets/**'
       - 'package.json'
       - 'capacitor.config.json'
       - 'scripts/prepare-mobile.mjs'
@@ -15,7 +22,7 @@ permissions:
   contents: read
 
 jobs:
-  build-debug-apk:
+  build-android:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -61,10 +68,65 @@ jobs:
         working-directory: android
         run: ./gradlew assembleDebug --no-daemon
 
-      - name: Upload APK
+      - name: Upload debug APK
         uses: actions/upload-artifact@v4
         with:
           name: family-treasury-debug-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 14
+
+      - name: Configure stable release signing when secrets exist
+        shell: bash
+        env:
+          KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          if [ -z "$KEYSTORE_B64" ] || [ -z "$KEYSTORE_PASSWORD" ] || [ -z "$KEY_ALIAS" ] || [ -z "$KEY_PASSWORD" ]; then
+            echo 'Release signing secrets are not configured; signed release APK is skipped.'
+            exit 0
+          fi
+          echo "$KEYSTORE_B64" | base64 --decode > android/app/family-treasury-release.jks
+          cat > android/app/release-signing.gradle <<'EOF'
+          android {
+            signingConfigs {
+              release {
+                storeFile file('family-treasury-release.jks')
+                storePassword System.getenv('ANDROID_KEYSTORE_PASSWORD')
+                keyAlias System.getenv('ANDROID_KEY_ALIAS')
+                keyPassword System.getenv('ANDROID_KEY_PASSWORD')
+              }
+            }
+            buildTypes {
+              release {
+                signingConfig signingConfigs.release
+              }
+            }
+          }
+          EOF
+          echo "apply from: 'release-signing.gradle'" >> android/app/build.gradle
+          touch android/.release-signing-ready
+
+      - name: Build signed release APK when configured
+        shell: bash
+        env:
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          if [ ! -f android/.release-signing-ready ]; then
+            echo 'Signed release build skipped.'
+            exit 0
+          fi
+          cd android
+          ./gradlew assembleRelease --no-daemon
+
+      - name: Upload signed release APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: family-treasury-release-apk
+          path: android/app/build/outputs/apk/release/app-release.apk
+          if-no-files-found: ignore
+          retention-days: 30
