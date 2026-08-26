@@ -24,6 +24,7 @@
 @import url('./components/export.css');
 @import url('./components/family-crest.css');
 @import url('./components/buttons-modern.css?v=buttons32');
+@import url('./components/offline.css?v=offline39');
 
 /* Optimized application and authorization artwork. */
 @import url('./backgrounds.css');
