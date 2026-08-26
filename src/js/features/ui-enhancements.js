@@ -1,31 +1,75 @@
 // Isolated UI enhancements: mobile selects, date dragging and tooltips.
 (function(){
   let mobilePicker=null,mobilePickerSelect=null;
-  function isMobilePicker(){return window.matchMedia('(max-width:760px)').matches}
-  function closeMobilePicker(){if(!mobilePicker)return;mobilePicker.remove();mobilePicker=null;mobilePickerSelect=null;document.documentElement.classList.remove('mobile-picker-open')}
+
+  function isMobilePicker(){
+    const narrow=window.matchMedia('(max-width:760px)').matches;
+    const coarse=window.matchMedia('(pointer:coarse)').matches||navigator.maxTouchPoints>0;
+    const android=/Android/i.test(navigator.userAgent||'');
+    return narrow||(android&&coarse&&window.innerWidth<=1400);
+  }
+
+  function closeMobilePicker(){
+    if(!mobilePicker)return;
+    mobilePicker.remove();mobilePicker=null;mobilePickerSelect=null;
+    document.documentElement.classList.remove('mobile-picker-open');
+  }
+
   function openMobilePicker(select){
-    if(!select||!isMobilePicker())return;closeMobilePicker();mobilePickerSelect=select;
-    const label=select.closest('.field')?.querySelector('label')?.textContent?.trim()||'Выберите значение',options=[...select.options];
+    if(!select||select.disabled||!isMobilePicker())return;
+    closeMobilePicker();mobilePickerSelect=select;
+    const label=select.closest('.field')?.querySelector('label')?.textContent?.trim()||'Выберите значение';
+    const options=[...select.options];
     const backdrop=document.createElement('div');backdrop.className='mobile-select-backdrop';backdrop.setAttribute('role','presentation');
     const sheet=document.createElement('div');sheet.className='mobile-select-sheet';sheet.setAttribute('role','dialog');sheet.setAttribute('aria-modal','true');sheet.setAttribute('aria-label',label);
     const head=document.createElement('div');head.className='mobile-select-head';
     const title=document.createElement('div');title.className='mobile-select-title';title.textContent=label;
     const close=document.createElement('button');close.type='button';close.className='mobile-select-close';close.setAttribute('aria-label','Закрыть');close.textContent='×';head.append(title,close);
     const list=document.createElement('div');list.className='mobile-select-options';
-    options.forEach(opt=>{const button=document.createElement('button');button.type='button';button.className='mobile-select-option'+(opt.value===select.value?' selected':'');button.textContent=opt.textContent||'';button.disabled=opt.disabled;button.dataset.value=opt.value;button.onclick=()=>{if(button.disabled||!mobilePickerSelect)return;mobilePickerSelect.value=button.dataset.value;mobilePickerSelect.dispatchEvent(new Event('change',{bubbles:true}));closeMobilePicker()};list.appendChild(button)});
-    sheet.append(head,list);backdrop.appendChild(sheet);document.body.appendChild(backdrop);mobilePicker=backdrop;document.documentElement.classList.add('mobile-picker-open');
-    close.onclick=closeMobilePicker;backdrop.addEventListener('click',e=>{if(e.target===backdrop)closeMobilePicker()});requestAnimationFrame(()=>list.querySelector('.selected')?.scrollIntoView({block:'nearest'}));
+    options.forEach(opt=>{
+      const button=document.createElement('button');button.type='button';
+      button.className='mobile-select-option'+(opt.value===select.value?' selected':'');
+      button.textContent=opt.textContent||'';button.disabled=opt.disabled;button.dataset.value=opt.value;
+      button.onclick=()=>{
+        if(button.disabled||!mobilePickerSelect)return;
+        const target=mobilePickerSelect;
+        target.value=button.dataset.value;
+        target.dispatchEvent(new Event('change',{bubbles:true}));
+        closeMobilePicker();
+      };
+      list.appendChild(button);
+    });
+    sheet.append(head,list);backdrop.appendChild(sheet);document.body.appendChild(backdrop);mobilePicker=backdrop;
+    document.documentElement.classList.add('mobile-picker-open');
+    close.onclick=closeMobilePicker;
+    backdrop.addEventListener('click',e=>{if(e.target===backdrop)closeMobilePicker()});
+    requestAnimationFrame(()=>list.querySelector('.selected')?.scrollIntoView({block:'nearest'}));
+  }
+
+  function selectFromTapTarget(target){
+    const direct=target.closest?.('#txForm select');
+    if(direct)return direct;
+    const field=target.closest?.('#txForm .field');
+    return field?.querySelector('select')||null;
   }
 
   function initMobileSelects(){
     if(window.__financeMobileSelects)return;window.__financeMobileSelects=true;
-    let press=null,suppressClickUntil=0;const TAP_DISTANCE=10,TAP_TIME=750;
-    document.addEventListener('pointerdown',e=>{const select=e.target.closest?.('#txForm select');if(!select||!isMobilePicker())return;press={select,pointerId:e.pointerId,x:e.clientX,y:e.clientY,startedAt:performance.now(),moved:false}},true);
-    document.addEventListener('pointermove',e=>{if(!press||e.pointerId!==press.pointerId)return;if(Math.hypot(e.clientX-press.x,e.clientY-press.y)>TAP_DISTANCE)press.moved=true},true);
-    document.addEventListener('pointerup',e=>{if(!press||e.pointerId!==press.pointerId)return;const current=press;press=null;const elapsed=performance.now()-current.startedAt,moved=current.moved||Math.hypot(e.clientX-current.x,e.clientY-current.y)>TAP_DISTANCE;suppressClickUntil=performance.now()+700;if(moved||elapsed>TAP_TIME)return;e.preventDefault();e.stopPropagation();openMobilePicker(current.select)},true);
-    document.addEventListener('pointercancel',e=>{if(press&&e.pointerId===press.pointerId){press=null;suppressClickUntil=performance.now()+700}},true);
-    document.addEventListener('click',e=>{const select=e.target.closest?.('#txForm select');if(!select||!isMobilePicker())return;e.preventDefault();e.stopPropagation();if(performance.now()<suppressClickUntil)return;openMobilePicker(select)},true);
-    document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMobilePicker()});window.addEventListener('resize',()=>{if(mobilePicker&&!isMobilePicker())closeMobilePicker()});
+
+    // On phones the native select itself does not receive pointer events (CSS below).
+    // Therefore a real tap ends as a normal click on its field, while a scrolling
+    // gesture produces no click. This avoids both accidental opening while scrolling
+    // and the Android/WebView issue where a second select (subcategory) would not open.
+    document.addEventListener('click',e=>{
+      if(!isMobilePicker())return;
+      const select=selectFromTapTarget(e.target);
+      if(!select||select.disabled)return;
+      e.preventDefault();e.stopPropagation();
+      openMobilePicker(select);
+    },true);
+
+    document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMobilePicker()});
+    window.addEventListener('resize',()=>{if(mobilePicker&&!isMobilePicker())closeMobilePicker()});
   }
 
   function initDateDrag(){
