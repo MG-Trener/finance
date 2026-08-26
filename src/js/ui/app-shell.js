@@ -40,7 +40,11 @@ function header(){
 }
 
 function apkDownloadMarkup(){
-  return `<a class="nav-item pirate-nav mobile-more-item apk-download-item" href="${APK_DOWNLOAD_URL}" target="_blank" rel="noopener"><span class="nav-icon nav-more-icon" aria-hidden="true">📱</span><span class="nav-label">Скачать Android APK</span></a>`;
+  const updater=window.FinanceAppUpdate,native=Boolean(window.__FINANCE_NATIVE__);
+  const label=updater?.label||(native?'Версия приложения':'Скачать Android APK');
+  const detail=updater?.detail||(native?'Проверка обновлений выполняется автоматически':'Установочный файл Android');
+  const available=Boolean(updater?.available);
+  return `<a class="nav-item pirate-nav mobile-more-item apk-download-item ${available?'has-update':''}" href="${updater?.downloadUrl||APK_DOWNLOAD_URL}" target="_blank" rel="noopener" data-app-update-link><span class="nav-icon nav-more-icon" aria-hidden="true">${available?'⬆️':'📱'}</span><span class="apk-update-copy"><span class="nav-label" data-app-update-label>${esc(label)}</span><small data-app-update-detail>${esc(detail)}</small></span><span class="app-update-badge" data-app-update-badge ${available?'':'hidden'}>Новая</span></a>`;
 }
 
 function mobileMoreMarkup(){
@@ -49,8 +53,8 @@ function mobileMoreMarkup(){
 }
 
 function shell(content){
-  const local=window.FinanceOfflineSession?.isLocalSession?.();
-  return `<div class="app-shell"><aside class="sidebar"><div class="side-brand"><div class="brand"><div class="brand-badge">₸</div><span class="brand-text">Казна</span></div></div><nav class="side-nav">${NAV_ITEMS.map(x=>navMarkup(x)).join('')}<button type="button" class="nav-item pirate-nav nav-more" id="navMore"><span class="nav-icon nav-more-icon" aria-hidden="true">•••</span><span class="nav-label">Ещё</span></button></nav><div class="family-crest" aria-label="Семейный герб"><img src="assets/gerb.png" loading="lazy" decoding="async" alt="Герб семьи"></div><div class="side-footer"><div class="side-copy"><b>${esc(state.family.name)}</b><div>${local?'Локальная копия · нужна авторизация для синхронизации':'Данные в Supabase'}</div></div></div></aside><main class="main">${header()}${content}</main>${mobileMoreMarkup()}</div>`;
+  const local=window.FinanceOfflineSession?.isLocalSession?.(),updateAvailable=Boolean(window.FinanceAppUpdate?.available);
+  return `<div class="app-shell"><aside class="sidebar"><div class="side-brand"><div class="brand"><div class="brand-badge">₸</div><span class="brand-text">Казна</span></div></div><nav class="side-nav">${NAV_ITEMS.map(x=>navMarkup(x)).join('')}<button type="button" class="nav-item pirate-nav nav-more ${updateAvailable?'has-update':''}" id="navMore"><span class="nav-icon nav-more-icon" aria-hidden="true">•••</span><span class="nav-label">Ещё</span><span class="app-update-nav-badge" data-app-update-badge ${updateAvailable?'':'hidden'}>1</span></button></nav><div class="family-crest" aria-label="Семейный герб"><img src="assets/gerb.png" loading="lazy" decoding="async" alt="Герб семьи"></div><div class="side-footer"><div class="side-copy"><b>${esc(state.family.name)}</b><div>${local?'Локальная копия · нужна авторизация для синхронизации':'Данные в Supabase'}</div></div></div></aside><main class="main">${header()}${content}</main>${mobileMoreMarkup()}</div>`;
 }
 
 async function bindAnalyticsRoute(){
@@ -86,6 +90,7 @@ function renderApp(){
   focusAmountDesktop?.();
   window.FinanceOffline?.updateStatus?.();
   window.FinanceOfflineSession?.bindStatus?.();
+  window.FinanceAppUpdate?.refreshUi?.();
   window.FinanceOffline?.persistSnapshotSoon?.();
 }
 
@@ -107,7 +112,7 @@ function bindCommon(){
   const year=document.getElementById('yearSelect');if(year)year.onchange=e=>{state.year=+e.target.value;state.journalLimit=50;renderApp()};
 
   const more=document.getElementById('mobileMore'),open=document.getElementById('navMore'),close=document.getElementById('mobileMoreClose');
-  if(open&&more)open.onclick=()=>{more.hidden=false;document.documentElement.classList.add('mobile-more-open')};
+  if(open&&more)open.onclick=()=>{more.hidden=false;document.documentElement.classList.add('mobile-more-open');window.FinanceAppUpdate?.check?.()};
   const closeMore=()=>{if(more)more.hidden=true;document.documentElement.classList.remove('mobile-more-open')};
   if(close)close.onclick=closeMore;
   if(more)more.onclick=e=>{if(e.target===more)closeMore()};
