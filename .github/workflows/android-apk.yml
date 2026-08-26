@@ -59,6 +59,8 @@ jobs:
         run: npm install --no-audit --no-fund
 
       - name: Prepare bundled offline web app
+        env:
+          FINANCE_BUILD_NUMBER: ${{ github.run_number }}
         run: npm run mobile:prepare
 
       - name: Create Android project
@@ -70,13 +72,13 @@ jobs:
       - name: Sync Capacitor
         run: npx cap sync android
 
-      - name: Verify Google Play target API
+      - name: Verify Android target API
         shell: bash
         run: |
           echo 'Generated Android SDK configuration:'
           grep -R -E 'compileSdkVersion|targetSdkVersion|compileSdk |targetSdk ' android/variables.gradle android/app/build.gradle || true
           if ! grep -R -E 'targetSdkVersion[ =]+36|targetSdk[ =]+36' android/variables.gradle android/app/build.gradle >/dev/null; then
-            echo 'Google Play preparation requires target API 36.'
+            echo 'Android target API 36 was expected.'
             exit 1
           fi
 
@@ -89,7 +91,7 @@ jobs:
           sed -i "s/versionName \"1.0\"/versionName \"1.0.${BUILD_NUMBER}\"/" android/app/build.gradle
           grep -E 'versionCode|versionName' android/app/build.gradle
 
-      - name: Configure stable debug signing
+      - name: Configure stable app signing
         shell: bash
         run: |
           base64 --decode mobile-assets/debug-keystore.b64 > android/app/family-treasury-debug.jks
@@ -112,7 +114,7 @@ jobs:
           EOF
           echo "apply from: 'debug-signing.gradle'" >> android/app/build.gradle
 
-      - name: Build installable debug APK
+      - name: Build installable APK
         working-directory: android
         run: ./gradlew assembleDebug --no-daemon
 
@@ -120,88 +122,27 @@ jobs:
         shell: bash
         run: cp android/app/build/outputs/apk/debug/app-debug.apk family-treasury.apk
 
-      - name: Upload debug APK artifact
+      - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: family-treasury-debug-apk
+          name: family-treasury-apk
           path: family-treasury.apk
           if-no-files-found: error
           retention-days: 14
 
-      - name: Publish rolling test APK
+      - name: Publish rolling APK update
         if: github.ref == 'refs/heads/main'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: latest-apk
-          name: 'Семейная казна — тестовая Android-сборка'
+          name: 'Семейная казна — Android'
           body: |
-            Автоматически собранная тестовая версия Android-приложения.
-            Файл `family-treasury.apk` можно устанавливать поверх предыдущей тестовой сборки.
-            Данные синхронизируются с Supabase, а поддерживаемые изменения сохраняются локально при отсутствии сети.
+            Автоматически собранная версия Android-приложения для установки без Google Play.
+            Build: ${{ github.run_number }}
+            Version: 1.0.${{ github.run_number }}
+            Файл `family-treasury.apk` можно устанавливать поверх предыдущей версии.
+            Приложение само проверяет эту сборку и показывает уведомление, когда доступно обновление.
           prerelease: true
           make_latest: false
           files: family-treasury.apk
           overwrite_files: true
-
-      - name: Configure stable release signing when secrets exist
-        shell: bash
-        env:
-          KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
-          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
-          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-        run: |
-          if [ -z "$KEYSTORE_B64" ] || [ -z "$KEYSTORE_PASSWORD" ] || [ -z "$KEY_ALIAS" ] || [ -z "$KEY_PASSWORD" ]; then
-            echo 'Release signing secrets are not configured; Play AAB and signed release APK are skipped.'
-            exit 0
-          fi
-          echo "$KEYSTORE_B64" | base64 --decode > android/app/family-treasury-release.jks
-          cat > android/app/release-signing.gradle <<'EOF'
-          android {
-            signingConfigs {
-              release {
-                storeFile file('family-treasury-release.jks')
-                storePassword System.getenv('ANDROID_KEYSTORE_PASSWORD')
-                keyAlias System.getenv('ANDROID_KEY_ALIAS')
-                keyPassword System.getenv('ANDROID_KEY_PASSWORD')
-              }
-            }
-            buildTypes {
-              release {
-                signingConfig signingConfigs.release
-              }
-            }
-          }
-          EOF
-          echo "apply from: 'release-signing.gradle'" >> android/app/build.gradle
-          touch android/.release-signing-ready
-
-      - name: Build signed release APK and Play AAB when configured
-        shell: bash
-        env:
-          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
-          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-        run: |
-          if [ ! -f android/.release-signing-ready ]; then
-            echo 'Signed release build skipped.'
-            exit 0
-          fi
-          cd android
-          ./gradlew assembleRelease bundleRelease --no-daemon
-
-      - name: Upload signed release APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: family-treasury-release-apk
-          path: android/app/build/outputs/apk/release/app-release.apk
-          if-no-files-found: ignore
-          retention-days: 30
-
-      - name: Upload Google Play AAB
-        uses: actions/upload-artifact@v4
-        with:
-          name: family-treasury-play-aab
-          path: android/app/build/outputs/bundle/release/app-release.aab
-          if-no-files-found: ignore
-          retention-days: 30
