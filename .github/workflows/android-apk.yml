@@ -6,6 +6,8 @@ on:
     branches: [main]
     paths:
       - 'index.html'
+      - 'privacy.html'
+      - 'delete-account.html'
       - 'styles.css'
       - 'hotfix.css'
       - 'manifest.webmanifest'
@@ -67,6 +69,16 @@ jobs:
 
       - name: Sync Capacitor
         run: npx cap sync android
+
+      - name: Verify Google Play target API
+        shell: bash
+        run: |
+          echo 'Generated Android SDK configuration:'
+          grep -R -E 'compileSdkVersion|targetSdkVersion|compileSdk |targetSdk ' android/variables.gradle android/app/build.gradle || true
+          if ! grep -R -E 'targetSdkVersion[ =]+36|targetSdk[ =]+36' android/variables.gradle android/app/build.gradle >/dev/null; then
+            echo 'Google Play preparation requires target API 36.'
+            exit 1
+          fi
 
       - name: Set Android build version
         shell: bash
@@ -140,7 +152,7 @@ jobs:
           KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
           if [ -z "$KEYSTORE_B64" ] || [ -z "$KEYSTORE_PASSWORD" ] || [ -z "$KEY_ALIAS" ] || [ -z "$KEY_PASSWORD" ]; then
-            echo 'Release signing secrets are not configured; signed release APK is skipped.'
+            echo 'Release signing secrets are not configured; Play AAB and signed release APK are skipped.'
             exit 0
           fi
           echo "$KEYSTORE_B64" | base64 --decode > android/app/family-treasury-release.jks
@@ -164,7 +176,7 @@ jobs:
           echo "apply from: 'release-signing.gradle'" >> android/app/build.gradle
           touch android/.release-signing-ready
 
-      - name: Build signed release APK when configured
+      - name: Build signed release APK and Play AAB when configured
         shell: bash
         env:
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
@@ -176,12 +188,20 @@ jobs:
             exit 0
           fi
           cd android
-          ./gradlew assembleRelease --no-daemon
+          ./gradlew assembleRelease bundleRelease --no-daemon
 
       - name: Upload signed release APK
         uses: actions/upload-artifact@v4
         with:
           name: family-treasury-release-apk
           path: android/app/build/outputs/apk/release/app-release.apk
+          if-no-files-found: ignore
+          retention-days: 30
+
+      - name: Upload Google Play AAB
+        uses: actions/upload-artifact@v4
+        with:
+          name: family-treasury-play-aab
+          path: android/app/build/outputs/bundle/release/app-release.aab
           if-no-files-found: ignore
           retention-days: 30
