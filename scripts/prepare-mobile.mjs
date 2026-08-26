@@ -10,7 +10,7 @@ await mkdir(out,{recursive:true});
 for(const entry of ['src','assets']){
   await cp(path.join(root,entry),path.join(out,entry),{recursive:true});
 }
-for(const file of ['styles.css','hotfix.css','manifest.webmanifest','sw.js']){
+for(const file of ['styles.css','hotfix.css','manifest.webmanifest','sw.js','privacy.html','delete-account.html']){
   try{await copyFile(path.join(root,file),path.join(out,file))}catch(error){if(error?.code!=='ENOENT')throw error}
 }
 
@@ -54,4 +54,4 @@ let exporter=await readFile(exportPath,'utf8');
 exporter=exporter.replace('https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js','vendor/xlsx.full.min.js');
 await writeFile(exportPath,exporter,'utf8');
 
-console.log('Android web assets prepared in www/ with local runtime libraries');
+console.log('Android web assets prepared in www/ with local runtime libraries and policy pages');
