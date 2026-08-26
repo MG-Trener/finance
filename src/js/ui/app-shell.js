@@ -9,6 +9,7 @@ const NAV_ITEMS=[
   {view:'categories',label:'Категории',icon:'tags',primary:false},
   {view:'access',label:'Доступ',icon:'key',primary:false}
 ];
+const APK_DOWNLOAD_URL='https://github.com/MG-Trener/finance/releases/download/latest-apk/family-treasury.apk';
 
 function navMarkup(item,extra=''){
   const due=item.view==='recurring'&&typeof phase3Upcoming==='function'?phase3Upcoming(3):[];
@@ -38,9 +39,13 @@ function header(){
   return `<header class="topbar"><div class="title"><h1>Семейный бюджет</h1><p>${overview?'Текущий обзор семейной казны':`${MONTHS[state.month-1]} ${state.year}`}</p></div><div class="top-actions">${overview?currentDateMarkup():`<select class="pill" id="monthSelect">${MONTHS.map((m,i)=>`<option value="${i+1}" ${i+1===+state.month?'selected':''}>${m}</option>`).join('')}</select><select class="pill" id="yearSelect">${availableYears().map(y=>`<option ${y===+state.year?'selected':''}>${y}</option>`).join('')}</select>`}${authState}${connection}${soundToggleMarkup()}<button class="btn btn-soft" id="logout">Выйти</button></div></header>`;
 }
 
+function apkDownloadMarkup(){
+  return `<a class="nav-item pirate-nav mobile-more-item apk-download-item" href="${APK_DOWNLOAD_URL}" target="_blank" rel="noopener"><span class="nav-icon nav-more-icon" aria-hidden="true">📱</span><span class="nav-label">Скачать Android APK</span></a>`;
+}
+
 function mobileMoreMarkup(){
   const secondary=NAV_ITEMS.filter(x=>!x.primary);
-  return `<div class="mobile-more-backdrop" id="mobileMore" hidden><div class="mobile-more-sheet"><div class="mobile-more-head"><div><b>Ещё</b><small>Дополнительные разделы</small></div><button type="button" class="mobile-more-close" id="mobileMoreClose" aria-label="Закрыть">×</button></div><div class="mobile-more-list">${secondary.map(x=>navMarkup(x,'mobile-more-item')).join('')}</div></div></div>`;
+  return `<div class="mobile-more-backdrop" id="mobileMore" hidden><div class="mobile-more-sheet"><div class="mobile-more-head"><div><b>Ещё</b><small>Дополнительные разделы</small></div><button type="button" class="mobile-more-close" id="mobileMoreClose" aria-label="Закрыть">×</button></div><div class="mobile-more-list">${secondary.map(x=>navMarkup(x,'mobile-more-item')).join('')}${apkDownloadMarkup()}</div></div></div>`;
 }
 
 function shell(content){
