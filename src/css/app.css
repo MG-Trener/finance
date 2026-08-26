@@ -32,3 +32,5 @@
 @import url('./mobile.css?v=mobile23');
 @import url('./pages/overview-mobile.css?v=overview-mobile28');
 @import url('./mobile-nav-more.css?v=nav32');
+/* Android embedded browsers sometimes expose a desktop-size CSS viewport. */
+@import url('./mobile-device-fallback.css?v=mobile35');
