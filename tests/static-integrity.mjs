@@ -11,7 +11,13 @@ const manifest=JSON.parse(fs.readFileSync(path.join(root,'manifest.webmanifest')
 assert(manifest.name==='Семейная казна','manifest: unexpected application name');
 assert(manifest.start_url==='/finance/','manifest: start_url must match GitHub Pages path');
 assert(manifest.scope==='/finance/','manifest: scope must match GitHub Pages path');
+assert(manifest.orientation==='portrait-primary','manifest: installed app must remain portrait-only');
 for(const icon of manifest.icons||[])assert(exists(icon.src),`manifest icon is missing: ${icon.src}`);
+
+// Android builds must also enforce portrait orientation at the native Activity level.
+const androidWorkflow=fs.readFileSync(path.join(root,'.github/workflows/android-apk.yml'),'utf8');
+assert(androidWorkflow.includes('Lock Android to portrait orientation'),'android workflow: portrait lock step is missing');
+assert(androidWorkflow.includes('android:screenOrientation="portrait"'),'android workflow: MainActivity portrait lock is missing');
 
 // The optimized artwork is the production background; the legacy PNG is only a tiny compatibility fallback.
 assert(exists('assets/backgrounds/site-bg.webp'),'optimized application background is missing');
