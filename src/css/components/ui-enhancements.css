@@ -33,7 +33,7 @@
 .quick-amount-actions .btn{width:100%;min-width:0}
 
 .mobile-select-backdrop{display:none}
-@media(max-width:760px){
+@media (max-width:760px), (max-device-width:760px) and (min-width:761px), (pointer:coarse) and (min-width:761px) and (max-width:1400px){
   .current-date-info{padding:6px 8px;gap:7px}.current-date-info .date-medallion{width:26px;height:26px}.current-date-info b{font-size:10px}.ui-tooltip{display:none}
   .overview-last .tx{grid-template-columns:34px minmax(0,1fr) auto!important;gap:7px 8px!important;align-items:center}
   .overview-last .tx-actions{grid-column:2/-1!important;display:flex!important;justify-content:flex-end!important;gap:6px!important}
@@ -43,8 +43,14 @@
   .quick-amount-modal{width:100%!important}
   .quick-amount-input{min-height:58px!important;font-size:26px!important}
   .quick-amount-actions{grid-template-columns:1fr 1.25fr;gap:7px}
-  #txForm select{color-scheme:dark}
+
+  /* The visible native select is presentation-only on phones. Taps land on the
+     surrounding field and JS opens our own bottom sheet. This is more reliable
+     than native Android/WebView select handling and still lets page scrolling pass. */
+  #txForm .field:has(select){cursor:pointer}
+  #txForm select{color-scheme:dark;pointer-events:none!important}
   #txForm select option{background:#0b141b;color:#f6e7c9;-webkit-text-fill-color:#f6e7c9}
+
   html.mobile-picker-open,html.mobile-picker-open body{overflow:hidden!important}
   .mobile-select-backdrop{
     position:fixed;inset:0;z-index:10000;display:flex;align-items:flex-end;
