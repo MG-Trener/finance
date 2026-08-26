@@ -81,7 +81,14 @@ const ROUTES={
   access:{page:()=>accessPage(),bind:()=>bindAccess?.()}
 };
 
+function releaseMobileScrollLock(){
+  document.documentElement.classList.remove('mobile-more-open');
+  const more=document.getElementById('mobileMore');
+  if(more)more.hidden=true;
+}
+
 function renderApp(){
+  releaseMobileScrollLock();
   destroyCharts?.();
   const route=ROUTES[state.view]||ROUTES.overview;
   app.innerHTML=shell(route.page());
@@ -97,6 +104,7 @@ function renderApp(){
 function bindCommon(){
   document.querySelectorAll('.nav-item[data-view]').forEach(x=>x.onclick=()=>{
     const next=x.dataset.view;
+    releaseMobileScrollLock();
     if(next==='overview'){
       const now=new Date();state.year=now.getFullYear();state.month=now.getMonth()+1;
     }
