@@ -1,0 +1,6 @@
+/* Small mobile readability fixes that should apply to every normal mobile browser. */
+@media(max-width:760px){
+  .side-nav .nav-item .nav-label,
+  .side-nav .nav-item>span:not(.nav-icon):not(.nav-badge){font-size:9px!important;line-height:11px!important}
+  .side-nav .nav-item{min-height:58px!important}
+}
