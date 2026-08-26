@@ -8,6 +8,7 @@ on:
       - 'package.json'
       - 'capacitor.config.json'
       - 'scripts/prepare-mobile.mjs'
+      - 'mobile-assets/**'
       - '.github/workflows/android-apk.yml'
 
 permissions:
@@ -49,6 +50,9 @@ jobs:
 
       - name: Create Android project
         run: npx cap add android
+
+      - name: Generate native icon and splash
+        run: npx @capacitor/assets generate --android --assetPath mobile-assets --iconBackgroundColor '#071019' --iconBackgroundColorDark '#071019' --splashBackgroundColor '#071019' --splashBackgroundColorDark '#071019'
 
       - name: Sync Capacitor
         run: npx cap sync android
