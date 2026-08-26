@@ -1,0 +1,20 @@
+{
+  "name": "family-treasury-mobile",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Семейная казна: статический веб-интерфейс и Android-оболочка Capacitor",
+  "scripts": {
+    "mobile:prepare": "node scripts/prepare-mobile.mjs",
+    "android:add": "npm run mobile:prepare && npx cap add android",
+    "android:sync": "npm run mobile:prepare && npx cap sync android",
+    "android:debug": "npm run mobile:prepare && npx cap sync android && cd android && ./gradlew assembleDebug"
+  },
+  "dependencies": {
+    "@capacitor/core": "8.5.0",
+    "@supabase/supabase-js": "2.112.4"
+  },
+  "devDependencies": {
+    "@capacitor/android": "8.5.0",
+    "@capacitor/cli": "8.5.0"
+  }
+}
