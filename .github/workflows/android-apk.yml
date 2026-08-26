@@ -64,6 +64,29 @@ jobs:
       - name: Sync Capacitor
         run: npx cap sync android
 
+      - name: Configure stable debug signing
+        shell: bash
+        run: |
+          base64 --decode mobile-assets/debug-keystore.b64 > android/app/family-treasury-debug.jks
+          cat > android/app/debug-signing.gradle <<'EOF'
+          android {
+            signingConfigs {
+              debug {
+                storeFile file('family-treasury-debug.jks')
+                storePassword 'android'
+                keyAlias 'androiddebugkey'
+                keyPassword 'android'
+              }
+            }
+            buildTypes {
+              debug {
+                signingConfig signingConfigs.debug
+              }
+            }
+          }
+          EOF
+          echo "apply from: 'debug-signing.gradle'" >> android/app/build.gradle
+
       - name: Build installable debug APK
         working-directory: android
         run: ./gradlew assembleDebug --no-daemon
