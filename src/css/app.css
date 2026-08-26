@@ -38,4 +38,4 @@
 /* Android embedded browsers sometimes expose a desktop-size CSS viewport. */
 @import url('./mobile-device-fallback.css?v=mobile35');
 /* Keep this last: it restores labels hidden by legacy <=1100px rules. */
-@import url('./mobile-menu-fixes.css?v=menu46');
+@import url('./mobile-menu-fixes.css?v=menu49');
