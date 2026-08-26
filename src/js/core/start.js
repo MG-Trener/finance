@@ -1,14 +1,15 @@
-// Final application start after all feature overrides are registered.
-// Keep the boot screen visible until Supabase has resolved the persisted session.
-// This prevents the login form from flashing for already-authenticated users on refresh.
+// Final application start after all feature modules are registered.
+// Keep the boot screen visible until Supabase resolves the persisted session.
 (function(){
   let initialResolved=false;
   let renderedUserId=null;
 
-  function runAfterAuthCallback(fn){
-    // Supabase recommends avoiding additional client calls directly inside
-    // onAuthStateChange. Move app loading to the next task instead.
-    setTimeout(fn,0);
+  function runAfterAuthCallback(fn){setTimeout(()=>Promise.resolve().then(fn).catch(error=>console.error('Ошибка запуска приложения',error)),0)}
+  async function openUserSession(user){
+    if(!user)return false;
+    const unlocked=await window.FinanceLocalLock?.unlockIfNeeded?.(user);
+    if(unlocked===false)return false;
+    await loadData();return true;
   }
 
   sb.auth.onAuthStateChange((event,session)=>{
@@ -20,10 +21,8 @@
       initialResolved=true;
       if(user){
         renderedUserId=user.id;
-        runAfterAuthCallback(()=>loadData());
-      }else{
-        runAfterAuthCallback(()=>renderAuth());
-      }
+        runAfterAuthCallback(()=>openUserSession(user));
+      }else runAfterAuthCallback(()=>renderAuth());
       return;
     }
 
@@ -32,15 +31,15 @@
       if(!user)return;
       if(renderedUserId===user.id&&state.family)return;
       renderedUserId=user.id;
-      runAfterAuthCallback(()=>loadData());
+      runAfterAuthCallback(()=>openUserSession(user));
       return;
     }
 
     if(event==='SIGNED_OUT'){
       initialResolved=true;
       renderedUserId=null;
-      state.user=null;
-      state.family=null;
+      window.FinanceLocalLock?.reset?.();
+      state.user=null;state.family=null;
       runAfterAuthCallback(()=>renderAuth());
       return;
     }
