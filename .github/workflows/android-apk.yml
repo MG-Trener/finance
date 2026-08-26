@@ -19,7 +19,7 @@ on:
       - '.github/workflows/android-apk.yml'
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: android-apk-${{ github.ref }}
@@ -104,13 +104,32 @@ jobs:
         working-directory: android
         run: ./gradlew assembleDebug --no-daemon
 
-      - name: Upload debug APK
+      - name: Prepare downloadable APK
+        shell: bash
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk family-treasury.apk
+
+      - name: Upload debug APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: family-treasury-debug-apk
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          path: family-treasury.apk
           if-no-files-found: error
           retention-days: 14
+
+      - name: Publish rolling test APK
+        if: github.ref == 'refs/heads/main'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest-apk
+          name: 'Семейная казна — тестовая Android-сборка'
+          body: |
+            Автоматически собранная тестовая версия Android-приложения.
+            Файл `family-treasury.apk` можно устанавливать поверх предыдущей тестовой сборки.
+            Данные синхронизируются с Supabase, а поддерживаемые изменения сохраняются локально при отсутствии сети.
+          prerelease: true
+          make_latest: false
+          files: family-treasury.apk
+          overwrite_files: true
 
       - name: Configure stable release signing when secrets exist
         shell: bash
