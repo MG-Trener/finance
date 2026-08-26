@@ -9,7 +9,7 @@
 @import url('./pages/journal-enhancements.css?v=journal32');
 @import url('./pages/analytics.css?v=analytics55');
 @import url('./pages/budgets.css?v=budgets29');
-@import url('./pages/goals.css');
+@import url('./pages/goals.css?v=goals56');
 
 /* Components */
 @import url('./components/transaction-entry.css');
