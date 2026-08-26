@@ -19,7 +19,13 @@ The app also contains an authenticated deletion-request flow in `Ещё → До
 
 Do not use the repository debug key for Google Play production.
 
-Create a private upload keystore and store it only in GitHub Actions secrets:
+A helper script is included for creating a private Play upload key on a trusted computer with Java installed:
+
+```bash
+bash scripts/create-play-upload-key.sh
+```
+
+Back up the generated keystore securely and store its base64 form and passwords only in GitHub Actions secrets:
 
 - `ANDROID_KEYSTORE_BASE64`
 - `ANDROID_KEYSTORE_PASSWORD`
