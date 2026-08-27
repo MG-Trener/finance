@@ -32,7 +32,7 @@
 
   function renderRequest(prefill=''){
     app.innerHTML=authFrame(`<h2>Восстановление пароля</h2><p class="invite-auth-note">Укажите email аккаунта. Мы отправим ссылку для создания нового пароля.</p><div id="passwordRecoveryNotice"></div><form id="passwordRecoveryForm"><div class="field"><label>Email</label><input id="recoveryEmail" type="email" required autocomplete="email" value="${esc(prefill)}"></div><button class="btn btn-primary btn-wide" type="submit">Отправить ссылку</button></form><div class="auth-switch"><button class="link-btn" id="recoveryBack" type="button">Вернуться ко входу</button></div>`);
-    document.getElementById('recoveryBack').onclick=()=>baseRenderAuth(false);
+    document.getElementById('recoveryBack').onclick=()=>window.renderAuth(false);
     document.getElementById('passwordRecoveryForm').onsubmit=async event=>{
       event.preventDefault();
       notice('passwordRecoveryNotice','');
@@ -70,7 +70,7 @@
         setTimeout(async()=>{
           try{await sb.auth.signOut()}catch(_){ }
           state.user=null;state.family=null;
-          baseRenderAuth(false);
+          window.renderAuth(false);
         },900);
       }catch(error){
         notice('passwordResetNotice',error?.message||'Не удалось изменить пароль. Откройте ссылку из письма повторно.');
