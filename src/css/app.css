@@ -39,5 +39,5 @@
 @import url('./mobile-device-fallback.css?v=mobile35');
 /* Keep this late: it restores labels hidden by legacy <=1100px rules. */
 @import url('./mobile-menu-fixes.css?v=menu49');
-/* Keep this last: portrait mobile uses a swipeable bottom navigation rail. */
-@import url('./mobile-scroll-nav.css?v=scroll59');
+/* Keep this last: portrait mobile uses a swipeable bottom navigation rail with a fixed update action. */
+@import url('./mobile-scroll-nav.css?v=scroll60');
