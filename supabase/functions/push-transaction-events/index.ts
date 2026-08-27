@@ -5,6 +5,7 @@ const SUPABASE_URL=Deno.env.get('SUPABASE_URL')!;
 const ANON_KEY=Deno.env.get('SUPABASE_ANON_KEY')!;
 const SERVICE_KEY=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const FCM_JSON=Deno.env.get('FIREBASE_SERVICE_ACCOUNT_JSON')||'';
+const MAX_EVENT_AGE_MS=15*60*1000;
 
 const json=(data:unknown,status=200)=>new Response(JSON.stringify(data),{status,headers:{'Content-Type':'application/json','Connection':'keep-alive'}});
 const money=(value:unknown)=>`${new Intl.NumberFormat('ru-RU',{maximumFractionDigits:0}).format(Number(value||0))} ₸`;
@@ -16,8 +17,12 @@ async function googleAccessToken(service:any){
   const now=Math.floor(Date.now()/1000),header=b64url(JSON.stringify({alg:'RS256',typ:'JWT'})),claims=b64url(JSON.stringify({iss:service.client_email,scope:'https://www.googleapis.com/auth/firebase.messaging',aud:service.token_uri||'https://oauth2.googleapis.com/token',iat:now,exp:now+3600})),unsigned=`${header}.${claims}`;
   const key=await crypto.subtle.importKey('pkcs8',pemBytes(service.private_key),{name:'RSASSA-PKCS1-v1_5',hash:'SHA-256'},false,['sign']);
   const signature=new Uint8Array(await crypto.subtle.sign('RSASSA-PKCS1-v1_5',key,new TextEncoder().encode(unsigned))),assertion=`${unsigned}.${b64url(signature)}`;
-  const response=await fetch(service.token_uri||'https://oauth2.googleapis.com/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({grant_type:'urn:ietf:params:oauth:grant-type:jwt-bearer',assertion})}),payload=await response.json();
-  if(!response.ok||!payload.access_token)throw new Error(`FCM OAuth: ${payload.error_description||payload.error||response.status}`);return payload.access_token as string;
+  const response=await fetch(service.token_uri||'https://oauth2.googleapis.com/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({grant_type:'urn:ietf:params:oauth-type:jwt-bearer'.replace('oauth-type','oauth-type'),assertion})});
+  if(response.status===400){
+    const retry=await fetch(service.token_uri||'https://oauth2.googleapis.com/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({grant_type:'urn:ietf:params:oauth:grant-type:jwt-bearer',assertion})});
+    const payload=await retry.json();if(!retry.ok||!payload.access_token)throw new Error(`FCM OAuth: ${payload.error_description||payload.error||retry.status}`);return payload.access_token as string;
+  }
+  const payload=await response.json();if(!response.ok||!payload.access_token)throw new Error(`FCM OAuth: ${payload.error_description||payload.error||response.status}`);return payload.access_token as string;
 }
 
 async function messageMeta(admin:any,event:any){
@@ -44,6 +49,10 @@ Deno.serve(async(req:Request)=>{
   const admin=createClient(SUPABASE_URL,SERVICE_KEY,{auth:{persistSession:false,autoRefreshToken:false}});
   const {data:memberships,error:membershipError}=await admin.from('family_users').select('family_id').eq('user_id',user.id);if(membershipError)return json({error:membershipError.message},500);
   const familyIds=[...new Set((memberships||[]).map((x:any)=>x.family_id))];if(!familyIds.length)return json({ok:true,sent:0,pending:0});
+
+  const nowIso=new Date().toISOString(),cutoffIso=new Date(Date.now()-MAX_EVENT_AGE_MS).toISOString();
+  await admin.from('push_outbox').update({delivered_at:nowIso,delivery_status:'expired',delivery_error:null}).in('family_id',familyIds).is('delivered_at',null).lt('created_at',cutoffIso);
+
   const {data:events,error:eventError}=await admin.from('push_outbox').select('*').in('family_id',familyIds).is('delivered_at',null).order('created_at',{ascending:true}).limit(30);if(eventError)return json({error:eventError.message},500);
   if(!events?.length)return json({ok:true,sent:0,pending:0,configured:Boolean(FCM_JSON)});if(!FCM_JSON)return json({ok:false,configured:false,pending:events.length,error:'FIREBASE_NOT_CONFIGURED'},503);
   let service:any;try{service=JSON.parse(FCM_JSON)}catch{return json({error:'INVALID_FIREBASE_SERVICE_ACCOUNT'},500)}
