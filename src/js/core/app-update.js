@@ -21,7 +21,7 @@
     if(available&&permissionRequired)return 'Разрешить обновление';
     if(available)return 'Обновить приложение';
     if(checking)return 'Проверяю обновление…';
-    return currentBuild?`Приложение · версия 1.0.${currentBuild}`:'Версия приложения';
+    return 'Проверить обновление';
   }
   function detail(){
     if(!native)return 'Установочный файл Android';
@@ -29,9 +29,9 @@
     if(available&&nativeState==='downloaded')return 'Обновление скачано · подтвердите установку Android';
     if(available&&permissionRequired)return 'Нужно один раз разрешить установку обновлений';
     if(available)return `Доступна версия 1.0.${latestBuild}`;
-    if(lastError)return 'Не удалось проверить обновление';
-    if(checked)return 'Установлена актуальная версия';
-    return 'Проверка выполняется автоматически';
+    if(lastError)return 'Не удалось проверить обновление · нажмите ещё раз';
+    if(checked)return currentBuild?`Версия 1.0.${currentBuild} · установлена актуальная версия`:'Установлена актуальная версия';
+    return currentBuild?`Установлена версия 1.0.${currentBuild} · нажмите для проверки`:'Нажмите, чтобы проверить новую версию';
   }
   function refreshUi(){
     document.documentElement.classList.toggle('app-update-available',available);
@@ -42,7 +42,7 @@
     document.querySelectorAll('[data-app-update-link]').forEach(el=>{
       el.href=DOWNLOAD_URL;
       el.classList.toggle('has-update',available);
-      el.setAttribute('aria-label',available?`${label()}. ${detail()}`:'Установлена актуальная версия приложения');
+      el.setAttribute('aria-label',`${label()}. ${detail()}`);
     });
     const more=document.getElementById('navMore');
     if(more)more.setAttribute('aria-label',available?'Ещё. Доступно обновление приложения':'Ещё');
