@@ -33,8 +33,11 @@
 .annual-analytics-grid .annual-wide{grid-column:1/-1}
 .chart-card-head{display:flex;justify-content:space-between;gap:12px;align-items:start;margin-bottom:7px}
 .chart-swipe-hint{display:none;margin-top:6px;color:#d7ba80;font-size:10px;font-weight:700;letter-spacing:.01em}
-.monthly-ribbon-scroll{width:100%;min-width:0;overflow:hidden}
-.monthly-ribbon-track{height:280px;min-width:100%}
+.monthly-ribbon-scroll{display:flex;width:100%;min-width:0;overflow:hidden;position:relative;isolation:isolate}
+.monthly-ribbon-axis{position:sticky;left:0;z-index:5;flex:0 0 78px;width:78px;height:280px;background:linear-gradient(90deg,rgba(8,15,21,.99) 72%,rgba(8,15,21,.92));border-right:1px solid rgba(177,139,82,.28);box-shadow:8px 0 14px rgba(3,8,12,.45)}
+.monthly-ribbon-axis-tick{position:absolute;right:8px;transform:translateY(-50%);max-width:66px;white-space:nowrap;color:#a99a81;font-size:10px;line-height:1;font-weight:700;text-align:right;text-shadow:0 1px 3px #000}
+.monthly-ribbon-axis-tick.zero{color:#e1c078}
+.monthly-ribbon-track{height:280px;min-width:calc(100% - 78px);flex:0 0 auto}
 .people-comparison-box{height:300px}
 .annual-person-chart{min-width:0}
 .person-chart-box{height:260px}
@@ -55,7 +58,9 @@
   .chart-swipe-hint{display:block}
   .monthly-ribbon-scroll{overflow-x:auto;overflow-y:hidden;padding:2px 0 7px;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;scrollbar-width:none;touch-action:pan-x}
   .monthly-ribbon-scroll::-webkit-scrollbar{display:none;width:0;height:0}
-  .monthly-ribbon-track{min-width:max(100%,calc(var(--ribbon-months,12) * 96px));height:250px}
+  .monthly-ribbon-axis{height:250px;flex-basis:72px;width:72px}
+  .monthly-ribbon-axis-tick{right:7px;max-width:61px;font-size:9px}
+  .monthly-ribbon-track{min-width:max(calc(100% - 72px),calc(var(--ribbon-months,12) * 96px));height:250px}
 }
 @media(max-width:620px){
   .analytics-insights{grid-template-columns:1fr;gap:8px}
