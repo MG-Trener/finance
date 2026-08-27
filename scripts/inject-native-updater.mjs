@@ -144,6 +144,7 @@ public class AppUpdaterPlugin extends Plugin {
     JSObject result = new JSObject();
     result.put("state", state);
     result.put("build", build);
+    result.put("installedBuild", installedBuild());
     result.put("downloadId", id);
     result.put("installAllowed", canInstallPackages());
     return result;
