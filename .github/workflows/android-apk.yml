@@ -66,6 +66,16 @@ jobs:
       - name: Create Android project
         run: npx cap add android
 
+      - name: Configure Firebase push notifications
+        shell: bash
+        run: |
+          if [ -f mobile-assets/google-services.json ]; then
+            cp mobile-assets/google-services.json android/app/google-services.json
+            echo 'Firebase google-services.json installed.'
+          else
+            echo 'Firebase google-services.json is not present yet; APK will build with push transport disabled.'
+          fi
+
       - name: Generate native icon and splash
         run: npx @capacitor/assets generate --android --assetPath mobile-assets --iconBackgroundColor '#071019' --iconBackgroundColorDark '#071019' --splashBackgroundColor '#071019' --splashBackgroundColorDark '#071019'
 
