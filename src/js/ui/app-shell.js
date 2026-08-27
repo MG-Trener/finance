@@ -43,16 +43,15 @@ function desktopApkDownloadMarkup(){
   return `<a class="crest-apk-download" href="${APK_DOWNLOAD_URL}" target="_blank" rel="noopener" aria-label="Скачать последнюю версию Семейной казны для Android"><span class="crest-apk-icon" aria-hidden="true">📱</span><span><b>Скачать Android</b><small>Последняя версия APK</small></span></a>`;
 }
 
-function mobileUpdateMarkup(){
+function mobileUpdateNavMarkup(){
   const updater=window.FinanceAppUpdate,native=Boolean(window.__FINANCE_NATIVE__),available=Boolean(updater?.available);
-  const label=updater?.label||(native?'Версия приложения':'Скачать Android APK');
-  const detail=updater?.detail||(native?'Проверка обновлений выполняется автоматически':'Последняя версия приложения');
-  return `<a class="mobile-update-notice ${native?'native-update':'web-apk-download'} ${available?'has-update':''}" href="${updater?.downloadUrl||APK_DOWNLOAD_URL}" target="_blank" rel="noopener" data-app-update-link aria-label="${esc(label)}. ${esc(detail)}"><span class="mobile-update-icon" aria-hidden="true">${available?'⬆️':'📱'}</span><span class="mobile-update-copy"><b data-app-update-label>${esc(label)}</b><small data-app-update-detail>${esc(detail)}</small></span><span class="mobile-update-pill" data-app-update-badge ${available?'':'hidden'}>NEW</span></a>`;
+  const detail=updater?.detail||(native?'Нажмите, чтобы проверить обновление':'Скачать Android APK');
+  return `<a class="mobile-update-nav ${native?'native-update':'web-apk-download'} ${available?'has-update':''}" href="${updater?.downloadUrl||APK_DOWNLOAD_URL}" target="_blank" rel="noopener" data-app-update-link aria-label="${esc(detail)}"><span class="mobile-update-nav-icon" aria-hidden="true"><span class="update-check-icon">↻</span><span class="update-ready-icon">⬆</span></span><span class="mobile-update-nav-label"><span class="update-check-label">${native?'Проверить':'Android'}</span><span class="update-ready-label">${native?'Обновить':'Android'}</span></span><span class="mobile-update-nav-badge" data-app-update-badge ${available?'':'hidden'}>NEW</span></a>`;
 }
 
 function shell(content){
   const local=window.FinanceOfflineSession?.isLocalSession?.();
-  return `<div class="app-shell"><aside class="sidebar"><div class="side-brand"><div class="brand"><div class="brand-badge">₸</div><span class="brand-text">Казна</span></div></div><nav class="side-nav" aria-label="Разделы приложения">${NAV_ITEMS.map(x=>navMarkup(x)).join('')}</nav><div class="family-crest" aria-label="Семейный герб"><img src="assets/gerb.png" loading="lazy" decoding="async" alt="Герб семьи"></div>${desktopApkDownloadMarkup()}<div class="side-footer"><div class="side-copy"><b>${esc(state.family.name)}</b><div>${local?'Локальная копия · нужна авторизация для синхронизации':'Данные в Supabase'}</div></div></div></aside><main class="main">${header()}${content}</main>${mobileUpdateMarkup()}</div>`;
+  return `<div class="app-shell"><aside class="sidebar"><div class="side-brand"><div class="brand"><div class="brand-badge">₸</div><span class="brand-text">Казна</span></div></div><nav class="side-nav" aria-label="Разделы приложения">${NAV_ITEMS.map(x=>navMarkup(x)).join('')}</nav>${mobileUpdateNavMarkup()}<div class="family-crest" aria-label="Семейный герб"><img src="assets/gerb.png" loading="lazy" decoding="async" alt="Герб семьи"></div>${desktopApkDownloadMarkup()}<div class="side-footer"><div class="side-copy"><b>${esc(state.family.name)}</b><div>${local?'Локальная копия · нужна авторизация для синхронизации':'Данные в Supabase'}</div></div></div></aside><main class="main">${header()}${content}</main></div>`;
 }
 
 async function bindAnalyticsRoute(){
