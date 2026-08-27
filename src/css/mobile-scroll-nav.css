@@ -1,12 +1,20 @@
-/* Final portrait-mobile navigation: every section lives in one swipeable bottom rail. */
-.mobile-update-notice{display:none}
+/* Final portrait-mobile navigation: sections scroll, update action stays visible at the right edge. */
+.mobile-update-notice,.mobile-update-nav{display:none}
 @media (max-width:760px), (max-device-width:760px) and (min-width:761px), (pointer:coarse) and (min-width:761px) and (max-width:1400px){
+  .sidebar{
+    display:flex!important;
+    flex-direction:row!important;
+    align-items:stretch!important;
+    gap:4px!important
+  }
+  .sidebar>.side-brand,.sidebar>.side-footer,.sidebar>.family-crest,.sidebar>.crest-apk-download{display:none!important}
   .side-nav{
     display:flex!important;
     grid-template-columns:none!important;
+    flex:1 1 auto!important;
     flex-wrap:nowrap!important;
     gap:4px!important;
-    width:100%!important;
+    width:auto!important;
     min-width:0!important;
     overflow-x:auto!important;
     overflow-y:hidden!important;
@@ -53,38 +61,96 @@
   .mobile-more-backdrop{display:none!important}
   html.mobile-more-open,html.mobile-more-open body{overflow:auto!important}
 
-  .mobile-update-notice{
-    position:fixed!important;
-    right:10px!important;
-    bottom:calc(82px + env(safe-area-inset-bottom))!important;
-    z-index:140!important;
+  .mobile-update-nav{
+    position:relative!important;
+    display:flex!important;
+    flex:0 0 74px!important;
+    width:74px!important;
+    min-width:74px!important;
+    min-height:57px!important;
     align-items:center!important;
-    gap:8px!important;
-    max-width:min(330px,calc(100vw - 20px))!important;
-    min-height:42px!important;
-    padding:7px 9px!important;
-    border-radius:12px!important;
-    border:1px solid rgba(164,119,61,.55)!important;
-    background:linear-gradient(180deg,rgba(24,35,43,.98),rgba(8,15,20,.99))!important;
-    box-shadow:0 9px 28px rgba(0,0,0,.5),inset 0 0 0 1px rgba(244,204,134,.04)!important;
-    color:#ead5aa!important;
+    justify-content:center!important;
+    flex-direction:column!important;
+    gap:3px!important;
+    padding:4px 3px!important;
+    border:1px solid rgba(128,93,49,.72)!important;
+    border-radius:10px!important;
+    background:linear-gradient(180deg,rgba(21,31,39,.98),rgba(8,15,20,.99))!important;
+    color:#d7bd8b!important;
     text-decoration:none!important;
-    backdrop-filter:blur(10px)!important
+    box-shadow:inset 1px 0 0 rgba(239,192,107,.08),0 3px 10px rgba(0,0,0,.28)!important;
+    overflow:hidden!important;
+    -webkit-tap-highlight-color:transparent!important;
+    touch-action:manipulation!important
   }
-  .mobile-update-notice.web-apk-download{display:flex!important}
-  .mobile-update-notice.native-update{display:flex!important}
-  html.app-update-available .mobile-update-notice.native-update{display:flex!important;border-color:rgba(218,166,81,.9)!important;background:linear-gradient(180deg,rgba(68,49,27,.98),rgba(20,17,14,.99))!important}
-  .mobile-update-icon{display:grid!important;place-items:center!important;width:28px!important;height:28px!important;flex:0 0 28px!important;font-size:17px!important}
-  .mobile-update-copy{display:grid!important;gap:2px!important;min-width:0!important;flex:1 1 auto!important}
-  .mobile-update-copy b{display:block!important;font-size:10px!important;line-height:1.2!important;color:#f0d29a!important;-webkit-text-fill-color:#f0d29a!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
-  .mobile-update-copy small{display:block!important;font-size:8.5px!important;line-height:1.25!important;color:#948873!important;-webkit-text-fill-color:#948873!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
-  .mobile-update-pill{display:inline-flex!important;align-items:center!important;justify-content:center!important;flex:0 0 auto!important;padding:3px 5px!important;border-radius:999px!important;background:#7b4b22!important;border:1px solid #c7954c!important;color:#ffe0aa!important;-webkit-text-fill-color:#ffe0aa!important;font-size:7px!important;font-weight:900!important;letter-spacing:.06em!important}
-  .mobile-update-pill[hidden]{display:none!important}
-  html.app-update-downloading .mobile-update-notice.native-update{animation:mobileUpdateGlow 1.5s ease-in-out infinite!important}
+  .mobile-update-nav:active{transform:translateY(1px)!important;filter:brightness(1.08)!important}
+  .mobile-update-nav-icon{
+    display:grid!important;
+    place-items:center!important;
+    width:25px!important;
+    height:25px!important;
+    flex:0 0 25px!important;
+    border-radius:50%!important;
+    border:1px solid rgba(190,144,74,.7)!important;
+    background:radial-gradient(circle at 35% 30%,#6b522f,#241d15 70%)!important;
+    color:#f0cb82!important;
+    font-size:18px!important;
+    line-height:1!important;
+    font-weight:900!important
+  }
+  .mobile-update-nav-label{
+    display:block!important;
+    width:100%!important;
+    max-width:100%!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+    white-space:nowrap!important;
+    font-size:8px!important;
+    line-height:10px!important;
+    font-weight:700!important;
+    text-align:center!important;
+    color:#d7bd8b!important;
+    -webkit-text-fill-color:#d7bd8b!important
+  }
+  .update-ready-icon,.update-ready-label{display:none!important}
+  .mobile-update-nav.has-update .update-check-icon,.mobile-update-nav.has-update .update-check-label{display:none!important}
+  .mobile-update-nav.has-update .update-ready-icon,.mobile-update-nav.has-update .update-ready-label{display:inline!important}
+  .mobile-update-nav.has-update{
+    border-color:#d0a052!important;
+    background:linear-gradient(180deg,rgba(86,58,28,.98),rgba(30,23,16,.99))!important;
+    box-shadow:inset 0 -3px 0 #d3aa61,0 3px 12px rgba(0,0,0,.35),0 0 12px rgba(211,170,97,.14)!important
+  }
+  .mobile-update-nav.has-update .mobile-update-nav-icon{
+    border-color:#e2b86c!important;
+    background:radial-gradient(circle at 35% 30%,#d2a04f,#63411f 72%)!important;
+    color:#1d1309!important
+  }
+  .mobile-update-nav-badge{
+    position:absolute!important;
+    right:2px!important;
+    top:2px!important;
+    display:grid!important;
+    place-items:center!important;
+    min-width:20px!important;
+    height:14px!important;
+    padding:0 3px!important;
+    border-radius:999px!important;
+    background:#9d3226!important;
+    border:1px solid #ed9272!important;
+    color:#fff1d4!important;
+    -webkit-text-fill-color:#fff1d4!important;
+    font-size:6px!important;
+    line-height:1!important;
+    font-weight:900!important;
+    letter-spacing:.03em!important
+  }
+  .mobile-update-nav-badge[hidden]{display:none!important}
+  html.app-update-downloading .mobile-update-nav.native-update{animation:mobileUpdateGlow 1.5s ease-in-out infinite!important}
 }
 @media(max-width:380px){
   .side-nav .nav-item{flex-basis:70px!important;width:70px!important;min-width:70px!important;max-width:70px!important}
   .side-nav .nav-item .nav-label{font-size:8px!important}
-  .mobile-update-notice{left:8px!important;right:8px!important;max-width:none!important}
+  .mobile-update-nav{flex-basis:68px!important;width:68px!important;min-width:68px!important}
+  .mobile-update-nav-label{font-size:7.5px!important}
 }
-@keyframes mobileUpdateGlow{0%,100%{box-shadow:0 9px 28px rgba(0,0,0,.5),0 0 0 rgba(210,165,87,0)}50%{box-shadow:0 9px 28px rgba(0,0,0,.5),0 0 16px rgba(210,165,87,.24)}}
+@keyframes mobileUpdateGlow{0%,100%{box-shadow:inset 0 -3px 0 #d3aa61,0 3px 12px rgba(0,0,0,.35),0 0 0 rgba(210,165,87,0)}50%{box-shadow:inset 0 -3px 0 #d3aa61,0 3px 12px rgba(0,0,0,.35),0 0 16px rgba(210,165,87,.30)}}
