@@ -72,9 +72,8 @@
     backdrop-filter:blur(10px)!important
   }
   .mobile-update-notice.web-apk-download{display:flex!important}
-  html.app-update-available .mobile-update-notice.native-update{display:flex!important}
-  .mobile-update-notice.native-update{display:none!important}
-  html.app-update-available .mobile-update-notice.native-update{display:flex!important}
+  .mobile-update-notice.native-update{display:flex!important}
+  html.app-update-available .mobile-update-notice.native-update{display:flex!important;border-color:rgba(218,166,81,.9)!important;background:linear-gradient(180deg,rgba(68,49,27,.98),rgba(20,17,14,.99))!important}
   .mobile-update-icon{display:grid!important;place-items:center!important;width:28px!important;height:28px!important;flex:0 0 28px!important;font-size:17px!important}
   .mobile-update-copy{display:grid!important;gap:2px!important;min-width:0!important;flex:1 1 auto!important}
   .mobile-update-copy b{display:block!important;font-size:10px!important;line-height:1.2!important;color:#f0d29a!important;-webkit-text-fill-color:#f0d29a!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
