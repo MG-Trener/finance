@@ -1,20 +1,13 @@
-/* Final portrait-mobile navigation: sections scroll, update action stays visible at the right edge. */
+/* Final portrait-mobile navigation: every section, including update, lives in one swipeable bottom rail. */
 .mobile-update-notice,.mobile-update-nav{display:none}
 @media (max-width:760px), (max-device-width:760px) and (min-width:761px), (pointer:coarse) and (min-width:761px) and (max-width:1400px){
-  .sidebar{
-    display:flex!important;
-    flex-direction:row!important;
-    align-items:stretch!important;
-    gap:4px!important
-  }
   .sidebar>.side-brand,.sidebar>.side-footer,.sidebar>.family-crest,.sidebar>.crest-apk-download{display:none!important}
   .side-nav{
     display:flex!important;
     grid-template-columns:none!important;
-    flex:1 1 auto!important;
     flex-wrap:nowrap!important;
     gap:4px!important;
-    width:auto!important;
+    width:100%!important;
     min-width:0!important;
     overflow-x:auto!important;
     overflow-y:hidden!important;
@@ -61,69 +54,37 @@
   .mobile-more-backdrop{display:none!important}
   html.mobile-more-open,html.mobile-more-open body{overflow:auto!important}
 
-  .mobile-update-nav{
-    position:relative!important;
+  .side-nav .mobile-update-nav{
     display:flex!important;
-    flex:0 0 74px!important;
-    width:74px!important;
-    min-width:74px!important;
-    min-height:57px!important;
     align-items:center!important;
     justify-content:center!important;
     flex-direction:column!important;
     gap:3px!important;
-    padding:4px 3px!important;
-    border:1px solid rgba(128,93,49,.72)!important;
-    border-radius:10px!important;
-    background:linear-gradient(180deg,rgba(21,31,39,.98),rgba(8,15,20,.99))!important;
-    color:#d7bd8b!important;
+    padding:4px 2px!important;
+    color:#c9b894!important;
     text-decoration:none!important;
-    box-shadow:inset 1px 0 0 rgba(239,192,107,.08),0 3px 10px rgba(0,0,0,.28)!important;
-    overflow:hidden!important;
     -webkit-tap-highlight-color:transparent!important;
     touch-action:manipulation!important
   }
-  .mobile-update-nav:active{transform:translateY(1px)!important;filter:brightness(1.08)!important}
-  .mobile-update-nav-icon{
+  .side-nav .mobile-update-nav:active{transform:translateY(1px)!important;filter:brightness(1.08)!important}
+  .side-nav .mobile-update-nav-icon{
     display:grid!important;
     place-items:center!important;
     width:25px!important;
     height:25px!important;
     flex:0 0 25px!important;
     border-radius:50%!important;
-    border:1px solid rgba(190,144,74,.7)!important;
-    background:radial-gradient(circle at 35% 30%,#6b522f,#241d15 70%)!important;
-    color:#f0cb82!important;
+    border:1px solid rgba(190,144,74,.62)!important;
+    background:radial-gradient(circle at 35% 30%,#5d492d,#221b14 72%)!important;
+    color:#e0bd78!important;
+    -webkit-text-fill-color:#e0bd78!important;
     font-size:18px!important;
     line-height:1!important;
     font-weight:900!important
   }
-  .mobile-update-nav-label{
-    display:block!important;
-    width:100%!important;
-    max-width:100%!important;
-    overflow:hidden!important;
-    text-overflow:ellipsis!important;
-    white-space:nowrap!important;
-    font-size:8px!important;
-    line-height:10px!important;
-    font-weight:700!important;
-    text-align:center!important;
-    color:#d7bd8b!important;
-    -webkit-text-fill-color:#d7bd8b!important
-  }
-  .update-ready-icon,.update-ready-label{display:none!important}
-  .mobile-update-nav.has-update .update-check-icon,.mobile-update-nav.has-update .update-check-label{display:none!important}
-  .mobile-update-nav.has-update .update-ready-icon,.mobile-update-nav.has-update .update-ready-label{display:inline!important}
-  .mobile-update-nav.has-update{
-    border-color:#d0a052!important;
-    background:linear-gradient(180deg,rgba(86,58,28,.98),rgba(30,23,16,.99))!important;
-    box-shadow:inset 0 -3px 0 #d3aa61,0 3px 12px rgba(0,0,0,.35),0 0 12px rgba(211,170,97,.14)!important
-  }
-  .mobile-update-nav.has-update .mobile-update-nav-icon{
-    border-color:#e2b86c!important;
-    background:radial-gradient(circle at 35% 30%,#d2a04f,#63411f 72%)!important;
-    color:#1d1309!important
+  .side-nav .mobile-update-nav-label{
+    color:inherit!important;
+    -webkit-text-fill-color:currentColor!important
   }
   .mobile-update-nav-badge{
     position:absolute!important;
@@ -142,15 +103,14 @@
     font-size:6px!important;
     line-height:1!important;
     font-weight:900!important;
-    letter-spacing:.03em!important
+    letter-spacing:.03em!important;
+    box-shadow:0 0 8px rgba(237,146,114,.32)!important
   }
   .mobile-update-nav-badge[hidden]{display:none!important}
-  html.app-update-downloading .mobile-update-nav.native-update{animation:mobileUpdateGlow 1.5s ease-in-out infinite!important}
+  html.app-update-downloading .mobile-update-nav.native-update .mobile-update-nav-icon{animation:mobileUpdateSpin 1.1s linear infinite!important}
 }
 @media(max-width:380px){
   .side-nav .nav-item{flex-basis:70px!important;width:70px!important;min-width:70px!important;max-width:70px!important}
   .side-nav .nav-item .nav-label{font-size:8px!important}
-  .mobile-update-nav{flex-basis:68px!important;width:68px!important;min-width:68px!important}
-  .mobile-update-nav-label{font-size:7.5px!important}
 }
-@keyframes mobileUpdateGlow{0%,100%{box-shadow:inset 0 -3px 0 #d3aa61,0 3px 12px rgba(0,0,0,.35),0 0 0 rgba(210,165,87,0)}50%{box-shadow:inset 0 -3px 0 #d3aa61,0 3px 12px rgba(0,0,0,.35),0 0 16px rgba(210,165,87,.30)}}
+@keyframes mobileUpdateSpin{to{transform:rotate(360deg)}}
