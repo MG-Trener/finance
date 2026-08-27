@@ -49,18 +49,18 @@
   }
   function refreshUi(){
     reconcileAvailability();
-    document.documentElement.classList.toggle('app-update-available',available);
-    document.documentElement.classList.toggle('app-update-downloading',available&&nativeState==='downloading');
+    const confirmedUpdate=available&&checked;
+    document.documentElement.classList.toggle('app-update-available',confirmedUpdate);
+    document.documentElement.classList.toggle('app-update-downloading',confirmedUpdate&&nativeState==='downloading');
     document.querySelectorAll('[data-app-update-label]').forEach(el=>el.textContent=label());
     document.querySelectorAll('[data-app-update-detail]').forEach(el=>el.textContent=detail());
-    document.querySelectorAll('[data-app-update-badge],[data-app-update-dot]').forEach(el=>el.hidden=!available);
     document.querySelectorAll('[data-app-update-link]').forEach(el=>{
       el.href=DOWNLOAD_URL;
-      el.classList.toggle('has-update',available);
+      el.classList.toggle('has-update',confirmedUpdate);
       el.setAttribute('aria-label',`${label()}. ${detail()}`);
     });
     const more=document.getElementById('navMore');
-    if(more)more.setAttribute('aria-label',available?'Ещё. Доступно обновление приложения':'Ещё');
+    if(more)more.setAttribute('aria-label',confirmedUpdate?'Ещё. Доступно обновление приложения':'Ещё');
   }
   async function syncNativeState({resumeInstall=false}={}){
     if(!native)return null;
@@ -139,6 +139,7 @@
       if(available)await maybeBackgroundDownload();
     }catch(error){
       lastError=error?.message||String(error);
+      checked=false;
       applyCached();
       await syncNativeState();
     }finally{
@@ -150,7 +151,7 @@
     event?.preventDefault?.();
     if(native){
       await syncNativeState();
-      if(!available)await check({force:true});
+      if(!available||!checked)await check({force:true});
       if(!available)return false;
       const updater=nativeUpdater();
       if(updater?.downloadAndInstall){
@@ -175,7 +176,7 @@
     return true;
   }
 
-  window.FinanceAppUpdate={check,refreshUi,openDownload,downloadUrl:DOWNLOAD_URL,get native(){return native},get currentBuild(){return effectiveBuild()},get latestBuild(){return latestBuild},get checked(){return checked},get checking(){return checking},get available(){return available},get nativeState(){return nativeState},get label(){return label()},get detail(){return detail()}};
+  window.FinanceAppUpdate={check,refreshUi,openDownload,downloadUrl:DOWNLOAD_URL,get native(){return native},get currentBuild(){return effectiveBuild()},get latestBuild(){return latestBuild},get checked(){return checked},get checking(){return checking},get available(){return available&&checked},get nativeState(){return nativeState},get label(){return label()},get detail(){return detail()}};
   applyCached();
   window.addEventListener('online',()=>check({force:true}));
   document.addEventListener('visibilitychange',()=>{
