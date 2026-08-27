@@ -23,14 +23,25 @@
   sb.auth.onAuthStateChange((event,session)=>{
     const user=session?.user||null;
     const wasLocalSession=Boolean(state.user?._offlineLocal);
+    const recovery=window.FinancePasswordRecovery;
     // Do not erase a PIN-unlocked local identity merely because Supabase has no
     // network session while Android is offline.
     if(user||!wasLocalSession)state.user=user;
 
+    if(event==='PASSWORD_RECOVERY'){
+      initialResolved=true;
+      if(user)renderedUserId=user.id;
+      runAfterAuthCallback(()=>recovery?.renderReset?.());
+      return;
+    }
+
     if(event==='INITIAL_SESSION'){
       if(initialResolved)return;
       initialResolved=true;
-      if(user){
+      if(user&&recovery?.hasIntent?.()){
+        renderedUserId=user.id;
+        runAfterAuthCallback(()=>recovery.renderReset());
+      }else if(user){
         renderedUserId=user.id;
         runAfterAuthCallback(()=>openUserSession(user));
       }else runAfterAuthCallback(()=>openWithoutServerSession());
@@ -41,6 +52,11 @@
       initialResolved=true;
       if(!user)return;
       state.user=user;
+      if(recovery?.hasIntent?.()){
+        renderedUserId=user.id;
+        runAfterAuthCallback(()=>recovery.renderReset());
+        return;
+      }
       if(renderedUserId===user.id&&state.family&&!wasLocalSession)return;
       renderedUserId=user.id;
       runAfterAuthCallback(()=>openUserSession(user));
