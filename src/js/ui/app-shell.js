@@ -46,7 +46,7 @@ function desktopApkDownloadMarkup(){
 function mobileUpdateNavMarkup(){
   const updater=window.FinanceAppUpdate,native=Boolean(window.__FINANCE_NATIVE__),available=Boolean(updater?.available);
   const detail=updater?.detail||(native?'Нажмите, чтобы проверить обновление':'Скачать Android APK');
-  return `<a class="nav-item pirate-nav nav-secondary mobile-update-nav ${native?'native-update':'web-apk-download'} ${available?'has-update':''}" href="${updater?.downloadUrl||APK_DOWNLOAD_URL}" target="_blank" rel="noopener" data-app-update-link aria-label="${esc(detail)}"><span class="nav-icon mobile-update-nav-icon" aria-hidden="true">↻</span><span class="nav-label mobile-update-nav-label">Обновить</span><span class="mobile-update-nav-badge" data-app-update-badge ${available?'':'hidden'}>NEW</span></a>`;
+  return `<a class="nav-item pirate-nav nav-secondary mobile-update-nav ${native?'native-update':'web-apk-download'} ${available?'has-update':''}" href="${updater?.downloadUrl||APK_DOWNLOAD_URL}" target="_blank" rel="noopener" data-app-update-link aria-label="${esc(detail)}"><span class="nav-icon mobile-update-nav-icon" aria-hidden="true">↻</span><span class="nav-label mobile-update-nav-label">Обновить</span><span class="mobile-update-nav-badge" data-app-update-badge ${available?'':'hidden'} aria-label="Доступно обновление"></span></a>`;
 }
 
 function shell(content){
