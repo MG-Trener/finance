@@ -5,14 +5,27 @@
   const CHECK_INTERVAL=15*60*1000;
   const native=Boolean(window.__FINANCE_NATIVE__);
   const currentBuild=Number(window.__FINANCE_BUILD__||0);
+  let runtimeInstalledBuild=currentBuild;
   let checked=false,checking=false,available=false,latestBuild=0,lastError='';
   let nativeState='idle',nativeInstallAllowed=true,permissionRequired=false;
 
   function nativeUpdater(){return window.Capacitor?.Plugins?.AppUpdater}
   function cachedLatest(){return Number(localStorage.getItem('finance.latestApkBuild')||0)}
+  function effectiveBuild(){return Math.max(currentBuild,Number(runtimeInstalledBuild||0))}
+  function reconcileAvailability(){
+    const installed=effectiveBuild();
+    available=native&&installed>0&&latestBuild>installed;
+    if(!available&&latestBuild>0&&installed>=latestBuild){
+      localStorage.setItem('finance.latestApkBuild',String(latestBuild));
+      localStorage.setItem('finance.appUpdateCheckedAt',String(Date.now()));
+      nativeState='idle';
+      permissionRequired=false;
+    }
+    return available;
+  }
   function applyCached(){
     latestBuild=cachedLatest();
-    available=native&&currentBuild>0&&latestBuild>currentBuild;
+    reconcileAvailability();
   }
   function label(){
     if(!native)return 'Скачать Android APK';
@@ -25,15 +38,17 @@
   }
   function detail(){
     if(!native)return 'Установочный файл Android';
+    const installed=effectiveBuild();
     if(available&&nativeState==='downloading')return `Версия 1.0.${latestBuild} загружается в фоне`;
     if(available&&nativeState==='downloaded')return 'Обновление скачано · подтвердите установку Android';
     if(available&&permissionRequired)return 'Нужно один раз разрешить установку обновлений';
     if(available)return `Доступна версия 1.0.${latestBuild}`;
     if(lastError)return 'Не удалось проверить обновление · нажмите ещё раз';
-    if(checked)return currentBuild?`Версия 1.0.${currentBuild} · установлена актуальная версия`:'Установлена актуальная версия';
-    return currentBuild?`Установлена версия 1.0.${currentBuild} · нажмите для проверки`:'Нажмите, чтобы проверить новую версию';
+    if(checked)return installed?`Версия 1.0.${installed} · установлена актуальная версия`:'Установлена актуальная версия';
+    return installed?`Установлена версия 1.0.${installed} · нажмите для проверки`:'Нажмите, чтобы проверить новую версию';
   }
   function refreshUi(){
+    reconcileAvailability();
     document.documentElement.classList.toggle('app-update-available',available);
     document.documentElement.classList.toggle('app-update-downloading',available&&nativeState==='downloading');
     document.querySelectorAll('[data-app-update-label]').forEach(el=>el.textContent=label());
@@ -53,8 +68,11 @@
     if(!updater?.getStatus)return null;
     try{
       const status=await updater.getStatus();
+      const installedFromAndroid=Number(status?.installedBuild||0);
+      if(installedFromAndroid>0)runtimeInstalledBuild=Math.max(runtimeInstalledBuild,installedFromAndroid);
       nativeState=String(status?.state||'idle');
       nativeInstallAllowed=status?.installAllowed!==false;
+      reconcileAvailability();
       permissionRequired=available&&!nativeInstallAllowed;
       if(resumeInstall&&available&&nativeState==='downloaded'&&nativeInstallAllowed&&updater.installPending){
         await updater.installPending();
@@ -67,17 +85,21 @@
     }
   }
   async function maybeBackgroundDownload(){
-    if(!native||!available||latestBuild<=currentBuild)return false;
+    if(!native||!available||latestBuild<=effectiveBuild())return false;
     const updater=nativeUpdater();
     if(!updater?.downloadAndInstall)return false;
     const status=await syncNativeState();
+    if(!available)return false;
     if(status?.state==='downloading'||status?.state==='downloaded')return true;
     if(status?.installAllowed===false){permissionRequired=true;refreshUi();return false}
     try{
       const result=await updater.downloadAndInstall({url:DOWNLOAD_URL,build:latestBuild,automatic:true});
+      const installedFromAndroid=Number(result?.installedBuild||0);
+      if(installedFromAndroid>0)runtimeInstalledBuild=Math.max(runtimeInstalledBuild,installedFromAndroid);
       nativeState=String(result?.state||nativeState||'idle');
       nativeInstallAllowed=result?.installAllowed!==false;
-      permissionRequired=Boolean(result?.permissionRequired)||!nativeInstallAllowed;
+      reconcileAvailability();
+      permissionRequired=available&&(Boolean(result?.permissionRequired)||!nativeInstallAllowed);
       refreshUi();
       return Boolean(result?.started)||nativeState==='downloading'||nativeState==='downloaded';
     }catch(error){
@@ -87,12 +109,14 @@
   }
   async function check({force=false}={}){
     if(!native){refreshUi();return false}
-    applyCached();refreshUi();
-    if(!navigator.onLine){await syncNativeState();return available}
+    latestBuild=cachedLatest();
+    await syncNativeState();
+    reconcileAvailability();
+    refreshUi();
+    if(!navigator.onLine)return available;
     const last=Number(localStorage.getItem('finance.appUpdateCheckedAt')||0);
     if(!force&&last&&Date.now()-last<CHECK_INTERVAL){
       checked=true;
-      await syncNativeState();
       if(available)await maybeBackgroundDownload();
       refreshUi();
       return available;
@@ -109,7 +133,7 @@
         localStorage.setItem('finance.latestApkBuild',String(latestBuild));
         localStorage.setItem('finance.appUpdateCheckedAt',String(Date.now()));
       }
-      available=currentBuild>0&&latestBuild>currentBuild;
+      reconcileAvailability();
       checked=true;
       await syncNativeState();
       if(available)await maybeBackgroundDownload();
@@ -125,15 +149,19 @@
   async function openDownload(event){
     event?.preventDefault?.();
     if(native){
+      await syncNativeState();
       if(!available)await check({force:true});
       if(!available)return false;
       const updater=nativeUpdater();
       if(updater?.downloadAndInstall){
         try{
           const result=await updater.downloadAndInstall({url:DOWNLOAD_URL,build:latestBuild,automatic:false});
+          const installedFromAndroid=Number(result?.installedBuild||0);
+          if(installedFromAndroid>0)runtimeInstalledBuild=Math.max(runtimeInstalledBuild,installedFromAndroid);
           nativeState=String(result?.state||nativeState||'idle');
           nativeInstallAllowed=result?.installAllowed!==false;
-          permissionRequired=Boolean(result?.permissionRequired)||!nativeInstallAllowed;
+          reconcileAvailability();
+          permissionRequired=available&&(Boolean(result?.permissionRequired)||!nativeInstallAllowed);
           refreshUi();
           return true;
         }catch(error){console.warn('Нативное обновление недоступно',error)}
@@ -147,16 +175,17 @@
     return true;
   }
 
-  window.FinanceAppUpdate={check,refreshUi,openDownload,downloadUrl:DOWNLOAD_URL,get native(){return native},get currentBuild(){return currentBuild},get latestBuild(){return latestBuild},get checked(){return checked},get checking(){return checking},get available(){return available},get nativeState(){return nativeState},get label(){return label()},get detail(){return detail()}};
+  window.FinanceAppUpdate={check,refreshUi,openDownload,downloadUrl:DOWNLOAD_URL,get native(){return native},get currentBuild(){return effectiveBuild()},get latestBuild(){return latestBuild},get checked(){return checked},get checking(){return checking},get available(){return available},get nativeState(){return nativeState},get label(){return label()},get detail(){return detail()}};
   applyCached();
   window.addEventListener('online',()=>check({force:true}));
   document.addEventListener('visibilitychange',()=>{
     if(document.hidden)return;
-    check();
+    check({force:true});
     if(native)setTimeout(async()=>{
       await syncNativeState({resumeInstall:true});
       if(available)await maybeBackgroundDownload();
     },250);
   });
+  window.addEventListener('focus',()=>{if(native)syncNativeState().then(()=>refreshUi())});
   window.addEventListener('load',()=>setTimeout(()=>check(),900));
 })();
