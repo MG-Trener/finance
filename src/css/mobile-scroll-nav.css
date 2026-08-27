@@ -86,27 +86,32 @@
     color:inherit!important;
     -webkit-text-fill-color:currentColor!important
   }
-  .mobile-update-nav-badge{
+  .side-nav .mobile-update-nav-badge{
     position:absolute!important;
-    right:2px!important;
-    top:2px!important;
-    display:grid!important;
-    place-items:center!important;
-    min-width:20px!important;
-    height:14px!important;
-    padding:0 3px!important;
-    border-radius:999px!important;
-    background:#9d3226!important;
-    border:1px solid #ed9272!important;
-    color:#fff1d4!important;
-    -webkit-text-fill-color:#fff1d4!important;
-    font-size:6px!important;
-    line-height:1!important;
-    font-weight:900!important;
-    letter-spacing:.03em!important;
-    box-shadow:0 0 8px rgba(237,146,114,.32)!important
+    right:6px!important;
+    top:5px!important;
+    display:block!important;
+    flex:0 0 10px!important;
+    width:10px!important;
+    min-width:10px!important;
+    max-width:10px!important;
+    height:10px!important;
+    min-height:10px!important;
+    max-height:10px!important;
+    padding:0!important;
+    margin:0!important;
+    border-radius:50%!important;
+    background:#d84936!important;
+    border:1px solid #ffc1a5!important;
+    color:transparent!important;
+    -webkit-text-fill-color:transparent!important;
+    font-size:0!important;
+    line-height:0!important;
+    box-shadow:0 0 8px rgba(237,146,114,.5)!important;
+    z-index:4!important;
+    overflow:hidden!important
   }
-  .mobile-update-nav-badge[hidden]{display:none!important}
+  .side-nav .mobile-update-nav-badge[hidden]{display:none!important}
   html.app-update-downloading .mobile-update-nav.native-update .mobile-update-nav-icon{animation:mobileUpdateSpin 1.1s linear infinite!important}
 }
 @media(max-width:380px){
