@@ -82,36 +82,29 @@
     line-height:1!important;
     font-weight:900!important
   }
-  .side-nav .mobile-update-nav-label{
-    color:inherit!important;
-    -webkit-text-fill-color:currentColor!important
-  }
-  .side-nav .mobile-update-nav-badge{
+  .side-nav .mobile-update-nav-label{color:inherit!important;-webkit-text-fill-color:currentColor!important}
+
+  /* No marker exists in the normal state. A tiny dot is generated only for a confirmed update. */
+  .side-nav .mobile-update-nav::after{content:none!important}
+  .side-nav .mobile-update-nav.has-update::after{
+    content:""!important;
     position:absolute!important;
-    right:6px!important;
-    top:5px!important;
+    right:8px!important;
+    top:7px!important;
     display:block!important;
-    flex:0 0 10px!important;
-    width:10px!important;
-    min-width:10px!important;
-    max-width:10px!important;
-    height:10px!important;
-    min-height:10px!important;
-    max-height:10px!important;
+    width:9px!important;
+    height:9px!important;
+    min-width:9px!important;
+    min-height:9px!important;
     padding:0!important;
     margin:0!important;
     border-radius:50%!important;
-    background:#d84936!important;
-    border:1px solid #ffc1a5!important;
-    color:transparent!important;
-    -webkit-text-fill-color:transparent!important;
-    font-size:0!important;
-    line-height:0!important;
-    box-shadow:0 0 8px rgba(237,146,114,.5)!important;
-    z-index:4!important;
-    overflow:hidden!important
+    background:#e14b38!important;
+    border:1px solid #ffd0b8!important;
+    box-shadow:0 0 0 2px rgba(225,75,56,.18),0 0 7px rgba(225,75,56,.55)!important;
+    z-index:5!important;
+    pointer-events:none!important
   }
-  .side-nav .mobile-update-nav-badge[hidden]{display:none!important}
   html.app-update-downloading .mobile-update-nav.native-update .mobile-update-nav-icon{animation:mobileUpdateSpin 1.1s linear infinite!important}
 }
 @media(max-width:380px){
