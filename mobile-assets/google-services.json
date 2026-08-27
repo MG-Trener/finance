@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "425430025523",
+    "project_id": "family-treasury-3e0cb",
+    "storage_bucket": "family-treasury-3e0cb.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:425430025523:android:9fc22e279f53d483352a46",
+        "android_client_info": {
+          "package_name": "kz.mgtrener.familyfinance"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBsRhHqd89DfFwtnlH4rLnNcJk2UWcSJk4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
