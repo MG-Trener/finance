@@ -15,8 +15,7 @@ async function patchStyles(file){
     ['android:statusBarColor','#050b12'],
     ['android:navigationBarColor','#050b12'],
     ['android:windowLightStatusBar','false'],
-    ['android:windowLightNavigationBar','false'],
-    ['android:windowNavigationBarContrastEnforced','false']
+    ['android:windowLightNavigationBar','false']
   ];
   for(const [name,value] of items){
     const re=new RegExp(`<item\\s+name=["']${name.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}["'][^>]*>[^<]*<\\/item>`,'g');
