@@ -4,6 +4,8 @@
   "private": true,
   "description": "Семейная казна: статический веб-интерфейс и Android-оболочка Capacitor",
   "scripts": {
+    "web:vendor": "node scripts/prepare-web-vendor.mjs",
+    "test:ui": "playwright test",
     "mobile:prepare": "node scripts/prepare-mobile.mjs",
     "android:add": "npm run mobile:prepare && npx cap add android",
     "android:sync": "npm run mobile:prepare && npx cap sync android",
@@ -22,6 +24,7 @@
   "devDependencies": {
     "@capacitor/android": "8.5.0",
     "@capacitor/assets": "3.0.5",
-    "@capacitor/cli": "8.5.0"
+    "@capacitor/cli": "8.5.0",
+    "@playwright/test": "1.55.0"
   }
 }
