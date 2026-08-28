@@ -1,0 +1,5 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><style>body{font-family:sans-serif}.pirate-date-track{display:flex;gap:4px}.pirate-day{width:56px;height:48px}.selected{outline:2px solid gold}</style></head><body><div id="app"><form id="txForm"><details class="time-details"><summary>Дата</summary></details></form><div id="overviewHistorySubtitle"></div><div id="overviewHistoryList" data-date=""></div></div><script>
+window.state={view:'overview',overviewDateKey:null};
+(function(){const d=new Date(),p=n=>String(n).padStart(2,'0');state.overviewDateKey=`${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`})();
+window.refreshOverviewHistory=function(date){const p=n=>String(n).padStart(2,'0'),key=`${date.getFullYear()}-${p(date.getMonth()+1)}-${p(date.getDate())}`;document.getElementById('overviewHistoryList').dataset.date=key;document.getElementById('overviewHistorySubtitle').textContent=key};
+</script><script src="../../src/js/features/date-ribbon.js"></script><script src="../../src/js/features/ui-enhancements.js"></script></body></html>
