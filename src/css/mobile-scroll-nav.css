@@ -1,4 +1,4 @@
-/* Final portrait-mobile navigation: every section, including update, lives in one swipeable bottom rail. */
+/* Final portrait-mobile navigation: six primary sections fit in one bottom rail. */
 .mobile-update-notice,.mobile-update-nav{display:none}
 @media (max-width:760px), (max-device-width:760px) and (min-width:761px), (pointer:coarse) and (min-width:761px) and (max-width:1400px){
   .sidebar>.side-brand,.sidebar>.side-footer,.sidebar>.family-crest,.sidebar>.crest-apk-download{display:none!important}
@@ -6,31 +6,27 @@
     display:flex!important;
     grid-template-columns:none!important;
     flex-wrap:nowrap!important;
-    gap:4px!important;
+    gap:3px!important;
     width:100%!important;
     min-width:0!important;
-    overflow-x:auto!important;
-    overflow-y:hidden!important;
-    padding:0 4px 1px!important;
+    overflow:hidden!important;
+    padding:0 3px 1px!important;
     scrollbar-width:none!important;
     -ms-overflow-style:none!important;
-    -webkit-overflow-scrolling:touch!important;
-    overscroll-behavior-x:contain!important;
-    scroll-snap-type:x proximity!important;
-    touch-action:pan-x!important
+    touch-action:manipulation!important
   }
   .side-nav::-webkit-scrollbar{display:none!important;width:0!important;height:0!important}
   .side-nav>.nav-primary,.side-nav>.nav-secondary{display:flex!important}
   .side-nav>.nav-more{display:none!important}
   .side-nav .nav-item{
-    flex:0 0 76px!important;
-    width:76px!important;
-    min-width:76px!important;
-    max-width:76px!important;
+    flex:1 1 0!important;
+    width:auto!important;
+    min-width:0!important;
+    max-width:none!important;
     min-height:57px!important;
-    scroll-snap-align:center!important;
-    scroll-snap-stop:normal!important;
-    position:relative!important
+    position:relative!important;
+    padding-left:2px!important;
+    padding-right:2px!important
   }
   .side-nav .nav-item .nav-label{
     display:block!important;
@@ -39,7 +35,7 @@
     overflow:hidden!important;
     text-overflow:ellipsis!important;
     white-space:nowrap!important;
-    font-size:8.5px!important;
+    font-size:8px!important;
     line-height:10px!important;
     text-align:center!important;
     visibility:visible!important;
@@ -49,66 +45,14 @@
     box-shadow:inset 0 -3px 0 #d3aa61,0 3px 10px rgba(0,0,0,.28)!important;
     background:linear-gradient(180deg,rgba(80,56,29,.42),rgba(19,26,31,.86))!important
   }
-  .side-nav .nav-badge,.side-nav .pirate-alert{right:3px!important;top:2px!important}
+  .side-nav .nav-badge,.side-nav .pirate-alert{right:1px!important;top:2px!important;transform:scale(.86)}
+  .side-nav .nav-icon.pirate-icon{width:25px!important;height:25px!important;flex-basis:25px!important}
 
   .mobile-more-backdrop{display:none!important}
   html.mobile-more-open,html.mobile-more-open body{overflow:auto!important}
-
-  .side-nav .mobile-update-nav{
-    display:flex!important;
-    align-items:center!important;
-    justify-content:center!important;
-    flex-direction:column!important;
-    gap:3px!important;
-    padding:4px 2px!important;
-    color:#c9b894!important;
-    text-decoration:none!important;
-    -webkit-tap-highlight-color:transparent!important;
-    touch-action:manipulation!important
-  }
-  .side-nav .mobile-update-nav:active{transform:translateY(1px)!important;filter:brightness(1.08)!important}
-  .side-nav .mobile-update-nav-icon{
-    display:grid!important;
-    place-items:center!important;
-    width:25px!important;
-    height:25px!important;
-    flex:0 0 25px!important;
-    border-radius:50%!important;
-    border:1px solid rgba(190,144,74,.62)!important;
-    background:radial-gradient(circle at 35% 30%,#5d492d,#221b14 72%)!important;
-    color:#e0bd78!important;
-    -webkit-text-fill-color:#e0bd78!important;
-    font-size:18px!important;
-    line-height:1!important;
-    font-weight:900!important
-  }
-  .side-nav .mobile-update-nav-label{color:inherit!important;-webkit-text-fill-color:currentColor!important}
-
-  /* No marker exists in the normal state. A tiny dot is generated only for a confirmed update. */
-  .side-nav .mobile-update-nav::after{content:none!important}
-  .side-nav .mobile-update-nav.has-update::after{
-    content:""!important;
-    position:absolute!important;
-    right:8px!important;
-    top:7px!important;
-    display:block!important;
-    width:9px!important;
-    height:9px!important;
-    min-width:9px!important;
-    min-height:9px!important;
-    padding:0!important;
-    margin:0!important;
-    border-radius:50%!important;
-    background:#e14b38!important;
-    border:1px solid #ffd0b8!important;
-    box-shadow:0 0 0 2px rgba(225,75,56,.18),0 0 7px rgba(225,75,56,.55)!important;
-    z-index:5!important;
-    pointer-events:none!important
-  }
-  html.app-update-downloading .mobile-update-nav.native-update .mobile-update-nav-icon{animation:mobileUpdateSpin 1.1s linear infinite!important}
 }
 @media(max-width:380px){
-  .side-nav .nav-item{flex-basis:70px!important;width:70px!important;min-width:70px!important;max-width:70px!important}
-  .side-nav .nav-item .nav-label{font-size:8px!important}
+  .side-nav{gap:2px!important;padding-left:2px!important;padding-right:2px!important}
+  .side-nav .nav-item .nav-label{font-size:7.4px!important}
+  .side-nav .nav-icon.pirate-icon{width:23px!important;height:23px!important;flex-basis:23px!important}
 }
-@keyframes mobileUpdateSpin{to{transform:rotate(360deg)}}
