@@ -35,8 +35,14 @@ function availableYears(){
 }
 
 function header(){
-  const overview=state.view==='overview',connection=window.FinanceOffline?.statusMarkup?.()||'',authState=window.FinanceOfflineSession?.statusMarkup?.()||'';
-  return `<header class="topbar"><div class="title"><h1>Семейный бюджет</h1><p>${overview?'Текущий обзор семейной казны':`${MONTHS[state.month-1]} ${state.year}`}</p></div><div class="top-actions">${overview?currentDateMarkup():`<select class="pill" id="monthSelect">${MONTHS.map((m,i)=>`<option value="${i+1}" ${i+1===+state.month?'selected':''}>${m}</option>`).join('')}</select><select class="pill" id="yearSelect">${availableYears().map(y=>`<option ${y===+state.year?'selected':''}>${y}</option>`).join('')}</select>`}${authState}${connection}${soundToggleMarkup()}<button class="btn btn-soft" id="logout">Выйти</button></div></header>`;
+  const overview=state.view==='overview',annualAnalytics=state.view==='analytics',connection=window.FinanceOffline?.statusMarkup?.()||'',authState=window.FinanceOfflineSession?.statusMarkup?.()||'';
+  const periodLabel=overview?'Текущий обзор семейной казны':annualAnalytics?`${state.year} год`:`${MONTHS[state.month-1]} ${state.year}`;
+  const periodControls=overview
+    ?currentDateMarkup()
+    :annualAnalytics
+      ?`<select class="pill" id="yearSelect" aria-label="Год аналитики">${availableYears().map(y=>`<option ${y===+state.year?'selected':''}>${y}</option>`).join('')}</select>`
+      :`<select class="pill" id="monthSelect">${MONTHS.map((m,i)=>`<option value="${i+1}" ${i+1===+state.month?'selected':''}>${m}</option>`).join('')}</select><select class="pill" id="yearSelect">${availableYears().map(y=>`<option ${y===+state.year?'selected':''}>${y}</option>`).join('')}</select>`;
+  return `<header class="topbar"><div class="title"><h1>Семейный бюджет</h1><p>${periodLabel}</p></div><div class="top-actions">${periodControls}${authState}${connection}${soundToggleMarkup()}<button class="btn btn-soft" id="logout">Выйти</button></div></header>`;
 }
 
 function desktopApkDownloadMarkup(){
