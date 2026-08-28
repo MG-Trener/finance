@@ -13,6 +13,7 @@
 
 /* Components */
 @import url('./components/transaction-entry.css?v=entry72');
+@import url('./components/transfers.css?v=transfer1');
 @import url('./components/reminders.css');
 @import url('./components/pirate-navigation.css');
 @import url('./components/navigation-modern.css?v=nav32');
