@@ -45,6 +45,25 @@ test('редактирование операции открывается св�
   expect(box.y+box.height).toBeLessThanOrEqual(844);
 });
 
+test('в редактировании нет Недавних, заголовок компактный и окно прокручивается',async({page})=>{
+  await page.setViewportSize({width:390,height:640});
+  await page.goto('/tests/ui/transaction-form-harness.html');
+  await expect(page.locator('.entry-card .quick-pairs')).toBeVisible();
+  await page.locator('#openEdit').click();
+  await expect(page.locator('.transaction-edit-modal .quick-pairs')).toHaveCount(0);
+  const metrics=await page.locator('.transaction-edit-modal').evaluate(modal=>{
+    const heading=modal.querySelector('.modal-head h2');
+    const style=getComputedStyle(modal);
+    const headingStyle=getComputedStyle(heading);
+    modal.scrollTop=modal.scrollHeight;
+    return {clientHeight:modal.clientHeight,scrollHeight:modal.scrollHeight,scrollTop:modal.scrollTop,overflowY:style.overflowY,headingSize:parseFloat(headingStyle.fontSize)};
+  });
+  expect(metrics.headingSize).toBeLessThanOrEqual(26);
+  expect(metrics.scrollHeight).toBeGreaterThan(metrics.clientHeight);
+  expect(['auto','scroll']).toContain(metrics.overflowY);
+  expect(metrics.scrollTop).toBeGreaterThan(0);
+});
+
 test('кнопка редактирования идёт после даты и не sticky, а главная кнопка остаётся sticky',async({page})=>{
   await page.setViewportSize({width:390,height:844});
   await page.goto('/tests/ui/transaction-form-harness.html');
@@ -70,7 +89,7 @@ test('нижняя навигация читаема и помещается н�
   }
 });
 
-test('последняя операция компактна, а удаление визуально вторично',async({page})=>{
+test('последняя операция компактна, а удаление показывает иконку корзины',async({page})=>{
   await page.setViewportSize({width:390,height:844});
   await page.goto('/tests/ui/mobile-layout-harness.html');
   const buttons=page.locator('.overview-last .tx-actions .btn');
@@ -78,6 +97,8 @@ test('последняя операция компактна, а удалени�
   expect(edit).toBeTruthy();expect(remove).toBeTruthy();
   expect(remove.width).toBeLessThanOrEqual(50);
   expect(edit.width).toBeGreaterThan(remove.width*2);
+  const icon=await buttons.nth(1).evaluate(el=>getComputedStyle(el,'::before').backgroundImage);
+  expect(icon).toContain('data:image/svg+xml');
 });
 
 test('быстрое исправление суммы открывается как центрированная доступная модалка',async({page})=>{
