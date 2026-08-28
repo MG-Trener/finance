@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <link rel="stylesheet" href="../../src/css/app.css?v=stability1">
+  <style>body{margin:0}.app-shell{min-height:1200px}.main{padding:10px 10px 120px!important}.overview-last{margin-top:16px}.entry-card{margin-bottom:12px}</style>
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar">
+    <nav class="side-nav">
+      <button class="nav-item nav-primary active"><span class="nav-icon pirate-icon"></span><span class="nav-label">Обзор</span></button>
+      <button class="nav-item nav-primary"><span class="nav-icon pirate-icon"></span><span class="nav-label">Операции</span></button>
+      <button class="nav-item nav-primary"><span class="nav-icon pirate-icon"></span><span class="nav-label">Аналитика</span></button>
+      <button class="nav-item nav-primary"><span class="nav-icon pirate-icon"></span><span class="nav-label">Цели</span></button>
+      <button class="nav-item nav-primary"><span class="nav-icon pirate-icon"></span><span class="nav-label">План</span></button>
+      <button class="nav-item nav-primary"><span class="nav-icon pirate-icon"></span><span class="nav-label">Настройки</span></button>
+    </nav>
+  </aside>
+  <main class="main">
+    <section class="card entry-card">
+      <form id="txForm" class="quick-form quick-form-v3" data-edit-id="">
+        <div class="field full"><label>Комментарий</label><input placeholder="Необязательно"></div>
+        <div class="full save-row"><button class="btn btn-primary btn-wide save-operation" type="button">Сохранить операцию</button></div>
+        <details class="time-details full"><summary><span>Дата и время</span><b>Сейчас</b></summary></details>
+      </form>
+    </section>
+    <section class="card overview-last">
+      <div class="list">
+        <div class="tx"><div class="tx-icon">↘</div><div><div class="tx-title">Продукты · Супермаркет</div><div class="tx-meta">Михаил · 28 авг., 23:39</div></div><button class="tx-amount negative"><span>− 3 050 ₸</span><small>Исправить</small></button><div class="tx-actions"><button class="btn btn-soft btn-small">Изменить</button><button class="btn btn-danger btn-small">В корзину</button></div></div>
+      </div>
+    </section>
+    <button id="openQuick" type="button">Quick</button>
+    <button id="openGeneric" type="button">Generic</button>
+  </main>
+</div>
+<script>window.closeModal=()=>document.getElementById('modal')?.remove();</script>
+<script src="../../src/js/ui/modal-stability.js?v=stability1"></script>
+<script>
+openQuick.onclick=()=>document.body.insertAdjacentHTML('beforeend','<div class="modal-backdrop" id="modal"><div class="modal quick-amount-modal"><div class="modal-head"><h2>Исправить сумму</h2></div><form id="quickAmountForm"><div class="field"><label>Сумма</label><input value="1000"></div></form></div></div>');
+openGeneric.onclick=()=>document.body.insertAdjacentHTML('beforeend','<div class="modal-backdrop" id="modal"><div class="modal"><div class="modal-head"><h2>Обычное окно</h2></div><div class="field"><label>Поле</label><input></div></div></div>');
+</script>
+</body>
+</html>
