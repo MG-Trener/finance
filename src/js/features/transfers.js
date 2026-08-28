@@ -49,8 +49,9 @@ function openTransferModal(tx=null){
       if(editing){
         result=window.FinanceOffline?.updateTransaction?await window.FinanceOffline.updateTransaction(tx.id,payload):await sb.from('transactions').update(payload).eq('id',tx.id).select().single();
       }else{
+        if(!navigator.onLine)return notice('transferNotice','Для нового перевода нужно подключение к интернету. После синхронизации он будет доступен офлайн.');
         const createArgs={p_family_id:state.family.id,p_from_person_id:fromId,p_to_person_id:toId,p_amount:value,p_description:description,p_occurred_at:occurredIso};
-        result=window.FinanceOffline?.saveTransaction?await window.FinanceOffline.saveTransaction({payload,createArgs}):await sb.rpc('create_family_transfer',createArgs);
+        result=await sb.rpc('create_family_transfer',createArgs);
       }
       if(result.error)return notice('transferNotice',`Не удалось сохранить перевод: ${result.error.message||result.error}`);
       const row=Array.isArray(result.data)?result.data[0]:result.data;if(!row)return notice('transferNotice','Перевод не был сохранён.');
