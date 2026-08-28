@@ -2,6 +2,23 @@ name: Android APK
 
 on:
   workflow_dispatch:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - 'privacy.html'
+      - 'delete-account.html'
+      - 'styles.css'
+      - 'hotfix.css'
+      - 'manifest.webmanifest'
+      - 'sw.js'
+      - 'src/**'
+      - 'assets/**'
+      - 'package.json'
+      - 'capacitor.config.json'
+      - 'scripts/**'
+      - 'mobile-assets/**'
+      - '.github/workflows/android-apk.yml'
   push:
     branches: [main]
     paths:
@@ -31,6 +48,11 @@ jobs:
   build-android:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    env:
+      ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+      ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+      ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+      ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -63,6 +85,12 @@ jobs:
           FINANCE_BUILD_NUMBER: ${{ github.run_number }}
         run: npm run mobile:prepare
 
+      - name: Verify local Android fonts
+        shell: bash
+        run: |
+          test -f www/assets/fonts/mobile-fonts.css
+          grep -q 'assets/fonts/mobile-fonts.css' www/index.html
+
       - name: Create Android project
         run: npx cap add android
 
@@ -81,6 +109,9 @@ jobs:
 
       - name: Sync Capacitor
         run: npx cap sync android
+
+      - name: Configure Android system UI
+        run: node scripts/configure-android-ui.mjs
 
       - name: Lock Android to portrait orientation
         shell: bash
@@ -127,7 +158,7 @@ jobs:
           sed -i "s/versionName \"1.0\"/versionName \"1.0.${BUILD_NUMBER}\"/" android/app/build.gradle
           grep -E 'versionCode|versionName' android/app/build.gradle
 
-      - name: Configure stable app signing
+      - name: Configure stable sideload signing
         shell: bash
         run: |
           base64 --decode mobile-assets/debug-keystore.b64 > android/app/family-treasury-debug.jks
@@ -150,15 +181,59 @@ jobs:
           EOF
           echo "apply from: 'debug-signing.gradle'" >> android/app/build.gradle
 
-      - name: Build installable APK
+      - name: Detect production signing
+        shell: bash
+        run: |
+          if [ -n "$ANDROID_KEYSTORE_BASE64" ] && [ -n "$ANDROID_KEYSTORE_PASSWORD" ] && [ -n "$ANDROID_KEY_ALIAS" ] && [ -n "$ANDROID_KEY_PASSWORD" ]; then
+            echo 'RELEASE_SIGNING_AVAILABLE=true' >> "$GITHUB_ENV"
+          else
+            echo 'RELEASE_SIGNING_AVAILABLE=false' >> "$GITHUB_ENV"
+            echo 'Production signing secrets are not configured; stable sideload APK will still be built.'
+          fi
+
+      - name: Configure production release signing
+        if: env.RELEASE_SIGNING_AVAILABLE == 'true'
+        shell: bash
+        run: |
+          printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > android/app/family-treasury-release.jks
+          cat > android/app/release-signing.gradle <<EOF
+          android {
+            signingConfigs {
+              release {
+                storeFile file('family-treasury-release.jks')
+                storePassword '${ANDROID_KEYSTORE_PASSWORD}'
+                keyAlias '${ANDROID_KEY_ALIAS}'
+                keyPassword '${ANDROID_KEY_PASSWORD}'
+              }
+            }
+            buildTypes {
+              release {
+                signingConfig signingConfigs.release
+              }
+            }
+          }
+          EOF
+          echo "apply from: 'release-signing.gradle'" >> android/app/build.gradle
+
+      - name: Build installable sideload APK
         working-directory: android
         run: ./gradlew assembleDebug --no-daemon
+
+      - name: Build production-signed APK
+        if: env.RELEASE_SIGNING_AVAILABLE == 'true'
+        working-directory: android
+        run: ./gradlew assembleRelease --no-daemon
 
       - name: Prepare downloadable APK
         shell: bash
         run: cp android/app/build/outputs/apk/debug/app-debug.apk family-treasury.apk
 
-      - name: Upload APK artifact
+      - name: Prepare production APK
+        if: env.RELEASE_SIGNING_AVAILABLE == 'true'
+        shell: bash
+        run: cp android/app/build/outputs/apk/release/app-release.apk family-treasury-production.apk
+
+      - name: Upload sideload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: family-treasury-apk
@@ -166,8 +241,17 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
+      - name: Upload production APK artifact
+        if: env.RELEASE_SIGNING_AVAILABLE == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: family-treasury-production-apk
+          path: family-treasury-production.apk
+          if-no-files-found: error
+          retention-days: 30
+
       - name: Publish rolling APK update
-        if: github.ref == 'refs/heads/main'
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: latest-apk
@@ -176,9 +260,9 @@ jobs:
             Автоматически собранная версия Android-приложения для установки без Google Play.
             Build: ${{ github.run_number }}
             Version: 1.0.${{ github.run_number }}
-            Файл `family-treasury.apk` можно устанавливать поверх предыдущей версии.
+            Файл `family-treasury.apk` подписан стабильным sideload-ключом и устанавливается поверх предыдущей тестовой версии.
             Приложение работает только в вертикальной ориентации экрана.
-            Приложение само проверяет эту сборку. Начиная с версии с нативным обновлятором, APK загружается на телефоне в фоне, а Android показывает только системное подтверждение установки.
+            Приложение само проверяет эту сборку и предлагает обновление.
           prerelease: true
           make_latest: false
           files: family-treasury.apk
