@@ -1,0 +1,46 @@
+name: Web vendor bundles
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - package.json
+      - scripts/prepare-web-vendor.mjs
+      - .github/workflows/web-vendor.yml
+
+permissions:
+  contents: write
+
+jobs:
+  vendor:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm install --ignore-scripts --no-audit --no-fund
+
+      - name: Prepare local vendor files
+        run: npm run web:vendor
+
+      - name: Commit generated vendor files
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add vendor src/js/core/offline-store.js
+          if git diff --cached --quiet; then
+            echo "Vendor files are already up to date."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Generate local web vendor bundles"
+          git push origin HEAD:main
