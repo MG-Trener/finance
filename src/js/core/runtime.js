@@ -10,7 +10,7 @@ const TX_HISTORY_BATCH=500;
 
 let state={
   user:null,family:null,people:[],categories:[],subcategories:[],
-  transactions:[],trashTransactions:[],budgets:[],recurring:[],goals:[],goalContributions:[],
+  transactions:[],trashTransactions:[],recurring:[],goals:[],goalContributions:[],
   activeTransactionsHasMore:false,trashTransactionsHasMore:false,transactionHistoryLoading:false,
   view:'overview',txType:'expense',selectedPersonId:null,
   year:new Date().getFullYear(),month:new Date().getMonth()+1,
@@ -24,7 +24,13 @@ const byId=(arr,id)=>arr.find(x=>x.id===id);
 const localDT=d=>{const x=d?new Date(d):new Date();const pad=n=>String(n).padStart(2,'0');return `${x.getFullYear()}-${pad(x.getMonth()+1)}-${pad(x.getDate())}T${pad(x.getHours())}:${pad(x.getMinutes())}`};
 function notice(id,msg,type='error'){const el=document.getElementById(id);if(el)el.innerHTML=msg?`<div class="notice ${type}">${esc(msg)}</div>`:''}
 function periodTx(){return state.transactions.filter(x=>{const d=new Date(x.occurred_at);return d.getFullYear()===+state.year&&d.getMonth()+1===+state.month})}
-function stats(personId){const tx=periodTx().filter(x=>!personId||x.person_id===personId);const income=tx.filter(x=>x.type==='income').reduce((a,b)=>a+Number(b.amount),0);const expense=tx.filter(x=>x.type==='expense').reduce((a,b)=>a+Number(b.amount),0);return{income,expense,balance:income-expense}}
+function stats(personId){
+  const tx=periodTx(),own=tx.filter(x=>!personId||x.person_id===personId),income=own.filter(x=>x.type==='income').reduce((a,b)=>a+Number(b.amount),0),expense=own.filter(x=>x.type==='expense').reduce((a,b)=>a+Number(b.amount),0);
+  if(!personId)return{income,expense,balance:income-expense,transferIn:0,transferOut:0};
+  let transferIn=0,transferOut=0;
+  tx.filter(x=>x.type==='transfer').forEach(x=>{if(x.transfer_to_person_id===personId)transferIn+=Number(x.amount||0);if(x.person_id===personId)transferOut+=Number(x.amount||0)});
+  return{income,expense,balance:income-expense+transferIn-transferOut,transferIn,transferOut};
+}
 function catName(id){return byId(state.categories,id)?.name||'Без категории'}
 function subName(id){return byId(state.subcategories,id)?.name||''}
 function personName(id){return byId(state.people,id)?.display_name||'Участник'}
@@ -143,23 +149,22 @@ async function loadData(){
       sb.from('subcategories').select('*').order('sort_order'),
       sb.from('transactions').select('*').eq('family_id',familyId).is('deleted_at',null).order('occurred_at',{ascending:false}).limit(INITIAL_ACTIVE_TX_LIMIT),
       sb.from('transactions').select('*').eq('family_id',familyId).not('deleted_at','is',null).order('deleted_at',{ascending:false}).limit(INITIAL_TRASH_TX_LIMIT),
-      sb.from('budgets').select('*').eq('family_id',familyId),
       sb.from('recurring_payments').select('*').eq('family_id',familyId).order('day_of_month'),
       sb.from('financial_goals').select('*').eq('family_id',familyId).order('created_at',{ascending:false}),
       sb.from('goal_contributions').select('*').eq('family_id',familyId).order('contributed_at',{ascending:false})
     ]);
   }catch(err){await restoreOfflineOrShowError(`Ошибка загрузки: ${err?.message||err}`);return}
-  const [p,c,s,t,trash,b,r,g,gc]=responses,firstError=responses.find(x=>x.error)?.error;
+  const [p,c,s,t,trash,r,g,gc]=responses,firstError=responses.find(x=>x.error)?.error;
   if(firstError){await restoreOfflineOrShowError(`Ошибка загрузки: ${firstError.message}`);return}
 
   state.people=p.data||[];state.categories=c.data||[];state.subcategories=s.data||[];
   state.transactions=t.data||[];state.trashTransactions=trash.data||[];
   state.activeTransactionsHasMore=state.transactions.length===INITIAL_ACTIVE_TX_LIMIT;
   state.trashTransactionsHasMore=state.trashTransactions.length===INITIAL_TRASH_TX_LIMIT;
-  state.budgets=b.data||[];state.recurring=r.data||[];state.goals=g.data||[];state.goalContributions=gc.data||[];
+  state.recurring=r.data||[];state.goals=g.data||[];state.goalContributions=gc.data||[];
   if(!state.selectedPersonId&&state.people[0])state.selectedPersonId=state.people.find(x=>x.linked_user_id===state.user?.id)?.id||state.people[0].id;
   await window.FinanceOffline?.reapplyPendingToState?.();
-  if(hasDeletionIntent())state.view='access';
+  if(hasDeletionIntent())state.view='settings';
   renderApp();
   window.FinanceOffline?.persistSnapshotSoon?.();
   if(navigator.onLine)window.FinanceOffline?.flushQueue?.();
