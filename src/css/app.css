@@ -43,3 +43,56 @@
 @import url('./mobile-menu-fixes.css?v=menu49');
 /* Keep this last: portrait mobile uses a swipeable bottom navigation rail. */
 @import url('./mobile-scroll-nav.css?v=scroll63');
+
+/* Edit transaction is a top-aligned task modal on phones, not a bottom sheet. */
+@media (max-width:760px), (max-device-width:760px), (pointer:coarse) and (max-width:1400px){
+  body>.modal-backdrop:has(#editNotice){
+    z-index:12050!important;
+    display:flex!important;
+    align-items:flex-start!important;
+    justify-content:center!important;
+    padding:max(8px,env(safe-area-inset-top)) 8px max(8px,env(safe-area-inset-bottom))!important;
+    overflow:hidden!important;
+    overscroll-behavior:contain
+  }
+  body>.modal-backdrop:has(#editNotice)>.modal{
+    width:min(760px,100%)!important;
+    max-width:760px!important;
+    max-height:calc(100dvh - 16px)!important;
+    margin:0!important;
+    overflow:auto!important;
+    border-radius:16px!important;
+    padding:16px 14px max(18px,env(safe-area-inset-bottom))!important;
+    overscroll-behavior:contain;
+    scrollbar-gutter:stable
+  }
+  body>.modal-backdrop:has(#editNotice) .modal-head{
+    position:sticky;
+    top:-16px;
+    z-index:4;
+    margin:-16px -14px 10px;
+    padding:16px 14px 10px;
+    background:linear-gradient(180deg,#161d21 80%,rgba(22,29,33,.94));
+    border-bottom:1px solid rgba(138,102,56,.28)
+  }
+  body>.modal-backdrop:has(#editNotice) #txForm.quick-form-v3>.time-details{
+    order:8!important
+  }
+  body>.modal-backdrop:has(#editNotice) #txForm.quick-form-v3>.save-row{
+    order:9!important;
+    position:static!important;
+    inset:auto!important;
+    bottom:auto!important;
+    z-index:auto!important;
+    margin-top:4px!important;
+    padding:4px 0 0!important;
+    background:transparent!important
+  }
+  body>.modal-backdrop:has(#editNotice) .save-operation{
+    width:100%!important;
+    min-height:52px!important;
+    height:auto!important;
+    padding:12px 14px!important;
+    font-size:14px!important
+  }
+}
