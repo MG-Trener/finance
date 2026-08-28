@@ -1,7 +1,7 @@
 /* Neutral spouse transfers: compact entry action + modal. */
-.amount-transfer-row{grid-column:1/-1;display:grid;grid-template-columns:minmax(0,1fr) minmax(118px,30%);gap:10px;align-items:end;order:1}
-.amount-transfer-row .amount-field{min-width:0}
-.transfer-entry-btn{height:62px;border:1px solid #8c6538;border-radius:12px;background:linear-gradient(180deg,#26333a,#111920);color:#e9d2a5;font:800 13px Inter,sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:inset 0 1px 0 #fff1,0 5px 12px #0005;transition:.16s ease}
+.amount-transfer-row{grid-column:1/-1;display:grid;grid-template-columns:minmax(0,1fr) minmax(118px,30%);grid-template-areas:"amount transfer";gap:10px;align-items:end;order:1}
+.amount-transfer-row .amount-field{grid-area:amount;min-width:0}
+.transfer-entry-btn{grid-area:transfer;height:62px;border:1px solid #8c6538;border-radius:12px;background:linear-gradient(180deg,#26333a,#111920);color:#e9d2a5;font:800 13px Inter,sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:inset 0 1px 0 #fff1,0 5px 12px #0005;transition:.16s ease}
 .transfer-entry-btn:hover{border-color:#d1a55d;color:#fff0c6;transform:translateY(-1px)}
 .transfer-entry-btn .transfer-entry-icon{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;border:1px solid #8c6538;background:radial-gradient(circle at 35% 30%,#3c4d55,#10171d 72%);color:#e0b768;font-size:18px}
 .transfer-modal{max-width:620px}
@@ -12,15 +12,45 @@
 .tx.transfer-row .tx-icon,.journal-row.transfer-row .journal-amount{color:#d7b06a}
 .tx-amount.neutral,.journal-amount.neutral{color:#d7b06a!important}
 .transfer-flow{color:#d7b06a;font-weight:800}
+
+/* Transfer dialog is always an in-viewport modal, never the generic mobile bottom sheet. */
+body>.modal-backdrop:has(.transfer-modal){position:fixed!important;inset:0!important;z-index:12050!important;display:flex!important;align-items:center!important;justify-content:center!important;padding:max(10px,env(safe-area-inset-top)) 10px max(10px,env(safe-area-inset-bottom))!important;overflow:hidden!important;overscroll-behavior:contain}
+body>.modal-backdrop:has(.transfer-modal)>.transfer-modal{width:min(620px,100%)!important;max-width:620px!important;max-height:calc(100dvh - 20px)!important;overflow:auto!important;border-radius:16px!important;padding:18px!important;overscroll-behavior:contain;scrollbar-gutter:stable}
+
 @media(max-width:760px){
-  .amount-transfer-row{grid-template-columns:minmax(0,1fr) 126px!important;gap:8px!important;order:1!important}
+  .amount-transfer-row{grid-template-columns:minmax(0,1fr) minmax(112px,31%)!important;grid-template-areas:"amount transfer"!important;gap:8px!important;order:1!important}
   .amount-transfer-row .amount-hero{height:52px!important;min-height:52px!important}
-  .transfer-entry-btn{height:52px;min-height:52px;padding:6px 8px;font-size:11px}
+  .transfer-entry-btn{height:52px;min-height:52px;padding:6px 7px;font-size:11px}
   .transfer-entry-btn .transfer-entry-icon{width:26px;height:26px;font-size:16px}
   .transfer-people-grid{grid-template-columns:1fr 24px 1fr;gap:6px}
   .transfer-arrow{padding-bottom:13px;font-size:20px;text-align:center}
+  body>.modal-backdrop:has(.transfer-modal)>.transfer-modal{padding:14px 12px!important;max-height:calc(100dvh - 16px)!important}
+  .transfer-modal .modal-head{gap:10px;align-items:flex-start}
+  .transfer-modal .modal-head h2{margin:0;font-size:18px;line-height:1.15}
+  .transfer-modal .quick-amount-context{margin:4px 0 0;font-size:10px;line-height:1.25}
+  .transfer-modal .field{margin:8px 0;gap:5px}
+  .transfer-modal .field label{font-size:10px}
+  .transfer-modal .field input,.transfer-modal .field select{min-height:42px;padding:8px 10px;font-size:16px}
+  .transfer-modal .transfer-impact{margin:8px 0;padding:8px 10px;gap:4px 10px;font-size:10px}
+  .transfer-modal .quick-amount-actions{gap:8px}
+  .transfer-modal .quick-amount-actions .btn{min-height:42px;padding:8px 10px;font-size:11px}
 }
 @media(max-width:380px){
-  .amount-transfer-row{grid-template-columns:minmax(0,1fr) 112px!important}
+  .amount-transfer-row{grid-template-columns:minmax(0,1fr) 108px!important}
   .transfer-entry-btn{font-size:10px;gap:5px}
+}
+
+/* Same protection for Android WebViews that report a wider CSS viewport. */
+@media (max-device-width:760px) and (min-width:761px), (pointer:coarse) and (min-width:761px) and (max-width:1400px){
+  .amount-transfer-row{grid-template-columns:minmax(0,1fr) minmax(112px,31%)!important;grid-template-areas:"amount transfer"!important;gap:8px!important}
+  .amount-transfer-row .amount-hero,.transfer-entry-btn{height:52px!important;min-height:52px!important}
+  .transfer-entry-btn{padding:6px 7px!important;font-size:11px!important}
+  body>.modal-backdrop:has(.transfer-modal){align-items:center!important;justify-content:center!important;padding:max(10px,env(safe-area-inset-top)) 10px max(10px,env(safe-area-inset-bottom))!important}
+  body>.modal-backdrop:has(.transfer-modal)>.transfer-modal{width:min(620px,100%)!important;max-width:620px!important;max-height:calc(100dvh - 16px)!important;border-radius:16px!important;padding:14px 12px!important}
+  .transfer-modal .modal-head h2{margin:0;font-size:18px!important;line-height:1.15!important}
+  .transfer-modal .quick-amount-context{margin:4px 0 0!important;font-size:10px!important}
+  .transfer-modal .field{margin:8px 0!important;gap:5px!important}
+  .transfer-modal .field input,.transfer-modal .field select{min-height:42px!important;padding:8px 10px!important;font-size:16px!important}
+  .transfer-modal .transfer-impact{margin:8px 0!important;padding:8px 10px!important;font-size:10px!important}
+  .transfer-modal .quick-amount-actions .btn{min-height:42px!important;padding:8px 10px!important;font-size:11px!important}
 }
