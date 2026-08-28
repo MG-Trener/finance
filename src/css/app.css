@@ -3,13 +3,13 @@
 @import url('../../hotfix.css');
 
 /* Pages */
-@import url('./pages/overview.css?v=overview28');
+@import url('./pages/overview.css?v=overview29');
 @import url('./pages/recurring.css');
 @import url('./pages/journal.css?v=journal26');
 @import url('./pages/journal-enhancements.css?v=journal32');
 @import url('./pages/analytics.css?v=analytics56');
-@import url('./pages/budgets.css?v=budgets29');
 @import url('./pages/goals.css?v=goals57');
+@import url('./pages/settings.css?v=settings1');
 
 /* Components */
 @import url('./components/transaction-entry.css?v=entry72');
@@ -26,6 +26,7 @@
 @import url('./components/buttons-modern.css?v=buttons32');
 @import url('./components/offline.css?v=offline42');
 @import url('./components/local-lock.css?v=lock40');
+@import url('./components/compact-header.css?v=header1');
 
 /* Optimized application and authorization artwork. */
 @import url('./backgrounds.css');
@@ -39,5 +40,5 @@
 @import url('./mobile-device-fallback.css?v=mobile35');
 /* Keep this late: it restores labels hidden by legacy <=1100px rules. */
 @import url('./mobile-menu-fixes.css?v=menu49');
-/* Keep this last: portrait mobile uses a swipeable bottom navigation rail with a conditional update marker. */
-@import url('./mobile-scroll-nav.css?v=scroll62');
+/* Keep this last: portrait mobile uses a swipeable bottom navigation rail. */
+@import url('./mobile-scroll-nav.css?v=scroll63');
