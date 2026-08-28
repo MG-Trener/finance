@@ -1,4 +1,4 @@
-/* Mobile overview polish: key numbers are visible before the entry form. */
+/* Mobile overview polish: compact summary, fast entry and day-linked history. */
 @media(max-width:760px){
   .overview-v4{
     display:grid!important;
@@ -9,23 +9,24 @@
   .overview-kpis{
     grid-area:kpis!important;
     display:grid!important;
-    grid-template-columns:1fr 1fr!important;
-    gap:6px!important
+    grid-template-columns:1.15fr 1fr 1fr!important;
+    gap:5px!important
   }
   .overview-kpis .summary-kpi{
     min-width:0!important;
-    padding:9px 10px!important;
-    border-radius:10px!important
+    padding:8px 8px!important;
+    border-radius:9px!important
   }
   .overview-kpis .summary-kpi.primary{
-    grid-column:1/-1!important;
-    padding:10px 11px!important
+    grid-column:auto!important;
+    padding:8px 8px!important
   }
-  .overview-kpis .summary-kpi span{font-size:8px!important;line-height:1.15!important}
-  .overview-kpis .summary-kpi b{margin-top:4px!important;font-size:17px!important;line-height:1.05!important}
-  .overview-kpis .summary-kpi.primary b{font-size:24px!important}
-  .summary-kpi-top{gap:7px!important}
-  .summary-kpi-top em{font-size:8px!important;padding:3px 6px!important}
+  .overview-kpis .summary-kpi span{font-size:7.5px!important;line-height:1.1!important}
+  .overview-kpis .summary-kpi b{margin-top:4px!important;font-size:12px!important;line-height:1.05!important;letter-spacing:-.02em!important}
+  .overview-kpis .summary-kpi.primary b{font-size:14px!important}
+  .summary-kpi-top{gap:4px!important;align-items:flex-start!important}
+  .summary-kpi-top em{font-size:7.5px!important;padding:2px 4px!important;line-height:1!important}
+  .summary-kpi-top .saving-word{display:none!important}
 
   .overview-entry{grid-area:entry!important;margin:0!important}
   .overview-side{grid-area:side!important;display:grid!important;gap:8px!important;min-width:0!important}
@@ -85,8 +86,12 @@
 }
 
 @media(max-width:390px){
-  .overview-kpis .summary-kpi.primary b{font-size:22px!important}
-  .overview-kpis .summary-kpi b{font-size:15px!important}
+  .overview-kpis{grid-template-columns:1.12fr 1fr 1fr!important;gap:4px!important}
+  .overview-kpis .summary-kpi{padding:7px 6px!important}
+  .overview-kpis .summary-kpi.primary{padding:7px 6px!important}
+  .overview-kpis .summary-kpi.primary b{font-size:13px!important}
+  .overview-kpis .summary-kpi b{font-size:11px!important}
+  .summary-kpi-top em{font-size:7px!important;padding:2px 3px!important}
   .overview-last .tx{grid-template-columns:28px minmax(0,1fr) auto!important;padding:7px!important}
   .overview-last .tx-icon{width:28px!important;height:28px!important}
 }
