@@ -25,6 +25,7 @@ function overviewPage(){
 
 function bindOverview(){
   bindTransactionForm?.();
+  bindTransferEntryButton?.();
   bindTxButtons?.();
   const all=document.getElementById('allOperations');if(all)all.onclick=()=>{state.view='operations';state.journalLimit=50;renderApp()};
   document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{state.view=b.dataset.go;renderApp()});
