@@ -49,6 +49,40 @@ for(const ref of refs){
   assert(exists(local),`index.html references missing file: ${local}`);
 }
 
+// Website runtime libraries must be local, not dependent on a third-party JS CDN.
+for(const vendor of ['vendor/supabase.js','vendor/chart.umd.js','vendor/xlsx.full.min.js'])assert(exists(vendor),`local vendor bundle is missing: ${vendor}`);
+assert(html.includes('src="vendor/supabase.js'),'index.html must load Supabase from local vendor');
+assert(!html.includes('cdn.jsdelivr.net/npm/@supabase'),'index.html must not load Supabase from CDN');
+const exportJs=fs.readFileSync(path.join(root,'src/js/features/export.js'),'utf8');
+const transfersJs=fs.readFileSync(path.join(root,'src/js/features/transfers.js'),'utf8');
+assert(exportJs.includes("vendor/xlsx.full.min.js"),'Excel export must use local XLSX vendor');
+assert(transfersJs.includes("vendor/chart.umd.js"),'analytics must use local Chart.js vendor');
+
+// Neutral transfers must be first-class accounting records but never family income/expense.
+const transferMigration='supabase/migrations/20260828_013_family_transfer_transactions.sql';
+assert(exists('supabase/migrations/20260828_012_add_transfer_transaction_type.sql'),'transfer enum migration is missing');
+assert(exists(transferMigration),'transfer schema migration is missing');
+if(exists(transferMigration)){
+  const sql=fs.readFileSync(path.join(root,transferMigration),'utf8');
+  assert(sql.includes('create_family_transfer'),'transfer RPC is missing');
+  assert(sql.includes('transfer_to_person_id'),'transfer target column is missing');
+}
+assert(exists('src/js/features/transfers.js'),'transfer UI module is missing');
+assert(html.includes('src/js/features/transfers.js'),'transfer UI module is not loaded');
+const runtimeJs=fs.readFileSync(path.join(root,'src/js/core/runtime.js'),'utf8');
+assert(runtimeJs.includes("x.type==='transfer'"),'personal balances do not account for transfers');
+assert(transfersJs.includes("type:'transfer'"),'transfer UI does not create neutral transfer records');
+
+// Removed Budget feature must not remain in runtime, realtime or offline state.
+const offlineJs=fs.readFileSync(path.join(root,'src/js/core/offline-store.js'),'utf8');
+const realtimeJs=fs.readFileSync(path.join(root,'src/js/core/realtime.js'),'utf8');
+for(const [label,source] of [['runtime',runtimeJs],['offline',offlineJs],['realtime',realtimeJs]])assert(!/\bbudgets\b|\bbudget:\s*\{/.test(source),`${label}: obsolete Budget feature reference remains`);
+
+// Primary navigation requirements.
+const shellJs=fs.readFileSync(path.join(root,'src/js/ui/app-shell.js'),'utf8');
+assert(shellJs.includes("view:'recurring',label:'План'"),'recurring navigation must be labelled План');
+assert(shellJs.includes('scrollOverviewTop'),'Overview navigation must restore scroll to top');
+
 // Check the CSS import graph and every local url(...) asset used by active CSS.
 const seen=new Set();
 function resolveCssRef(base,ref){return path.normalize(path.join(base,ref.split('?')[0].split('#')[0])).replaceAll('\\','/')}
