@@ -57,6 +57,6 @@ async function saveTransaction(e,editId=null){
     if(result.error)return notice(noticeId,`Не удалось сохранить: ${result.error.message||result.error}`);
     const row=Array.isArray(result.data)?result.data[0]:result.data;if(!row)return notice(noticeId,'Операция не была сохранена.');
     if(!editId){phase3Prefs[personId]=phase3Prefs[personId]||{};phase3Prefs[personId][type]={category_id:categoryId,subcategory_id:subcategoryId};try{localStorage.setItem('finance.phase3.prefs',JSON.stringify(phase3Prefs))}catch(_){}}
-    syncTransactionState(row);if(typeof uiSound==='function')uiSound('success');if(editId)closeModal();renderStateChange();
+    syncTransactionState(row);if(typeof uiSound==='function')uiSound(type==='income'?'income':'success');if(editId)closeModal();renderStateChange();
   }catch(err){notice(noticeId,`Ошибка сохранения: ${err?.message||String(err)}`)}finally{if(submit&&document.body.contains(submit)){submit.disabled=false;submit.textContent=editId?'Сохранить изменения':'Сохранить операцию'}}
 }
