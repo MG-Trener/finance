@@ -13,10 +13,28 @@ test('клик по дате меняет историю, а Сегодня во
   await expect(page.locator('#overviewHistoryList')).toHaveAttribute('data-date',initial);
 });
 
-test('перевод создаётся как нейтральная операция между двумя супругами',async({page})=>{
+test('перевод расположен справа от суммы, модалка открывается в текущем экране и операция нейтральна',async({page})=>{
+  await page.setViewportSize({width:390,height:760});
   await page.goto('/tests/ui/transfer-harness.html');
+  await page.locator('.amount-transfer-row').scrollIntoViewIfNeeded();
+
+  const amountBox=await page.locator('.amount-field').boundingBox();
+  const transferBox=await page.locator('#openTransfer').boundingBox();
+  expect(amountBox).toBeTruthy();expect(transferBox).toBeTruthy();
+  expect(amountBox.x).toBeLessThan(transferBox.x);
+  expect(amountBox.width).toBeGreaterThan(transferBox.width*1.35);
+
+  const scrollBefore=await page.evaluate(()=>window.scrollY);
   await page.locator('#openTransfer').click();
   await expect(page.locator('#transferForm')).toBeVisible();
+  const modalBox=await page.locator('.transfer-modal').boundingBox();
+  expect(modalBox).toBeTruthy();
+  expect(modalBox.y).toBeGreaterThanOrEqual(0);
+  expect(modalBox.y).toBeLessThan(200);
+  expect(modalBox.y+modalBox.height).toBeLessThanOrEqual(760);
+  const scrollAfter=await page.evaluate(()=>window.scrollY);
+  expect(Math.abs(scrollAfter-scrollBefore)).toBeLessThanOrEqual(2);
+
   await page.locator('#transferFrom').selectOption('p1');
   await page.locator('#transferTo').selectOption('p2');
   await page.locator('#transferAmount').fill('12500');
