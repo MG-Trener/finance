@@ -5,9 +5,8 @@
   const DB_VERSION=1;
   const SNAPSHOT_STORE='snapshots';
   const QUEUE_STORE='queue';
-  const SNAPSHOT_FIELDS=['family','people','categories','subcategories','transactions','trashTransactions','budgets','recurring','goals','goalContributions','activeTransactionsHasMore','trashTransactionsHasMore','selectedPersonId'];
+  const SNAPSHOT_FIELDS=['family','people','categories','subcategories','transactions','trashTransactions','recurring','goals','goalContributions','activeTransactionsHasMore','trashTransactionsHasMore','selectedPersonId'];
   const ENTITY_CONFIG={
-    budget:{table:'budgets',stateKey:'budgets',label:'Бюджет'},
     recurring:{table:'recurring_payments',stateKey:'recurring',label:'Регулярный платёж'},
     goal:{table:'financial_goals',stateKey:'goals',label:'Финансовая цель'},
     contribution:{table:'goal_contributions',stateKey:'goalContributions',label:'Пополнение цели'},
@@ -103,7 +102,7 @@
   }
 
   function deepReplace(value,from,to){if(value===from)return to;if(Array.isArray(value))return value.map(x=>deepReplace(x,from,to));if(value&&typeof value==='object'){const out={};for(const [key,item] of Object.entries(value))out[key]=deepReplace(item,from,to);return out}return value}
-  async function remapTempId(from,to){for(const key of ['categories','subcategories','transactions','trashTransactions','budgets','recurring','goals','goalContributions'])state[key]=deepReplace(state[key],from,to);const all=await ownQueue();for(const item of all){const next=deepReplace(item,from,to);if(JSON.stringify(next)!==JSON.stringify(item))await storePut(QUEUE_STORE,next)}persistSnapshotSoon()}
+  async function remapTempId(from,to){for(const key of ['categories','subcategories','transactions','trashTransactions','recurring','goals','goalContributions'])state[key]=deepReplace(state[key],from,to);const all=await ownQueue();for(const item of all){const next=deepReplace(item,from,to);if(JSON.stringify(next)!==JSON.stringify(item))await storePut(QUEUE_STORE,next)}persistSnapshotSoon()}
   async function reapplyPendingToState(){
     const queue=await ownQueue();for(const item of queue){if(item.domain==='entity'){const list=entityArray(item.entity);if(!list)continue;if(item.kind==='create'){applyEntityRow(item.entity,item.optimisticRow||entityOptimistic(item.entity,item.payload,item.targetId));continue}if(item.kind==='update'){const current=byId(list,item.targetId);if(current)applyEntityRow(item.entity,{...current,...item.payload,_offline:true,_pending_action:'update'});continue}if(item.kind==='delete')state[ENTITY_CONFIG[item.entity].stateKey]=list.filter(x=>x.id!==item.targetId);continue}const targetId=item.targetId||item.transactionId;if(item.kind==='create'){syncTransactionState(item.optimisticRow||optimisticRow(item.payload,targetId,{_pending_action:'create'}));continue}const current=byId(state.transactions,targetId)||byId(state.trashTransactions,targetId);if(!current)continue;if(item.kind==='update')syncTransactionState({...current,...item.payload,_offline:true,_pending_action:'update'});if(item.kind==='delete')syncTransactionState({...current,deleted_at:item.payload.deleted_at||item.queuedAt,_offline:true,_pending_action:'delete'});if(item.kind==='restore')syncTransactionState({...current,deleted_at:null,_offline:true,_pending_action:'restore'})}await refreshPendingCount();return queue.length;
   }
