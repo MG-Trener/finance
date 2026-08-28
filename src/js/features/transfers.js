@@ -24,24 +24,19 @@ function openTransferModal(tx=null){
   if(state.people.length<2){alert('Для перевода нужны два участника семьи.');return}
   closeModal();
   const editing=tx?.type==='transfer';
-  const from=editing?tx.person_id:(state.selectedPersonId||state.people[0].id);
-  const to=editing?tx.transfer_to_person_id:(state.people.find(p=>p.id!==from)?.id||state.people[1]?.id||'');
-  document.body.insertAdjacentHTML('beforeend',`<div class="modal-backdrop" id="modal"><div class="modal transfer-modal"><div class="modal-head"><div><h2>${editing?'Изменить перевод':'Перевод между супругами'}</h2><p class="quick-amount-context">Не считается доходом или расходом семьи</p></div><button class="icon-btn" id="closeModal" aria-label="Закрыть">×</button></div><div id="transferNotice"></div><form id="transferForm"><div class="transfer-people-grid"><div class="field"><label for="transferFrom">От кого</label><select id="transferFrom">${transferPersonOptions(from)}</select></div><div class="transfer-arrow" aria-hidden="true">→</div><div class="field"><label for="transferTo">Кому</label><select id="transferTo">${transferPersonOptions(to)}</select></div></div><div class="field"><label for="transferAmount">Сумма, ₸</label><input id="transferAmount" class="quick-amount-input" type="number" min="1" step="1" inputmode="decimal" value="${editing?Number(tx.amount):''}" placeholder="0" required></div><div class="field"><label for="transferDescription">Комментарий</label><input id="transferDescription" value="${esc(tx?.description||'')}" placeholder="Необязательно"></div><div class="transfer-impact"><span>Семейные доходы</span><b>0 ₸</b><span>Семейные расходы</span><b>0 ₸</b></div><div class="quick-amount-actions"><button type="button" class="btn btn-soft" id="cancelTransfer">Отмена</button><button type="submit" class="btn btn-primary" id="saveTransfer">${editing?'Сохранить перевод':'Перевести'}</button></div></form></div></div>`);
-  const modal=document.getElementById('modal'),fromSelect=document.getElementById('transferFrom'),toSelect=document.getElementById('transferTo'),amount=document.getElementById('transferAmount'),save=document.getElementById('saveTransfer');
-  document.getElementById('closeModal').onclick=closeModal;document.getElementById('cancelTransfer').onclick=closeModal;modal.onclick=e=>{if(e.target===modal)closeModal()};
-  const keepDifferent=changed=>{
-    if(fromSelect.value!==toSelect.value)return;
-    const other=state.people.find(p=>p.id!==(changed==='from'?fromSelect.value:toSelect.value));
-    if(!other)return;
-    if(changed==='from')toSelect.value=other.id;else fromSelect.value=other.id;
-  };
-  fromSelect.onchange=()=>keepDifferent('from');toSelect.onchange=()=>keepDifferent('to');
+  let fromId=editing?tx.person_id:(state.selectedPersonId||state.people[0].id);
+  let toId=editing?tx.transfer_to_person_id:(state.people.find(p=>p.id!==fromId)?.id||state.people[1]?.id||'');
+  document.body.insertAdjacentHTML('beforeend',`<div class="modal-backdrop" id="modal"><div class="modal transfer-modal"><div class="modal-head"><div><h2>${editing?'Изменить перевод':'Перевод между супругами'}</h2><p class="quick-amount-context">Не считается доходом или расходом семьи</p></div><button class="icon-btn" id="closeModal" aria-label="Закрыть">×</button></div><div id="transferNotice" aria-live="polite"></div><form id="transferForm"><div class="transfer-people-grid" style="grid-template-columns:minmax(0,1fr) 44px minmax(0,1fr)"><div class="field"><label for="transferFrom">От кого</label><input id="transferFrom" value="${esc(personName(fromId))}" readonly aria-readonly="true"></div><button type="button" class="icon-btn" id="reverseTransfer" aria-label="Поменять супругов местами" title="Поменять местами" style="align-self:end;width:44px;height:44px;margin-bottom:8px;font-size:22px">⇄</button><div class="field"><label for="transferTo">Кому</label><input id="transferTo" value="${esc(personName(toId))}" readonly aria-readonly="true"></div></div><div class="field"><label for="transferAmount">Сумма, ₸</label><input id="transferAmount" class="quick-amount-input" type="number" min="1" step="1" inputmode="decimal" value="${editing?Number(tx.amount):''}" placeholder="0" required></div><div class="field"><label for="transferDescription">Комментарий</label><input id="transferDescription" value="${esc(tx?.description||'')}" placeholder="Необязательно"></div><div class="quick-amount-actions"><button type="button" class="btn btn-soft" id="cancelTransfer">Отмена</button><button type="submit" class="btn btn-primary" id="saveTransfer">${editing?'Сохранить перевод':'Перевести'}</button></div></form></div></div>`);
+  const modal=document.getElementById('modal'),fromInput=document.getElementById('transferFrom'),toInput=document.getElementById('transferTo'),amount=document.getElementById('transferAmount'),save=document.getElementById('saveTransfer'),cancel=document.getElementById('cancelTransfer'),reverse=document.getElementById('reverseTransfer');
+  document.getElementById('closeModal').onclick=closeModal;cancel.onclick=closeModal;modal.onclick=e=>{if(e.target===modal)closeModal()};
+  const renderParticipants=()=>{fromInput.value=personName(fromId);toInput.value=personName(toId)};
+  reverse.onclick=()=>{[fromId,toId]=[toId,fromId];renderParticipants()};
   document.getElementById('transferForm').onsubmit=async e=>{
     e.preventDefault();notice('transferNotice','');
-    const fromId=fromSelect.value,toId=toSelect.value,value=Number(amount.value||0),description=document.getElementById('transferDescription').value.trim()||null;
+    const value=Number(amount.value||0),description=document.getElementById('transferDescription').value.trim()||null;
     if(!fromId||!toId||fromId===toId)return notice('transferNotice','Выберите разных участников перевода');
     if(!(value>0))return notice('transferNotice','Введите сумму перевода');
-    save.disabled=true;save.textContent=navigator.onLine?'Сохраняю…':'Сохраняю офлайн…';
+    save.disabled=true;reverse.disabled=true;save.textContent=navigator.onLine?'Сохраняю…':'Сохраняю офлайн…';
     try{
       const occurredIso=editing?tx.occurred_at:new Date().toISOString();
       const payload={person_id:fromId,transfer_to_person_id:toId,type:'transfer',amount:value,category_id:null,subcategory_id:null,description,occurred_at:occurredIso};
@@ -55,8 +50,11 @@ function openTransferModal(tx=null){
       }
       if(result.error)return notice('transferNotice',`Не удалось сохранить перевод: ${result.error.message||result.error}`);
       const row=Array.isArray(result.data)?result.data[0]:result.data;if(!row)return notice('transferNotice','Перевод не был сохранён.');
-      syncTransactionState(row);state.selectedPersonId=fromId;const now=new Date();const pad=n=>String(n).padStart(2,'0');state.overviewDateKey=`${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`;if(typeof uiSound==='function')uiSound('success');closeModal();renderStateChange();
-    }catch(error){notice('transferNotice',`Ошибка: ${error?.message||String(error)}`)}finally{if(save&&document.body.contains(save)){save.disabled=false;save.textContent=editing?'Сохранить перевод':'Перевести'}}
+      syncTransactionState(row);state.selectedPersonId=fromId;const now=new Date();const pad=n=>String(n).padStart(2,'0');state.overviewDateKey=`${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`;if(typeof uiSound==='function')uiSound('success');renderStateChange();
+      const success=document.getElementById('transferNotice');
+      if(success)success.innerHTML=`<div role="status" style="margin:10px 0;padding:11px 13px;border:1px solid rgba(93,166,105,.55);border-radius:10px;background:rgba(38,92,50,.24);color:#d8f2dc;font-weight:800">✓ ${editing?'Перевод успешно изменён':'Перевод успешно выполнен'}</div>`;
+      save.textContent=editing?'Изменения сохранены':'Перевод выполнен';cancel.textContent='Закрыть';
+    }catch(error){notice('transferNotice',`Ошибка: ${error?.message||String(error)}`)}finally{if(save&&document.body.contains(save)&&!save.textContent.includes('выполнен')&&!save.textContent.includes('сохранены')){save.disabled=false;reverse.disabled=false;save.textContent=editing?'Сохранить перевод':'Перевести'}}
   };
   requestAnimationFrame(()=>{if(!matchMedia('(pointer:coarse)').matches)amount?.focus()});
 }
