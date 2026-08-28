@@ -95,8 +95,7 @@
 
   /* Edit transaction: compact header, predictable form order and reliable touch scrolling. */
   .transaction-edit-modal{
-    scrollbar-gutter:stable;
-    scroll-behavior:smooth
+    scrollbar-gutter:stable
   }
   .transaction-edit-modal .modal-head{
     position:sticky!important;
