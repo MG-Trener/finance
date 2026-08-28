@@ -1,10 +1,13 @@
-const CACHE='family-finance-shell-v5';
+const CACHE='family-finance-shell-v6';
 const PRECACHE=[
   './',
   './index.html',
   './privacy.html',
   './delete-account.html',
   './manifest.webmanifest',
+  './vendor/supabase.js',
+  './vendor/chart.umd.js',
+  './vendor/xlsx.full.min.js',
   './assets/app-icon.svg',
   './assets/icon-192.png',
   './assets/icon-512.png',
