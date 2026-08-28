@@ -4,7 +4,7 @@ const NAV_ITEMS=[
   {view:'operations',label:'Операции',icon:'journal',primary:true},
   {view:'analytics',label:'Аналитика',icon:'map',primary:true},
   {view:'goals',label:'Цели',icon:'chest',primary:true},
-  {view:'recurring',label:'Регулярные',icon:'hourglass',primary:true},
+  {view:'recurring',label:'План',icon:'hourglass',primary:true},
   {view:'settings',label:'Настройки',icon:'settings',primary:true}
 ];
 const APK_DOWNLOAD_URL='https://github.com/MG-Trener/finance/releases/download/latest-apk/family-treasury.apk';
@@ -80,6 +80,14 @@ function keepActiveMobileNavVisible(){
   });
 }
 
+function scrollOverviewTop(){
+  requestAnimationFrame(()=>{
+    try{window.scrollTo({top:0,left:0,behavior:'auto'})}catch(_){window.scrollTo(0,0)}
+    if(document.scrollingElement)document.scrollingElement.scrollTop=0;
+    const main=document.querySelector('.main');if(main)main.scrollTop=0;
+  });
+}
+
 function renderApp(){
   releaseMobileScrollLock();
   destroyCharts?.();
@@ -110,6 +118,7 @@ function bindCommon(){
       const now=new Date();state.year=now.getFullYear();state.month=now.getMonth()+1;
     }
     state.view=next;state.journalLimit=50;renderApp();
+    if(next==='overview')scrollOverviewTop();
   });
   const logout=document.getElementById('logout')||document.getElementById('settingsLogout');if(logout)logout.onclick=performLogout;
   const month=document.getElementById('monthSelect');if(month)month.onchange=e=>{state.month=+e.target.value;state.journalLimit=50;renderApp()};
