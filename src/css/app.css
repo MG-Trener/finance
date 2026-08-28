@@ -44,4 +44,4 @@
 /* Keep this late: portrait mobile uses a six-item bottom navigation rail. */
 @import url('./mobile-scroll-nav.css?v=scroll63');
 /* Keep this absolutely last: semantic modal layouts and narrow-scope sticky rules. */
-@import url('./mobile-stability.css?v=stability1');
+@import url('./mobile-stability.css?v=stability2');
