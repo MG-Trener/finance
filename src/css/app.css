@@ -12,13 +12,13 @@
 @import url('./pages/goals.css?v=goals57');
 
 /* Components */
-@import url('./components/transaction-entry.css');
+@import url('./components/transaction-entry.css?v=entry72');
 @import url('./components/reminders.css');
 @import url('./components/pirate-navigation.css');
 @import url('./components/navigation-modern.css?v=nav32');
 @import url('./components/pirate-transaction-controls.css');
 @import url('./components/compact-actions-recurring.css?v=layout32');
-@import url('./components/date-ribbon.css');
+@import url('./components/date-ribbon.css?v=date72');
 @import url('./components/private-access.css');
 @import url('./components/ui-enhancements.css?v=picker38');
 @import url('./components/export.css');
@@ -32,7 +32,7 @@
 
 /* Mobile overrides */
 @import url('./mobile.css?v=mobile23');
-@import url('./pages/overview-mobile.css?v=overview-mobile28');
+@import url('./pages/overview-mobile.css?v=overview-mobile72');
 @import url('./mobile-nav-more.css?v=nav46');
 @import url('./mobile-tweaks.css?v=mobile36');
 /* Android embedded browsers sometimes expose a desktop-size CSS viewport. */
