@@ -1,0 +1,154 @@
+/* Final mobile stability layer.
+   This file intentionally loads after all legacy mobile overrides. */
+
+.finance-modal-open{overflow:hidden!important}
+
+@media (max-width:760px), (max-device-width:760px), (pointer:coarse) and (max-width:1400px){
+  /* Neutralize the legacy "last full child" sticky rule globally. */
+  #txForm.quick-form-v3>.full:last-child{
+    position:static!important;
+    inset:auto!important;
+    bottom:auto!important;
+    z-index:auto!important;
+    padding-top:0!important;
+    background:transparent!important
+  }
+
+  /* Sticky save belongs only to the primary quick-entry card. */
+  .entry-card #txForm.quick-form-v3:not([data-edit-id]):not([data-edit-id=""])>.save-row,
+  .entry-card #txForm.quick-form-v3[data-edit-id=""]>.save-row{
+    position:sticky!important;
+    bottom:calc(72px + env(safe-area-inset-bottom))!important;
+    z-index:30!important;
+    padding-top:2px!important
+  }
+
+  /* Explicit modal layouts. */
+  body>.modal-backdrop.modal-layout-top{
+    display:flex!important;
+    align-items:flex-start!important;
+    justify-content:center!important;
+    padding:max(8px,env(safe-area-inset-top)) 8px max(8px,env(safe-area-inset-bottom))!important;
+    overflow:hidden!important;
+    overscroll-behavior:contain
+  }
+  body>.modal-backdrop.modal-layout-center{
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    padding:max(10px,env(safe-area-inset-top)) 10px max(10px,env(safe-area-inset-bottom))!important;
+    overflow:hidden!important;
+    overscroll-behavior:contain
+  }
+  body>.modal-backdrop.modal-layout-sheet{
+    display:flex!important;
+    align-items:flex-end!important;
+    justify-content:center!important;
+    padding:0!important
+  }
+  body>.modal-backdrop.modal-layout-top>.modal,
+  body>.modal-backdrop.modal-layout-center>.modal{
+    width:min(760px,100%)!important;
+    max-width:760px!important;
+    max-height:calc(100dvh - 16px)!important;
+    margin:0!important;
+    overflow:auto!important;
+    border-radius:16px!important;
+    padding:16px 14px max(18px,env(safe-area-inset-bottom))!important;
+    overscroll-behavior:contain
+  }
+  body>.modal-backdrop.modal-layout-center>.transfer-modal,
+  body>.modal-backdrop.modal-layout-center>.quick-amount-modal,
+  body>.modal-backdrop.modal-layout-center>.local-lock-settings{
+    width:min(620px,100%)!important;
+    max-width:620px!important
+  }
+
+  /* Edit transaction: top aligned, predictable form order, ordinary final save button. */
+  .transaction-edit-modal .modal-head{
+    position:sticky!important;
+    top:-16px!important;
+    z-index:5!important;
+    margin:-16px -14px 10px!important;
+    padding:16px 14px 10px!important;
+    background:linear-gradient(180deg,#161d21 82%,rgba(22,29,33,.94))!important;
+    border-bottom:1px solid rgba(138,102,56,.28)!important
+  }
+  .transaction-edit-modal #txForm.quick-form-v3>.time-details{order:8!important}
+  .transaction-edit-modal #txForm.quick-form-v3>.save-row{
+    order:9!important;
+    position:static!important;
+    inset:auto!important;
+    bottom:auto!important;
+    z-index:auto!important;
+    margin-top:4px!important;
+    padding:4px 0 0!important;
+    background:transparent!important
+  }
+  .transaction-edit-modal .save-operation{
+    width:100%!important;
+    min-height:52px!important;
+    height:auto!important;
+    padding:12px 14px!important;
+    font-size:14px!important
+  }
+
+  /* Typography: keep labels readable on real phones. */
+  .side-nav .nav-item .nav-label{
+    font-size:9.5px!important;
+    line-height:11px!important
+  }
+  #txForm .field label,
+  .modal .field label{
+    font-size:11px!important;
+    line-height:1.2!important
+  }
+  .tx-meta,.journal-meta,.quick-amount-context{font-size:11.5px!important;line-height:1.35!important}
+
+  /* Compact recent operations: primary action stays clear, destructive action recedes. */
+  .overview-last .list{gap:7px!important}
+  .overview-last .tx{
+    grid-template-columns:34px minmax(0,1fr) auto!important;
+    gap:6px 8px!important;
+    padding:9px 10px!important
+  }
+  .overview-last .tx-icon{width:32px!important;height:32px!important;font-size:14px!important}
+  .overview-last .tx-title{font-size:12px!important;line-height:1.25!important}
+  .overview-last .tx-meta{font-size:10.5px!important;margin-top:2px!important}
+  .overview-last .tx-amount{font-size:12px!important;min-width:76px!important}
+  .overview-last .tx-actions{
+    grid-column:2/-1!important;
+    display:flex!important;
+    justify-content:flex-end!important;
+    gap:6px!important;
+    margin-top:0!important
+  }
+  .overview-last .tx-actions .btn{
+    min-height:38px!important;
+    padding:7px 11px!important;
+    font-size:11px!important
+  }
+  .overview-last .tx-actions .btn-soft{min-width:104px!important}
+  .overview-last .tx-actions .btn-danger{
+    flex:0 0 42px!important;
+    width:42px!important;
+    min-width:42px!important;
+    padding:0!important;
+    overflow:hidden!important;
+    font-size:0!important;
+    color:#f4d0c7!important
+  }
+  .overview-last .tx-actions .btn-danger::before{
+    content:"⌫";
+    display:grid;
+    place-items:center;
+    width:100%;height:100%;
+    font-size:19px;
+    line-height:1
+  }
+}
+
+@media(max-width:380px){
+  .side-nav .nav-item .nav-label{font-size:9px!important}
+  .overview-last .tx-actions .btn-soft{min-width:94px!important}
+}
