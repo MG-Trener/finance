@@ -3,26 +3,26 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <link rel="stylesheet" href="../../styles.css">
-  <link rel="stylesheet" href="../../src/css/components/transfers.css?v=transfer2">
-  <link rel="stylesheet" href="../../src/css/mobile.css?v=mobile23">
-  <link rel="stylesheet" href="../../src/css/mobile-device-fallback.css?v=mobile35">
+  <link rel="stylesheet" href="../../src/css/app.css?v=stability1">
   <style>body{min-height:1800px}.test-spacer{height:820px}.test-entry{width:min(620px,calc(100% - 20px));margin:0 auto}</style>
 </head>
 <body>
 <div class="test-spacer"></div>
-<form id="txForm" class="quick-form quick-form-v3 test-entry">
+<form id="txForm" class="quick-form quick-form-v3 test-entry" data-edit-id="">
   <div class="amount-transfer-row full">
     <div class="field amount-field"><label>Сумма, ₸</label><input class="amount-input amount-hero" id="amount" type="number" value="0"></div>
     <button type="button" class="transfer-entry-btn" id="openTransfer"><span class="transfer-entry-icon">↔</span><b>Перевод</b></button>
   </div>
 </form>
 <script>
-window.state={family:{id:'family-1'},people:[{id:'p1',display_name:'Михаил',label:'husband'},{id:'p2',display_name:'Огонек',label:'wife'}],selectedPersonId:'p1',year:new Date().getFullYear(),transactions:[]};
-window.esc=s=>String(s??'').replace(/[&<>"']/g,'');window.money=n=>`${Number(n||0)} ₸`;window.personName=id=>state.people.find(p=>p.id===id)?.display_name||'Участник';window.periodTx=()=>[];window.yearTx=()=>[];window.notice=(id,msg)=>{const el=document.getElementById(id);if(el)el.textContent=msg};window.closeModal=()=>document.getElementById('modal')?.remove();window.syncTransactionState=row=>{window.__savedRow=row};window.renderStateChange=()=>{};window.uiSound=()=>{};
-window.sb={rpc:async(name,args)=>{window.__lastTransfer={name,args};return{error:null,data:{id:'transfer-1',family_id:'family-1',person_id:args.p_from_person_id,transfer_to_person_id:args.p_to_person_id,type:'transfer',amount:args.p_amount,category_id:null,subcategory_id:null,description:args.p_description,occurred_at:args.p_occurred_at}}},from:()=>({update:()=>({eq:()=>({select:()=>({single:async()=>({error:null,data:null})})})})})};
+window.state={user:{id:'u1'},family:{id:'family-1'},people:[{id:'p1',display_name:'Михаил',label:'husband'},{id:'p2',display_name:'Огонек',label:'wife'}],selectedPersonId:'p1',year:new Date().getFullYear(),transactions:[],trashTransactions:[]};
+window.esc=s=>String(s??'').replace(/[&<>"']/g,'');window.money=n=>`${Number(n||0)} ₸`;window.personName=id=>state.people.find(p=>p.id===id)?.display_name||'Участник';window.periodTx=()=>[];window.yearTx=()=>[];window.notice=(id,msg)=>{const el=document.getElementById(id);if(el)el.textContent=msg};window.closeModal=()=>document.getElementById('modal')?.remove();window.syncTransactionState=row=>{state.transactions=state.transactions.filter(x=>x.id!==row.id);state.transactions.unshift(row);window.__savedRow=row};window.renderStateChange=()=>{};window.uiSound=()=>{};window.byId=(arr,id)=>arr.find(x=>x.id===id);
+window.FinanceOffline={persistSnapshotSoon:()=>{},updateTransaction:async(id,payload)=>({error:null,data:{...(state.transactions.find(x=>x.id===id)||{}),...payload,id}}),setDeleted:async()=>({error:null,data:null})};
+window.sb={auth:{onAuthStateChange:()=>({data:{subscription:{unsubscribe(){}}}})},rpc:async(name,args)=>{window.__lastTransfer={name,args};return{error:null,data:{id:'transfer-1',family_id:'family-1',person_id:args.p_from_person_id,transfer_to_person_id:args.p_to_person_id,type:'transfer',amount:args.p_amount,category_id:null,subcategory_id:null,description:args.p_description,occurred_at:args.p_occurred_at}}},from:()=>({update:()=>({eq:()=>({select:()=>({single:async()=>({error:null,data:null})})})})})};
 </script>
-<script src="../../src/js/features/transfers.js"></script>
+<script src="../../src/js/core/offline-transfers.js?v=stability1"></script>
+<script src="../../src/js/features/transfers.js?v=stability1"></script>
+<script src="../../src/js/ui/modal-stability.js?v=stability1"></script>
 <script>bindTransferEntryButton();</script>
 </body>
 </html>
