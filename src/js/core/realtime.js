@@ -1,6 +1,5 @@
 // Live synchronization between family devices. Primary path: Supabase Realtime.
-// Transactions, budgets, goals, recurring payments and categories now update across
-// both family devices without requiring a manual reload.
+// Transactions, goals, recurring payments and categories update across both family devices.
 (function(){
   let channel=null;
   let subscribedFamilyId=null;
@@ -9,7 +8,6 @@
   let lastForegroundRefresh=0;
 
   const ENTITY_CHANNELS=[
-    {table:'budgets',stateKey:'budgets'},
     {table:'recurring_payments',stateKey:'recurring'},
     {table:'financial_goals',stateKey:'goals'},
     {table:'goal_contributions',stateKey:'goalContributions'},
@@ -71,8 +69,6 @@
     const list=state[config.stateKey];if(!Array.isArray(list))return;
     const id=(payload.eventType==='DELETE'?payload.old:payload.new)?.id;if(!id)return;
     const existing=byId(list,id);
-    // A locally queued change remains authoritative on this device until its queue
-    // is flushed. The sync centre will resolve any server conflict afterwards.
     if(existing?._offline)return;
 
     if(payload.eventType==='DELETE'){
