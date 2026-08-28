@@ -4,6 +4,11 @@
 .finance-modal-open{overflow:hidden!important}
 
 @media (max-width:760px), (max-device-width:760px), (pointer:coarse) and (max-width:1400px){
+  /* Modal UI must always sit above the fixed bottom navigation. */
+  body>.modal-backdrop{
+    z-index:1000!important
+  }
+
   /* Neutralize the legacy "last full child" sticky rule globally. */
   #txForm.quick-form-v3>.full:last-child{
     position:static!important;
@@ -28,7 +33,10 @@
     display:flex!important;
     align-items:flex-start!important;
     justify-content:center!important;
-    padding:max(8px,env(safe-area-inset-top)) 8px max(8px,env(safe-area-inset-bottom))!important;
+    width:100%!important;
+    height:100dvh!important;
+    min-height:0!important;
+    padding:max(6px,env(safe-area-inset-top)) 6px max(6px,env(safe-area-inset-bottom))!important;
     overflow:hidden!important;
     overscroll-behavior:contain
   }
@@ -36,6 +44,9 @@
     display:flex!important;
     align-items:center!important;
     justify-content:center!important;
+    width:100%!important;
+    height:100dvh!important;
+    min-height:0!important;
     padding:max(10px,env(safe-area-inset-top)) 10px max(10px,env(safe-area-inset-bottom))!important;
     overflow:hidden!important;
     overscroll-behavior:contain
@@ -46,16 +57,34 @@
     justify-content:center!important;
     padding:0!important
   }
-  body>.modal-backdrop.modal-layout-top>.modal,
+  body>.modal-backdrop.modal-layout-top>.modal{
+    width:min(760px,100%)!important;
+    max-width:760px!important;
+    height:100%!important;
+    max-height:100%!important;
+    min-height:0!important;
+    margin:0!important;
+    overflow-x:hidden!important;
+    overflow-y:auto!important;
+    -webkit-overflow-scrolling:touch;
+    touch-action:pan-y;
+    border-radius:16px!important;
+    padding:14px 12px max(18px,env(safe-area-inset-bottom))!important;
+    overscroll-behavior-y:contain
+  }
   body>.modal-backdrop.modal-layout-center>.modal{
     width:min(760px,100%)!important;
     max-width:760px!important;
-    max-height:calc(100dvh - 16px)!important;
+    max-height:100%!important;
+    min-height:0!important;
     margin:0!important;
-    overflow:auto!important;
+    overflow-x:hidden!important;
+    overflow-y:auto!important;
+    -webkit-overflow-scrolling:touch;
+    touch-action:pan-y;
     border-radius:16px!important;
     padding:16px 14px max(18px,env(safe-area-inset-bottom))!important;
-    overscroll-behavior:contain
+    overscroll-behavior-y:contain
   }
   body>.modal-backdrop.modal-layout-center>.transfer-modal,
   body>.modal-backdrop.modal-layout-center>.quick-amount-modal,
@@ -64,15 +93,32 @@
     max-width:620px!important
   }
 
-  /* Edit transaction: top aligned, predictable form order, ordinary final save button. */
+  /* Edit transaction: compact header, predictable form order and reliable touch scrolling. */
+  .transaction-edit-modal{
+    scrollbar-gutter:stable;
+    scroll-behavior:smooth
+  }
   .transaction-edit-modal .modal-head{
     position:sticky!important;
-    top:-16px!important;
+    top:-14px!important;
     z-index:5!important;
-    margin:-16px -14px 10px!important;
-    padding:16px 14px 10px!important;
-    background:linear-gradient(180deg,#161d21 82%,rgba(22,29,33,.94))!important;
+    min-height:50px!important;
+    margin:-14px -12px 8px!important;
+    padding:10px 12px 8px!important;
+    background:linear-gradient(180deg,#161d21 86%,rgba(22,29,33,.96))!important;
     border-bottom:1px solid rgba(138,102,56,.28)!important
+  }
+  .transaction-edit-modal .modal-head h2{
+    margin:0!important;
+    max-width:calc(100% - 54px)!important;
+    font-size:clamp(21px,6vw,26px)!important;
+    line-height:1.1!important;
+    letter-spacing:.01em!important
+  }
+  .transaction-edit-modal .modal-head .icon-btn{
+    flex:0 0 40px!important;
+    width:40px!important;
+    height:40px!important
   }
   .transaction-edit-modal #txForm.quick-form-v3>.time-details{order:8!important}
   .transaction-edit-modal #txForm.quick-form-v3>.save-row{
@@ -130,21 +176,22 @@
   }
   .overview-last .tx-actions .btn-soft{min-width:104px!important}
   .overview-last .tx-actions .btn-danger{
+    position:relative!important;
     flex:0 0 42px!important;
     width:42px!important;
     min-width:42px!important;
     padding:0!important;
     overflow:hidden!important;
     font-size:0!important;
-    color:#f4d0c7!important
+    color:#f2c77e!important
   }
   .overview-last .tx-actions .btn-danger::before{
-    content:"⌫";
-    display:grid;
-    place-items:center;
-    width:100%;height:100%;
-    font-size:19px;
-    line-height:1
+    content:"";
+    display:block;
+    width:24px;
+    height:24px;
+    margin:auto;
+    background:center/24px 24px no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M7 8h10l-1 11H8L7 8Zm-2-3h14M9 5l1-2h4l1 2M10 10v6m4-6v6' fill='none' stroke='%23f2c77e' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
   }
 }
 
