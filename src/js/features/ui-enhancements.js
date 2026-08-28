@@ -74,11 +74,30 @@
 
   function initDateDrag(){
     document.querySelectorAll('.pirate-date-track:not([data-drag-ready])').forEach(track=>{
-      track.dataset.dragReady='1';let down=false,startX=0,startScroll=0,moved=false;
-      track.addEventListener('pointerdown',e=>{if(e.button!==0)return;down=true;moved=false;startX=e.clientX;startScroll=track.scrollLeft;track.classList.add('dragging');track.setPointerCapture?.(e.pointerId)});
-      track.addEventListener('pointermove',e=>{if(!down)return;const dx=e.clientX-startX;if(Math.abs(dx)>4)moved=true;track.scrollLeft=startScroll-dx});
-      const finish=e=>{if(!down)return;down=false;track.classList.remove('dragging');try{track.releasePointerCapture?.(e.pointerId)}catch(_){ }if(moved){const swallow=ev=>{ev.preventDefault();ev.stopPropagation();track.removeEventListener('click',swallow,true)};track.addEventListener('click',swallow,true)}};
-      track.addEventListener('pointerup',finish);track.addEventListener('pointercancel',finish);track.addEventListener('pointerleave',e=>{if(down)finish(e)});
+      track.dataset.dragReady='1';let down=false,startX=0,startScroll=0,moved=false,capturedPointer=null;
+      track.addEventListener('pointerdown',e=>{
+        if(e.button!==0)return;
+        down=true;moved=false;capturedPointer=null;startX=e.clientX;startScroll=track.scrollLeft;
+      });
+      track.addEventListener('pointermove',e=>{
+        if(!down)return;
+        const dx=e.clientX-startX;
+        if(!moved&&Math.abs(dx)>4){
+          moved=true;track.classList.add('dragging');
+          try{track.setPointerCapture?.(e.pointerId);capturedPointer=e.pointerId}catch(_){capturedPointer=null}
+        }
+        if(moved)track.scrollLeft=startScroll-dx;
+      });
+      const finish=e=>{
+        if(!down)return;
+        down=false;track.classList.remove('dragging');
+        if(capturedPointer!==null){try{track.releasePointerCapture?.(capturedPointer)}catch(_){ }capturedPointer=null}
+        if(moved){
+          const swallow=ev=>{ev.preventDefault();ev.stopPropagation();track.removeEventListener('click',swallow,true)};
+          track.addEventListener('click',swallow,true);
+        }
+      };
+      track.addEventListener('pointerup',finish);track.addEventListener('pointercancel',finish);track.addEventListener('pointerleave',e=>{if(down&&moved)finish(e)});
     });
   }
 
