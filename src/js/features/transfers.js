@@ -36,6 +36,7 @@ function openTransferModal(tx=null){
     const value=Number(amount.value||0),description=document.getElementById('transferDescription').value.trim()||null;
     if(!fromId||!toId||fromId===toId)return notice('transferNotice','Выберите разных участников перевода');
     if(!(value>0))return notice('transferNotice','Введите сумму перевода');
+    let completed=false;
     save.disabled=true;reverse.disabled=true;save.textContent=navigator.onLine?'Сохраняю…':'Сохраняю офлайн…';
     try{
       const occurredIso=editing?tx.occurred_at:new Date().toISOString();
@@ -44,17 +45,18 @@ function openTransferModal(tx=null){
       if(editing){
         result=window.FinanceOffline?.updateTransaction?await window.FinanceOffline.updateTransaction(tx.id,payload):await sb.from('transactions').update(payload).eq('id',tx.id).select().single();
       }else{
-        if(!navigator.onLine)return notice('transferNotice','Для нового перевода нужно подключение к интернету. После синхронизации он будет доступен офлайн.');
         const createArgs={p_family_id:state.family.id,p_from_person_id:fromId,p_to_person_id:toId,p_amount:value,p_description:description,p_occurred_at:occurredIso};
-        result=await sb.rpc('create_family_transfer',createArgs);
+        result=window.FinanceTransferOffline?.saveTransfer
+          ?await window.FinanceTransferOffline.saveTransfer({payload,createArgs})
+          :await sb.rpc('create_family_transfer',createArgs);
       }
       if(result.error)return notice('transferNotice',`Не удалось сохранить перевод: ${result.error.message||result.error}`);
       const row=Array.isArray(result.data)?result.data[0]:result.data;if(!row)return notice('transferNotice','Перевод не был сохранён.');
       syncTransactionState(row);state.selectedPersonId=fromId;const now=new Date();const pad=n=>String(n).padStart(2,'0');state.overviewDateKey=`${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`;if(typeof uiSound==='function')uiSound('success');renderStateChange();
-      const success=document.getElementById('transferNotice');
-      if(success)success.innerHTML=`<div role="status" style="margin:10px 0;padding:11px 13px;border:1px solid rgba(93,166,105,.55);border-radius:10px;background:rgba(38,92,50,.24);color:#d8f2dc;font-weight:800">✓ ${editing?'Перевод успешно изменён':'Перевод успешно выполнен'}</div>`;
-      save.textContent=editing?'Изменения сохранены':'Перевод выполнен';cancel.textContent='Закрыть';
-    }catch(error){notice('transferNotice',`Ошибка: ${error?.message||String(error)}`)}finally{if(save&&document.body.contains(save)&&!save.textContent.includes('выполнен')&&!save.textContent.includes('сохранены')){save.disabled=false;reverse.disabled=false;save.textContent=editing?'Сохранить перевод':'Перевести'}}
+      const queued=Boolean(result.queued||row._offline),success=document.getElementById('transferNotice');
+      if(success)success.innerHTML=`<div role="status" style="margin:10px 0;padding:11px 13px;border:1px solid rgba(93,166,105,.55);border-radius:10px;background:rgba(38,92,50,.24);color:#d8f2dc;font-weight:800">✓ ${queued?'Перевод сохранён офлайн и будет отправлен после подключения':editing?'Перевод успешно изменён':'Перевод успешно выполнен'}</div>`;
+      completed=true;save.textContent=queued?'Сохранено офлайн':editing?'Изменения сохранены':'Перевод выполнен';cancel.textContent='Закрыть';
+    }catch(error){notice('transferNotice',`Ошибка: ${error?.message||String(error)}`)}finally{if(save&&document.body.contains(save)&&!completed){save.disabled=false;reverse.disabled=false;save.textContent=editing?'Сохранить перевод':'Перевести'}}
   };
   requestAnimationFrame(()=>{if(!matchMedia('(pointer:coarse)').matches)amount?.focus()});
 }
