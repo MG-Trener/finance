@@ -64,6 +64,12 @@ function openTransferModal(tx=null){
 function bindTransferEntryButton(){const button=document.getElementById('openTransfer');if(button)button.onclick=()=>openTransferModal()}
 
 // Analytics keeps transfers neutral for the family while applying them to each spouse's balance.
+function ensureChartJs(){
+  if(window.Chart)return Promise.resolve(window.Chart);
+  if(chartJsPromise)return chartJsPromise;
+  chartJsPromise=new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='vendor/chart.umd.js';s.async=true;s.onload=()=>window.Chart?resolve(window.Chart):reject(new Error('Chart.js не инициализирован'));s.onerror=()=>reject(new Error('Не удалось загрузить графики'));document.head.appendChild(s)}).finally(()=>{if(!window.Chart)chartJsPromise=null});
+  return chartJsPromise;
+}
 function yearSeries(year=+state.year){
   const income=Array(12).fill(0),expense=Array(12).fill(0),count=Array(12).fill(0);
   yearTx(year).forEach(x=>{const m=new Date(x.occurred_at).getMonth();if(x.type==='income')income[m]+=Number(x.amount||0);else if(x.type==='expense')expense[m]+=Number(x.amount||0);count[m]++});
