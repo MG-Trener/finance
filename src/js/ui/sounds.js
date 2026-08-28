@@ -52,7 +52,7 @@
   function icon(){return enabled?'🔊':'🔇'}function label(){return enabled?'Звуки включены':'Звуки выключены'}
   document.addEventListener('click',e=>{
     const toggle=e.target.closest('#soundToggle');
-    if(toggle){enabled=!enabled;localStorage.setItem('finance.uiSounds',enabled?'1':'0');if(enabled){unlocked=false;ensureAudio().then(c=>{if(c)play('switch',c)})}toggle.textContent=icon();toggle.title=label();toggle.setAttribute('aria-label',label());return}
+    if(toggle){enabled=!enabled;localStorage.setItem('finance.uiSounds',enabled?'1':'0');if(enabled){unlocked=false;ensureAudio().then(c=>{if(c)play('switch',c)})}toggle.textContent=`${icon()} ${label()}`;toggle.title=label();toggle.setAttribute('aria-label',label());return}
     if(!enabled)return;if(e.target.closest('.nav-item'))return window.uiSound('nav');if(e.target.closest('#txForm .segmented [data-type],#txForm [data-group="personChoice"]'))return window.uiSound('switch');if(e.target.closest('.deleteTx,.deleteCat,.deleteBudget,.deleteRecurring,.deleteGoal'))return window.uiSound('delete');if(e.target.closest('button,.icon-btn,.text-action,.quick-pair,.tx-amount-edit'))return window.uiSound('click');
   },true);
   document.addEventListener('change',e=>{if(enabled&&e.target.matches('select'))window.uiSound('switch')},true);
