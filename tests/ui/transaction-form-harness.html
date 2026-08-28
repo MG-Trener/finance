@@ -3,22 +3,23 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <link rel="stylesheet" href="../../src/css/app.css?v=stability1">
+  <link rel="stylesheet" href="../../src/css/app.css?v=stability3">
   <style>body{margin:0;padding:12px 10px 120px}.entry-card{max-width:620px;margin:auto}.test-actions{display:flex;gap:8px;margin:10px auto;max-width:620px}</style>
 </head>
 <body>
 <div class="card entry-card"><div class="entry-head"><h3>Новая операция</h3></div><div id="formHost"></div></div>
 <div class="test-actions"><button id="openEdit" type="button">Открыть редактирование</button></div>
 <script>
-window.state={user:{id:'u1'},family:{id:'f1'},people:[{id:'p1',display_name:'Михаил',label:'husband'},{id:'p2',display_name:'Огонек',label:'wife'}],categories:[{id:'ce1',name:'Продукты',type:'expense'},{id:'ce2',name:'Дом',type:'expense'},{id:'ci1',name:'Зарплата',type:'income'}],subcategories:[{id:'se1',category_id:'ce1',name:'Супермаркет',person_label:null},{id:'si1',category_id:'ci1',name:'Основная',person_label:null}],transactions:[],selectedPersonId:'p1',txType:'expense',year:2026,month:8};
+window.state={user:{id:'u1'},family:{id:'f1'},people:[{id:'p1',display_name:'Михаил',label:'husband'},{id:'p2',display_name:'Огонек',label:'wife'}],categories:[{id:'ce1',name:'Продукты',type:'expense'},{id:'ce2',name:'Дом',type:'expense'},{id:'ci1',name:'Зарплата',type:'income'}],subcategories:[{id:'se1',category_id:'ce1',name:'Супермаркет',person_label:null},{id:'si1',category_id:'ci1',name:'Основная',person_label:null}],transactions:[{id:'tx-recent',person_id:'p1',type:'expense',amount:390,category_id:'ce1',subcategory_id:'se1',description:'Вода',occurred_at:'2026-08-28T21:05:00+05:00'}],selectedPersonId:'p1',txType:'expense',year:2026,month:8};
 window.esc=s=>String(s??'').replace(/[&<>"']/g,'');
+window.catName=id=>state.categories.find(c=>c.id===id)?.name||'';window.subName=id=>state.subcategories.find(s=>s.id===id)?.name||'';
 window.localDT=d=>{const x=d?new Date(d):new Date();const p=n=>String(n).padStart(2,'0');return `${x.getFullYear()}-${p(x.getMonth()+1)}-${p(x.getDate())}T${p(x.getHours())}:${p(x.getMinutes())}`};
 window.personSwitch=(selected,prefix='personChoice')=>`<div class="person-switch full">${state.people.map(p=>`<button type="button" class="person-choice ${p.id===selected?'active':''}" data-person="${p.id}" data-group="${prefix}"><span class="avatar">${p.label==='husband'?'М':'Ж'}</span><span><b>${p.display_name}</b><small>${p.label==='husband'?'Муж':'Жена'}</small></span></button>`).join('')}</div>`;
 window.notice=(id,msg,type='error')=>{const el=document.getElementById(id);if(el)el.textContent=msg};window.closeModal=()=>document.getElementById('modal')?.remove();window.syncTransactionState=row=>{state.transactions=state.transactions.filter(x=>x.id!==row.id);state.transactions.unshift(row);window.__savedRow=row};window.renderStateChange=()=>{};window.uiSound=()=>{};
 window.FinanceOffline={saveTransaction:async args=>{window.__lastSave=args;const p=args.payload;return{error:null,data:{id:args.editId||'tx-new',family_id:'f1',...p,updated_at:new Date().toISOString()}}}};
 window.sb={from:()=>({update:()=>({eq:()=>({select:()=>({single:async()=>({error:null,data:null})})})})}),rpc:async()=>({error:null,data:null})};
 </script>
-<script src="../../src/js/features/transaction-entry.js?v=refactor80"></script>
+<script src="../../src/js/features/transaction-entry.js?v=refactor81"></script>
 <script src="../../src/js/ui/modal-stability.js?v=stability1"></script>
 <script>
 formHost.innerHTML=transactionForm();bindTransactionForm();
