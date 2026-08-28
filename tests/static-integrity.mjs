@@ -86,6 +86,21 @@ if(precacheMatch){
   }
 }else fail.push('service worker: PRECACHE list not found');
 
+// Income confirmation must use the licensed, mobile-bundled coin sample and keep it short.
+const incomeSound='assets/sounds/income-coins.wav';
+assert(exists(incomeSound),'income coin sound is missing');
+if(exists(incomeSound)){
+  const wav=fs.readFileSync(path.join(root,incomeSound));
+  assert(wav.toString('ascii',0,4)==='RIFF'&&wav.toString('ascii',8,12)==='WAVE','income coin sound must be a RIFF/WAVE file');
+  if(wav.length>=44){
+    const byteRate=wav.readUInt32LE(28),dataBytes=wav.readUInt32LE(40),duration=byteRate?dataBytes/byteRate:0;
+    assert(duration>=.5&&duration<=2,`income coin sound duration must be between 0.5 and 2 seconds, got ${duration.toFixed(3)}`);
+  }
+}
+const soundsJs=fs.readFileSync(path.join(root,'src/js/ui/sounds.js'),'utf8');
+assert(soundsJs.includes("assets/sounds/income-coins.wav"),'income coin sound is not loaded by the UI');
+assert(soundsJs.includes("kind==='income'"),'income sound route is missing');
+
 // Legacy refactor artifacts must not return to the active graph.
 const forbidden=[
   'phase2-fix.js','phase3.js','phase4.js','phase5.js','phase6.js','phase8.js','phase10.js','phase11.js',
