@@ -17,7 +17,7 @@ function transactionForm(tx=null){
   const type=tx?.type||state.txType,person=tx?.person_id||state.selectedPersonId,pref=phase3Prefs?.[person]?.[type]||{},cats=state.categories.filter(c=>c.type===type);
   let catId=tx?.category_id||pref.category_id||cats[0]?.id;if(!cats.some(c=>c.id===catId))catId=cats[0]?.id;
   const subs=txAllowedSubcategories(catId,person);let subId=tx?.subcategory_id||pref.subcategory_id||subs[0]?.id;if(!subs.some(s=>s.id===subId))subId=subs[0]?.id;
-  const quick=phase3QuickPairs(type,person);
+  const quick=tx?[]:phase3QuickPairs(type,person);
   const timeMarkup=`<details class="time-details full" ${tx?'open':''}><summary><span>Дата и время</span><b>${tx?'Изменить':'Сейчас'}</b></summary><div class="field"><input id="occurredAt" type="datetime-local" value="${localDT(tx?.occurred_at)}" required></div></details>`;
   const saveMarkup=`<div class="full save-row"><button type="submit" class="btn btn-primary btn-wide save-operation">${tx?'Сохранить изменения':'Сохранить операцию'}</button></div>`;
   const amountField=`<div class="field ${tx?'full ':''}amount-field"><label>Сумма, ₸</label><input class="amount-input amount-hero" id="amount" type="number" min="1" step="1" inputmode="decimal" value="${tx?Number(tx.amount):''}" placeholder="0" required></div>`;
