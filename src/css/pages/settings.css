@@ -1,0 +1,13 @@
+/* Consolidated application settings. */
+.settings-page{max-width:1080px}
+.settings-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.settings-card{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:14px;min-height:112px}
+.settings-card-icon{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;border:1px solid rgba(183,137,72,.55);background:radial-gradient(circle at 35% 30%,#394954,#111920 72%);color:#e1bd78;font-size:20px;box-shadow:inset 0 0 0 3px #0004,0 5px 12px #0005}
+.settings-card-body h3{margin:0 0 5px}.settings-card-body p{margin:0;color:#9e927f;font-size:12px;line-height:1.45}
+.settings-control{white-space:nowrap;min-width:132px;text-align:center;text-decoration:none}
+.settings-update{display:inline-flex;align-items:center;justify-content:center}
+.settings-danger-card{border-color:rgba(151,68,54,.45)}
+.settings-access{margin-top:18px}.settings-access .access-page{max-width:none}.settings-access .page-head{margin-top:0}
+.icon-settings{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='10' fill='%23d4ad63'/%3E%3Cpath d='M28 7h8l2 8 7 3 7-4 6 6-4 7 3 7 8 2v8l-8 2-3 7 4 7-6 6-7-4-7 3-2 8h-8l-2-8-7-3-7 4-6-6 4-7-3-7-8-2v-8l8-2 3-7-4-7 6-6 7 4 7-3z' fill='none' stroke='%23c8954d' stroke-width='4' stroke-linejoin='round'/%3E%3C/svg%3E")!important}
+@media(max-width:820px){.settings-grid{grid-template-columns:1fr}.settings-card{grid-template-columns:auto minmax(0,1fr);min-height:0;padding:14px}.settings-control{grid-column:1/-1;width:100%}.settings-access{margin-top:12px}}
+@media(max-width:760px){.settings-page>.page-head{margin-bottom:10px}.settings-card{gap:10px}.settings-card-icon{width:38px;height:38px;font-size:17px}.settings-card-body h3{font-size:14px}.settings-card-body p{font-size:10px}.settings-access .page-title{font-size:20px}}
