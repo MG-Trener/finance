@@ -61,4 +61,18 @@ function openTransferModal(tx=null){
 }
 
 function bindTransferEntryButton(){const button=document.getElementById('openTransfer');if(button)button.onclick=()=>openTransferModal()}
+
+// Analytics keeps transfers neutral for the family while applying them to each spouse's balance.
+function yearSeries(year=+state.year){
+  const income=Array(12).fill(0),expense=Array(12).fill(0),count=Array(12).fill(0);
+  yearTx(year).forEach(x=>{const m=new Date(x.occurred_at).getMonth();if(x.type==='income')income[m]+=Number(x.amount||0);else if(x.type==='expense')expense[m]+=Number(x.amount||0);count[m]++});
+  const balance=income.map((v,i)=>v-expense[i]);let running=0;const cumulative=balance.map(v=>(running+=v));return{income,expense,balance,cumulative,count};
+}
+function yearPersonStats(personId,year=+state.year){
+  const all=yearTx(year),incomeSeries=Array(12).fill(0),expenseSeries=Array(12).fill(0);let transferIn=0,transferOut=0;
+  all.forEach(x=>{const month=new Date(x.occurred_at).getMonth();if(x.type==='income'&&x.person_id===personId)incomeSeries[month]+=Number(x.amount||0);else if(x.type==='expense'&&x.person_id===personId)expenseSeries[month]+=Number(x.amount||0);else if(x.type==='transfer'){if(x.transfer_to_person_id===personId)transferIn+=Number(x.amount||0);if(x.person_id===personId)transferOut+=Number(x.amount||0)}});
+  const income=incomeSeries.reduce((a,b)=>a+b,0),expense=expenseSeries.reduce((a,b)=>a+b,0),balance=income-expense+transferIn-transferOut,savedRate=income?Math.round(balance/income*100):0;
+  return{income,expense,balance,savedRate,incomeSeries,expenseSeries,transferIn,transferOut};
+}
+
 window.openTransferModal=openTransferModal;
