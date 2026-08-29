@@ -46,4 +46,4 @@
 /* Keep this late: semantic modal layouts and narrow-scope sticky rules. */
 @import url('./mobile-stability.css?v=stability3');
 /* Must be last: spouse messaging UI and deterministic action-icon alignment. */
-@import url('./components/family-messages.css?v=familymsg1');
+@import url('./components/family-messages.css?v=familymsg2');
