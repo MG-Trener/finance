@@ -48,6 +48,15 @@
 .annual-category-main>div:first-child{display:flex;justify-content:space-between;gap:10px;align-items:center}
 .annual-category-main b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .annual-category-main span{white-space:nowrap;color:#d7c29a;font-size:12px;font-weight:700}
+.income-source-card-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:8px}
+.income-source-card-head h3{margin:0;color:#ead9b9;font-size:16px}
+.income-source-filters{display:flex;align-items:flex-end;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.income-source-filter{display:grid;gap:3px}
+.income-source-filter>span{font-size:8px;text-transform:uppercase;letter-spacing:.06em;color:#8f836f;font-weight:800}
+.income-source-select{height:34px;min-width:106px;padding:0 28px 0 9px;border:1px solid rgba(177,139,82,.38);border-radius:8px;background:#0b151c;color:#e3d0aa;font:700 11px Inter,sans-serif;outline:none}
+.income-source-year .income-source-select{min-width:76px}
+.income-source-select:focus{border-color:#c79a55;box-shadow:0 0 0 2px rgba(199,154,85,.14)}
+.income-source-body .empty{margin-top:4px}
 @media(max-width:1000px){
   .annual-facts{grid-template-columns:1fr 1fr}
   .analytics-insights{grid-template-columns:1fr 1fr}
@@ -80,4 +89,7 @@
   .annual-analytics-grid{grid-template-columns:1fr!important}
   .annual-analytics-grid .annual-wide{grid-column:auto}
   .people-comparison-box,.person-chart-box{height:250px}
+  .income-source-card-head{align-items:stretch;flex-direction:column;gap:8px}
+  .income-source-filters{display:grid;grid-template-columns:minmax(0,1fr) 92px;gap:7px;width:100%}
+  .income-source-select,.income-source-year .income-source-select{width:100%;min-width:0;height:38px;font-size:12px}
 }
