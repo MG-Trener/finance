@@ -89,7 +89,7 @@ test('нижняя навигация читаема и помещается н�
   }
 });
 
-test('последняя операция компактна, а удаление показывает иконку корзины',async({page})=>{
+test('последняя операция компактна, а SVG корзины ровно центрирован',async({page})=>{
   await page.setViewportSize({width:390,height:844});
   await page.goto('/tests/ui/mobile-layout-harness.html');
   const buttons=page.locator('.overview-last .tx-actions .btn');
@@ -97,8 +97,17 @@ test('последняя операция компактна, а удалени�
   expect(edit).toBeTruthy();expect(remove).toBeTruthy();
   expect(remove.width).toBeLessThanOrEqual(50);
   expect(edit.width).toBeGreaterThan(remove.width*2);
-  const icon=await buttons.nth(1).evaluate(el=>getComputedStyle(el,'::before').backgroundImage);
-  expect(icon).toContain('data:image/svg+xml');
+  const icon=buttons.nth(1).locator('svg');
+  await expect(icon).toHaveCount(1);
+  const alignment=await buttons.nth(1).evaluate(el=>{
+    const svg=el.querySelector('svg'),buttonRect=el.getBoundingClientRect(),iconRect=svg.getBoundingClientRect();
+    return {pseudo:getComputedStyle(el,'::before').display,dx:Math.abs((buttonRect.left+buttonRect.width/2)-(iconRect.left+iconRect.width/2)),dy:Math.abs((buttonRect.top+buttonRect.height/2)-(iconRect.top+iconRect.height/2)),iconWidth:iconRect.width,iconHeight:iconRect.height};
+  });
+  expect(alignment.pseudo).toBe('none');
+  expect(alignment.dx).toBeLessThanOrEqual(1);
+  expect(alignment.dy).toBeLessThanOrEqual(1);
+  expect(alignment.iconWidth).toBeGreaterThanOrEqual(19);
+  expect(alignment.iconHeight).toBeGreaterThanOrEqual(19);
 });
 
 test('быстрое исправление суммы открывается как центрированная доступная модалка',async({page})=>{
