@@ -1,16 +1,21 @@
-// Native Android push notifications for family transaction changes.
+// Native Android push notifications for family transaction changes and spouse messages.
 (function(){
   const native=Boolean(window.__FINANCE_NATIVE__);
   const configured=Boolean(window.__FINANCE_PUSH_CONFIGURED__);
   const TOKEN_KEY='finance.pushToken';
   const WANTED_KEY='finance.pushWanted';
   const ASKED_KEY='finance.pushPermissionAsked';
+  const MESSAGE_LIMIT=200;
+  const MESSAGE_EMOJIS=['👍','❤️','😊','😔','🌸','🍺','😂','😘','😍','🙏','🎉','🔥','😉','🤗'];
   let listenersBound=false,dispatchChannel=null,dispatchFamilyId=null,dispatchTimer=null,registering=false,lastError='';
 
   function plugin(){return window.Capacitor?.Plugins?.PushNotifications}
   function wanted(){return localStorage.getItem(WANTED_KEY)!=='0'}
   function token(){return localStorage.getItem(TOKEN_KEY)||''}
   function setStatus(message,type=''){lastError=type==='error'?message:'';window.dispatchEvent(new CustomEvent('finance-push-status',{detail:{message,type}}))}
+  function partner(){return state.people.find(p=>p.linked_user_id&&p.linked_user_id!==state.user?.id)||null}
+  function charCount(value){return Array.from(String(value||'')).length}
+  function clampMessage(value){return Array.from(String(value||'')).slice(0,MESSAGE_LIMIT).join('')}
 
   async function saveToken(value){
     if(!value||!state.user?.id||!state.family?.id)return false;
@@ -31,7 +36,7 @@
 
   async function createChannel(){
     const push=plugin();if(!push?.createChannel)return;
-    try{await push.createChannel({id:'finance_operations',name:'Операции семьи',description:'Доходы, расходы и изменения семейной казны',importance:5,visibility:1,sound:'default',vibration:true})}catch(_){ }
+    try{await push.createChannel({id:'finance_operations',name:'Операции семьи',description:'Доходы, расходы, изменения и личные сообщения семейной казны',importance:5,visibility:1,sound:'default',vibration:true})}catch(_){ }
   }
 
   function bindListeners(){
@@ -41,9 +46,15 @@
     push.addListener('registrationError',event=>{registering=false;setStatus(`Push недоступен: ${event?.error||'ошибка регистрации'}`,'error')});
     push.addListener('pushNotificationActionPerformed',event=>{
       const data=event?.notification?.data||{};
-      if(data.kind==='transaction'&&typeof state!=='undefined'){
+      if(typeof state==='undefined')return;
+      if(data.kind==='transaction'){
         state.view='operations';state.journalLimit=50;
         if(typeof renderApp==='function')renderApp();
+        if(typeof scrollOverviewTop==='function')scrollOverviewTop();
+      }else if(data.kind==='family_message'){
+        state.view='settings';
+        if(typeof renderApp==='function')renderApp();
+        if(typeof scrollOverviewTop==='function')scrollOverviewTop();
       }
     });
   }
@@ -94,6 +105,56 @@
   }
   function dispatchPendingSoon(){clearTimeout(dispatchTimer);dispatchTimer=setTimeout(dispatchPending,450)}
 
+  async function sendFamilyMessage(rawMessage){
+    const message=String(rawMessage||'').trim();
+    if(!message)return{ok:false,error:'Напишите сообщение'};
+    if(charCount(message)>MESSAGE_LIMIT)return{ok:false,error:`Максимум ${MESSAGE_LIMIT} символов`};
+    if(!navigator.onLine)return{ok:false,error:'Для отправки сообщения нужен интернет'};
+    if(!state.user?.id||state.user?._offlineLocal||!state.family?.id)return{ok:false,error:'Нужно войти в семейную казну'};
+    if(!partner())return{ok:false,error:'Второй участник семьи ещё не подключён'};
+    try{
+      const {data,error}=await sb.functions.invoke('push-transaction-events',{body:{action:'family_message',message}});
+      if(error)return{ok:false,error:error.message||String(error)};
+      if(!data?.ok){
+        const code=String(data?.error||'');
+        if(code==='NO_RECIPIENT_DEVICE')return{ok:false,error:'На телефоне супруга push-уведомления не включены'};
+        if(code==='FIREBASE_NOT_CONFIGURED')return{ok:false,error:'Сервис push временно недоступен'};
+        return{ok:false,error:data?.message||code||'Не удалось отправить сообщение'};
+      }
+      if(!Number(data.sent||0))return{ok:false,error:'Не найден телефон получателя с включёнными push'};
+      return{ok:true,sent:Number(data.sent||0)};
+    }catch(error){return{ok:false,error:error?.message||String(error)}}
+  }
+
+  function messageComposerMarkup(){
+    const recipient=partner(),recipientName=recipient?.display_name||'второму участнику';
+    const disabled=!recipient?.linked_user_id;
+    return `<div class="family-message-composer"><div class="family-message-heading"><div><h3>Сообщение супругу</h3><p>Отправьте короткое личное сообщение прямо в push на другой телефон.</p></div><span class="family-message-recipient">→ ${esc(recipientName)}</span></div><div class="family-message-emojis" aria-label="Быстрые смайлики">${MESSAGE_EMOJIS.map(emoji=>`<button type="button" class="family-message-emoji" data-family-emoji="${emoji}" aria-label="Добавить ${emoji}">${emoji}</button>`).join('')}</div><label class="family-message-field" for="familyPushMessage"><span>Текст сообщения</span><textarea id="familyPushMessage" rows="3" maxlength="400" placeholder="Например: Купи, пожалуйста, хлеб 😊" ${disabled?'disabled':''}></textarea></label><div class="family-message-footer"><span id="familyPushCounter">0 / ${MESSAGE_LIMIT}</span><button type="button" class="btn btn-primary" id="sendFamilyPush" ${disabled?'disabled':''}>Отправить push</button></div><div id="familyPushNotice"></div>${disabled?'<p class="access-note">Отправка станет доступна, когда второй семейный аккаунт будет подключён.</p>':''}</div>`;
+  }
+
+  function bindMessageComposer(){
+    const input=document.getElementById('familyPushMessage'),send=document.getElementById('sendFamilyPush'),counter=document.getElementById('familyPushCounter');
+    if(!input||!send)return;
+    const paintCounter=()=>{const count=charCount(input.value);if(counter){counter.textContent=`${count} / ${MESSAGE_LIMIT}`;counter.classList.toggle('limit',count>=MESSAGE_LIMIT)}};
+    input.addEventListener('input',()=>{const clipped=clampMessage(input.value);if(clipped!==input.value)input.value=clipped;paintCounter()});
+    document.querySelectorAll('[data-family-emoji]').forEach(button=>button.onclick=()=>{
+      const emoji=button.dataset.familyEmoji||'';
+      input.value=clampMessage(`${input.value}${emoji}`);paintCounter();input.focus();
+    });
+    send.onclick=async()=>{
+      notice('familyPushNotice','');
+      const message=input.value.trim();
+      if(!message)return notice('familyPushNotice','Напишите сообщение');
+      send.disabled=true;send.textContent='Отправляю…';
+      const result=await sendFamilyMessage(message);
+      send.disabled=false;send.textContent='Отправить push';
+      if(!result.ok)return notice('familyPushNotice',result.error||'Не удалось отправить сообщение');
+      input.value='';paintCounter();notice('familyPushNotice','Сообщение отправлено на другой телефон.','success');
+      if(typeof uiSound==='function')uiSound('success');
+    };
+    paintCounter();
+  }
+
   function actorFromPayload(payload){
     const row=payload?.new||payload?.old||{};
     if(payload?.eventType==='INSERT')return row.created_by||'';
@@ -143,5 +204,5 @@
   document.addEventListener('visibilitychange',()=>{if(!document.hidden){waitForSession();dispatchPendingSoon()}});
   window.addEventListener('focus',()=>{waitForSession();dispatchPendingSoon()});
 
-  window.FinancePush={enable,disable,register,dispatchPending,dispatchPendingSoon,settingsMarkup,bindSettings,get configured(){return configured},get wanted(){return wanted()},get token(){return token()}};
+  window.FinancePush={enable,disable,register,dispatchPending,dispatchPendingSoon,sendFamilyMessage,messageComposerMarkup,bindMessageComposer,settingsMarkup,bindSettings,get configured(){return configured},get wanted(){return wanted()},get token(){return token()},get messageLimit(){return MESSAGE_LIMIT}};
 })();

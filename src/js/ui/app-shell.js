@@ -118,7 +118,9 @@ function bindCommon(){
       const now=new Date();state.year=now.getFullYear();state.month=now.getMonth()+1;
     }
     state.view=next;state.journalLimit=50;renderApp();
-    if(next==='overview')scrollOverviewTop();
+    // A newly opened section must start at its beginning, especially on mobile where
+    // the previous section can leave the document scrolled far down.
+    scrollOverviewTop();
   });
   const logout=document.getElementById('logout')||document.getElementById('settingsLogout');if(logout)logout.onclick=performLogout;
   const month=document.getElementById('monthSelect');if(month)month.onchange=e=>{state.month=+e.target.value;state.journalLimit=50;renderApp()};
