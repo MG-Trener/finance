@@ -45,5 +45,7 @@
 @import url('./mobile-scroll-nav.css?v=scroll63');
 /* Keep this late: semantic modal layouts and narrow-scope sticky rules. */
 @import url('./mobile-stability.css?v=stability3');
-/* Must be last: spouse messaging UI and deterministic action-icon alignment. */
+/* Must be last among application UI rules: spouse messaging and action-icon alignment. */
 @import url('./components/family-messages.css?v=familymsg2');
+/* Final loading-screen override: the existing crest fills the viewport with a compact status strip. */
+@import url('./components/boot-splash.css?v=boot1');
