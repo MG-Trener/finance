@@ -9,7 +9,10 @@
 
     backdrop.classList.remove('modal-layout-top','modal-layout-center','modal-layout-sheet');
 
-    if(modal.querySelector('#editNotice')){
+    if(modal.querySelector('.salon-day-schedule')){
+      modal.classList.add('salon-day-modal');
+      backdrop.classList.add('modal-layout-top');
+    }else if(modal.querySelector('#editNotice')){
       modal.classList.add('transaction-edit-modal');
       backdrop.classList.add('modal-layout-top');
     }else if(modal.classList.contains('transfer-modal')||modal.querySelector('#transferForm')){
