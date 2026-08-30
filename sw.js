@@ -1,4 +1,4 @@
-const CACHE='family-finance-shell-v6';
+const CACHE='family-finance-shell-v7';
 const PRECACHE=[
   './',
   './index.html',
@@ -6,12 +6,9 @@ const PRECACHE=[
   './delete-account.html',
   './manifest.webmanifest',
   './vendor/supabase.js',
-  './vendor/chart.umd.js',
-  './vendor/xlsx.full.min.js',
   './assets/app-icon.svg',
   './assets/icon-192.png',
-  './assets/icon-512.png',
-  './assets/sounds/income-coins.wav'
+  './assets/icon-512.png'
 ];
 
 self.addEventListener('install',event=>{
@@ -64,7 +61,7 @@ self.addEventListener('fetch',event=>{
   event.respondWith(
     caches.match(req).then(cached=>{
       const network=fetch(req).then(res=>{
-        if(res.ok&&req.destination==='image'){
+        if(res.ok&&['image','audio'].includes(req.destination)){
           const copy=res.clone();caches.open(CACHE).then(cache=>cache.put(req,copy));
         }
         return res;
