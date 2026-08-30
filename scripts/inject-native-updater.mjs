@@ -11,7 +11,15 @@ await mkdir(packageDir,{recursive:true});
 
 const mainActivity=`package kz.mgtrener.familyfinance;
 
+import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
+import android.view.View;
+
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
+
 import com.getcapacitor.BridgeActivity;
 
 public class MainActivity extends BridgeActivity {
@@ -19,6 +27,40 @@ public class MainActivity extends BridgeActivity {
   public void onCreate(Bundle savedInstanceState) {
     registerPlugin(AppUpdaterPlugin.class);
     super.onCreate(savedInstanceState);
+
+    getWindow().setStatusBarColor(Color.parseColor("#050b12"));
+    getWindow().setNavigationBarColor(Color.parseColor("#050b12"));
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+      getWindow().setNavigationBarContrastEnforced(false);
+      getWindow().setStatusBarContrastEnforced(false);
+    }
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+      getWindow().getDecorView().setSystemUiVisibility(0);
+    }
+
+    // Android 15+ forces edge-to-edge for apps targeting current SDKs.
+    // Keep the Capacitor content below the status bar while leaving the
+    // bottom inset to the web UI, which already accounts for Android nav.
+    if (Build.VERSION.SDK_INT >= 35) {
+      final View contentView = findViewById(android.R.id.content);
+      final int initialLeft = contentView.getPaddingLeft();
+      final int initialTop = contentView.getPaddingTop();
+      final int initialRight = contentView.getPaddingRight();
+      final int initialBottom = contentView.getPaddingBottom();
+      ViewCompat.setOnApplyWindowInsetsListener(contentView, (view, insets) -> {
+        final Insets topInsets = insets.getInsets(
+          WindowInsetsCompat.Type.statusBars() | WindowInsetsCompat.Type.displayCutout()
+        );
+        view.setPadding(
+          initialLeft + topInsets.left,
+          initialTop + topInsets.top,
+          initialRight + topInsets.right,
+          initialBottom
+        );
+        return insets;
+      });
+      ViewCompat.requestApplyInsets(contentView);
+    }
   }
 }
 `;
@@ -168,8 +210,15 @@ public class AppUpdaterPlugin extends Plugin {
     return true;
   }
 
+  private String cacheBustedUrl(String url, int build) {
+    Uri.Builder builder = Uri.parse(url).buildUpon();
+    if (build > 0) builder.appendQueryParameter("build", String.valueOf(build));
+    builder.appendQueryParameter("downloadNonce", String.valueOf(System.currentTimeMillis()));
+    return builder.build().toString();
+  }
+
   private JSObject enqueue(String url, int build) {
-    DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
+    DownloadManager.Request request = new DownloadManager.Request(Uri.parse(cacheBustedUrl(url, build)));
     request.setTitle("Семейная казна — обновление");
     request.setDescription(build > 0 ? "Загрузка версии 1.0." + build : "Загрузка новой версии");
     request.setMimeType(APK_MIME);
@@ -265,4 +314,4 @@ if(!manifest.includes('android.permission.REQUEST_INSTALL_PACKAGES')){
   await writeFile(manifestPath,manifest,'utf8');
 }
 
-console.log('Native Android background updater injected.');
+console.log('Native Android updater and status-bar insets injected.');
