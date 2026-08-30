@@ -1,0 +1,47 @@
+/* Period controls and calendar readability refinements. */
+[hidden]{display:none!important}
+
+.journal-period-filter{display:flex;gap:8px;flex:2 1 430px;min-width:min(430px,100%)}
+.journal-period-filter select{min-width:120px}
+.journal-period-filter #filterPeriod{flex:1.15}
+.journal-period-filter #filterMonth{flex:1.35}
+.journal-period-filter #filterYear{flex:.8}
+
+.salon-period-controls{display:flex;align-items:flex-end;gap:10px;padding:14px 18px 8px}
+.salon-period-controls label{display:flex;flex-direction:column;gap:5px;min-width:0}
+.salon-period-controls label:first-child{flex:1 1 220px}
+.salon-period-controls label:last-child{flex:0 0 130px}
+.salon-period-controls span{color:#90999f;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.salon-period-controls select{width:100%;min-height:42px;border:1px solid rgba(199,163,96,.34);border-radius:10px;background:#101a22;color:#f0dfbd;padding:9px 11px;font:inherit}
+.salon-period-controls select:focus{outline:2px solid rgba(212,170,97,.28);outline-offset:1px;border-color:#d4aa61}
+
+.salon-date.is-weekend:not(.is-selected){border-color:rgba(190,86,78,.48);background:linear-gradient(180deg,rgba(91,38,38,.48),rgba(33,24,28,.82))}
+.salon-date.is-weekend span{color:#df8c83}
+.salon-date.is-weekend:not(.is-selected) strong{color:#f0c2bc}
+.salon-date.is-weekend.is-selected{box-shadow:0 5px 16px rgba(0,0,0,.26),inset 0 -3px 0 rgba(195,79,71,.72)}
+
+.salon-slot.has-appointment{border-color:rgba(225,186,112,.62);background:linear-gradient(90deg,rgba(105,69,30,.74),rgba(43,36,28,.54));box-shadow:inset 3px 0 0 rgba(225,178,91,.9)}
+.salon-slot.has-appointment .salon-time{color:#f4d59a}
+.salon-slot.is-covered{opacity:1;background:linear-gradient(90deg,rgba(86,62,35,.34),rgba(38,33,29,.22));box-shadow:inset 3px 0 0 rgba(197,151,79,.45)}
+.salon-slot.is-covered .salon-time{color:#d9bd87}
+
+@media(max-width:760px){
+  .salon-period-controls{padding:10px 11px 6px;gap:7px}
+  .salon-period-controls label:first-child{flex:1 1 auto}
+  .salon-period-controls label:last-child{flex:0 0 104px}
+  .salon-period-controls span{font-size:9px}
+  .salon-period-controls select{min-height:39px;padding:8px 9px;font-size:13px}
+}
+
+@media(max-width:620px){
+  .journal-period-filter{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:7px;min-width:0;width:100%}
+  .journal-period-filter #filterPeriod{grid-column:1/-1}
+  .journal-period-filter select{min-width:0!important;width:100%!important}
+}
+
+@media(max-width:390px){
+  .journal-period-filter{grid-template-columns:1fr}
+  .journal-period-filter #filterPeriod{grid-column:auto}
+  .salon-period-controls{display:grid;grid-template-columns:minmax(0,1fr) 96px}
+  .salon-period-controls label:last-child{flex-basis:auto}
+}
