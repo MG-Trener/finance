@@ -1,9 +1,10 @@
 // Period filters and calendar presentation refinements.
 (() => {
-  const hiddenHeaderDateViews=new Set(['operations','goals','recurring','settings','categories','calendar']);
+  const hiddenHeaderViews=new Set(['operations','goals','recurring','settings','categories','calendar']);
   const localPeriodViews=new Set(['operations','calendar']);
 
   header=function(){
+    if(hiddenHeaderViews.has(state.view))return '';
     const overview=state.view==='overview';
     const annualAnalytics=state.view==='analytics';
     const noPeriodControls=state.view==='settings'||state.view==='categories'||localPeriodViews.has(state.view);
@@ -15,8 +16,7 @@
       :annualAnalytics
         ?`<select class="pill" id="yearSelect" aria-label="Год аналитики">${availableYears().map(y=>`<option ${y===+state.year?'selected':''}>${y}</option>`).join('')}</select>`
         :`<select class="pill" id="monthSelect" aria-label="Месяц">${MONTHS.map((m,i)=>`<option value="${i+1}" ${i+1===+state.month?'selected':''}>${m}</option>`).join('')}</select><select class="pill" id="yearSelect" aria-label="Год">${availableYears().map(y=>`<option ${y===+state.year?'selected':''}>${y}</option>`).join('')}</select>`;
-    const currentDate=hiddenHeaderDateViews.has(state.view)?'':`<span class="header-date">${esc(headerDateText())}</span>`;
-    return `<header class="topbar compact-topbar"><div class="title compact-title"><div class="title-line"><h1>Семейная казна</h1>${currentDate}</div>${periodLabel?`<p>${periodLabel}</p>`:''}</div><div class="top-actions">${periodControls}${authState}${connection}</div></header>`;
+    return `<header class="topbar compact-topbar"><div class="title compact-title"><div class="title-line"><h1>Семейная казна</h1><span class="header-date">${esc(headerDateText())}</span></div>${periodLabel?`<p>${periodLabel}</p>`:''}</div><div class="top-actions">${periodControls}${authState}${connection}</div></header>`;
   };
 
   function journalPeriodYear(filters){
