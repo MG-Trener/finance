@@ -15,6 +15,7 @@ on:
       - 'scripts/**'
       - 'tests/**'
       - 'assets/**'
+      - '!assets/gerb.png'
       - 'vendor/**'
       - 'package.json'
       - '.github/workflows/static-check.yml'
@@ -31,6 +32,7 @@ on:
       - 'scripts/**'
       - 'tests/**'
       - 'assets/**'
+      - '!assets/gerb.png'
       - 'vendor/**'
       - 'package.json'
       - '.github/workflows/static-check.yml'
@@ -61,6 +63,9 @@ jobs:
           while IFS= read -r -d '' file; do
             node --check "$file"
           done < <(find src/js tests -type f \( -name '*.js' -o -name '*.mjs' \) -print0)
+
+      - name: Check repository size budget
+        run: npm run test:repo-size
 
       - name: Check static file graph
         run: node tests/static-integrity.mjs
