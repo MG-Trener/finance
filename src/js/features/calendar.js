@@ -1,7 +1,6 @@
 // Independent family calendar: husband events and wife salon appointments.
 const CALENDAR_WEEKDAYS=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
-const CALENDAR_MONTHS_GENITIVE=['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
-const calendarUi={selectedDate:null,touchStartX:0,touchStartY:0};
+const calendarUi={selectedDate:null,touchStartX:0,touchStartY:0,personId:null};
 
 function calendarPad(value){return String(value).padStart(2,'0')}
 function calendarDateKey(date){return `${date.getFullYear()}-${calendarPad(date.getMonth()+1)}-${calendarPad(date.getDate())}`}
@@ -15,11 +14,26 @@ function calendarDateLabel(key,{weekday=true}={}){
   const text=date.toLocaleDateString('ru-RU',{weekday:weekday?'long':undefined,day:'numeric',month:'long',year:'numeric'});
   return text.charAt(0).toUpperCase()+text.slice(1);
 }
-function calendarCurrentPerson(){
+function calendarOwnPerson(){
   return state.people.find(person=>person.linked_user_id===state.user?.id)
     ||byId(state.people,state.selectedPersonId)
     ||state.people[0]
     ||null;
+}
+function calendarCurrentPerson(){
+  const selected=calendarUi.personId?byId(state.people,calendarUi.personId):null;
+  return selected||calendarOwnPerson();
+}
+function calendarPersonSwitcher(person){
+  const people=state.people
+    .filter(item=>item.label==='husband'||item.label==='wife')
+    .sort((a,b)=>(a.label==='husband'?0:1)-(b.label==='husband'?0:1));
+  if(people.length<2)return '';
+  return `<div class="calendar-person-switcher" role="group" aria-label="Чей календарь показывать">${people.map(item=>{
+    const active=item.id===person.id;
+    const role=item.label==='wife'?'Жена':'Муж';
+    return `<button type="button" class="calendar-person-option ${active?'is-active':''}" data-calendar-person="${item.id}" aria-pressed="${active?'true':'false'}"><span>${esc(item.display_name)}</span><small>${role}</small></button>`;
+  }).join('')}</div>`;
 }
 function calendarPersonEntries(personId){
   return (state.calendarEntries||[]).filter(row=>row.person_id===personId);
@@ -29,9 +43,7 @@ function calendarEntriesOn(personId,dateKey,kind=null){
     .filter(row=>row.entry_date===dateKey&&(!kind||row.kind===kind))
     .sort((a,b)=>String(a.start_time||'').localeCompare(String(b.start_time||''))||String(a.created_at||'').localeCompare(String(b.created_at||'')));
 }
-function calendarMonthTitle(){
-  return `${MONTHS[state.month-1]} ${state.year}`;
-}
+function calendarMonthTitle(){return `${MONTHS[state.month-1]} ${state.year}`}
 function calendarShiftMonth(delta){
   const date=new Date(+state.year,+state.month-1+delta,1);
   state.year=date.getFullYear();
@@ -86,7 +98,6 @@ function calendarModal(markup){
 function calendarModalHead(title,subtitle=''){
   return `<div class="modal-head"><div><h2>${esc(title)}</h2>${subtitle?`<p class="quick-amount-context">${esc(subtitle)}</p>`:''}</div><button type="button" class="icon-btn" id="closeModal" aria-label="Закрыть">×</button></div>`;
 }
-function calendarDayHasEntries(personId,dateKey){return calendarEntriesOn(personId,dateKey).length>0}
 
 function husbandCalendarPage(person){
   const first=new Date(+state.year,+state.month-1,1);
@@ -108,6 +119,7 @@ function husbandCalendarPage(person){
   return `<div class="calendar-page husband-calendar-page">
     <div class="page-head calendar-page-head">
       <div><h2 class="page-title">Календарь</h2><div class="page-subtitle">Мероприятия ${esc(person.display_name)}. Выходные выделены отдельно.</div></div>
+      ${calendarPersonSwitcher(person)}
     </div>
     <section class="card husband-calendar-card">
       <div class="calendar-month-toolbar">
@@ -162,6 +174,7 @@ function wifeCalendarPage(person){
   return `<div class="calendar-page wife-calendar-page">
     <div class="page-head calendar-page-head">
       <div><h2 class="page-title">Календарь салона</h2><div class="page-subtitle">Запись клиентов ${esc(person.display_name)} с 07:00 до 22:00.</div></div>
+      ${calendarPersonSwitcher(person)}
     </div>
     <section class="card salon-calendar-card">
       <div class="salon-month-title"><strong>${esc(calendarMonthTitle())}</strong><span>Год и месяц можно выбрать сверху</span></div>
@@ -212,7 +225,7 @@ function openHusbandDay(dateKey,editId=null){
   const events=calendarEntriesOn(person.id,dateKey,'event');
   const edit=editId?events.find(row=>row.id===editId):null;
   const existing=events.length?`<div class="calendar-existing-list">${events.map(row=>`<div class="calendar-existing-item"><button type="button" class="calendar-existing-main" data-edit-calendar="${row.id}"><strong>${esc(row.title||'Мероприятие')}</strong><small>${row.amount!=null&&row.amount!==''?money(row.amount):'Без суммы'}${row.comment?` · ${esc(row.comment)}`:''}</small></button><button type="button" class="calendar-delete" data-delete-calendar="${row.id}" aria-label="Удалить запись">Удалить</button></div>`).join('')}</div>`:'<div class="calendar-empty-day">На этот день записей пока нет.</div>';
-  calendarModal(`${calendarModalHead(edit?'Изменить мероприятие':'Мероприятие',calendarDateLabel(dateKey))}
+  calendarModal(`${calendarModalHead(edit?'Изменить мероприятие':'Мероприятие',`${calendarDateLabel(dateKey)} · ${person.display_name}`)}
     <div id="calendarNotice"></div>
     ${existing}
     <form id="husbandCalendarForm" class="calendar-form">
@@ -264,7 +277,7 @@ function openSalonAppointment(dateKey,startTime,editId=null){
   const appointments=calendarEntriesOn(person.id,dateKey,'appointment');
   const edit=editId?appointments.find(row=>row.id===editId):null;
   const time=edit?calendarTimeText(edit.start_time):startTime;
-  calendarModal(`${calendarModalHead(edit?'Изменить запись':'Записать клиента',`${calendarDateLabel(dateKey)} · ${time}`)}
+  calendarModal(`${calendarModalHead(edit?'Изменить запись':'Записать клиента',`${calendarDateLabel(dateKey)} · ${time} · ${person.display_name}`)}
     <div id="calendarNotice"></div>
     <form id="salonAppointmentForm" class="calendar-form">
       <div class="field"><label>Клиент</label><input id="salonClient" maxlength="120" required value="${esc(edit?.client_name||edit?.title||'')}" placeholder="Имя клиента"></div>
@@ -301,6 +314,14 @@ function openSalonAppointment(dateKey,startTime,editId=null){
   setTimeout(()=>document.getElementById('salonClient')?.focus(),0);
 }
 
+function bindCalendarPersonSwitcher(){
+  document.querySelectorAll('[data-calendar-person]').forEach(button=>button.onclick=()=>{
+    if(button.dataset.calendarPerson===calendarUi.personId)return;
+    calendarUi.personId=button.dataset.calendarPerson;
+    calendarUi.selectedDate=null;
+    renderApp();
+  });
+}
 function bindHusbandCalendar(){
   document.getElementById('calendarPrevMonth').onclick=()=>calendarShiftMonth(-1);
   document.getElementById('calendarNextMonth').onclick=()=>calendarShiftMonth(1);
@@ -338,6 +359,7 @@ function bindWifeCalendar(){
 function bindCalendar(){
   const person=calendarCurrentPerson();
   if(!person)return;
+  bindCalendarPersonSwitcher();
   if(person.label==='wife')bindWifeCalendar();else bindHusbandCalendar();
 }
 
@@ -359,6 +381,7 @@ bindCommon=function(){
   if(calendarNav)calendarNav.onclick=()=>{
     releaseMobileScrollLock?.();
     resetCalendarToToday();
+    calendarUi.personId=calendarOwnPerson()?.id||null;
     state.view='calendar';
     state.journalLimit=50;
     renderApp();
@@ -374,6 +397,7 @@ loadData=async function(){
     const {data,error}=await sb.from('calendar_entries').select('*').eq('family_id',state.family.id).order('entry_date',{ascending:true}).order('start_time',{ascending:true});
     if(error)throw error;
     state.calendarEntries=data||[];
+    if(!calendarUi.personId)calendarUi.personId=calendarOwnPerson()?.id||null;
     if(typeof renderApp==='function')renderApp();
   }catch(error){
     console.error('Не удалось загрузить календарь',error);
