@@ -3,10 +3,44 @@ name: Static integrity
 on:
   push:
     branches: [main]
+    paths:
+      - 'index.html'
+      - 'privacy.html'
+      - 'delete-account.html'
+      - 'styles.css'
+      - 'hotfix.css'
+      - 'manifest.webmanifest'
+      - 'sw.js'
+      - 'src/**'
+      - 'scripts/**'
+      - 'tests/**'
+      - 'assets/**'
+      - 'vendor/**'
+      - 'package.json'
+      - '.github/workflows/static-check.yml'
   pull_request:
+    paths:
+      - 'index.html'
+      - 'privacy.html'
+      - 'delete-account.html'
+      - 'styles.css'
+      - 'hotfix.css'
+      - 'manifest.webmanifest'
+      - 'sw.js'
+      - 'src/**'
+      - 'scripts/**'
+      - 'tests/**'
+      - 'assets/**'
+      - 'vendor/**'
+      - 'package.json'
+      - '.github/workflows/static-check.yml'
 
 permissions:
   contents: read
+
+concurrency:
+  group: static-integrity-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   verify:
