@@ -32,31 +32,33 @@ body:has(#app>.boot){
 
 #app>.boot>.boot-crest{
   position:absolute!important;
-  inset:0!important;
+  inset:0 0 48px!important;
   z-index:0!important;
-  display:block!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
   width:100%!important;
-  height:100%!important;
-  min-width:100%!important;
-  min-height:100%!important;
+  height:auto!important;
+  min-width:0!important;
+  min-height:0!important;
   margin:0!important;
   padding:0!important;
   overflow:hidden!important;
+  background:radial-gradient(circle at center,rgba(20,29,38,.28),rgba(5,11,18,0) 68%)!important;
 }
 
 #app>.boot>.boot-crest>img{
-  position:absolute!important;
-  inset:0!important;
+  position:static!important;
   display:block!important;
-  width:100%!important;
-  max-width:none!important;
-  min-width:100%!important;
-  height:100%!important;
-  max-height:none!important;
-  min-height:100%!important;
+  width:80%!important;
+  max-width:80%!important;
+  min-width:0!important;
+  height:auto!important;
+  max-height:92%!important;
+  min-height:0!important;
   margin:0!important;
   padding:0!important;
-  object-fit:cover!important;
+  object-fit:contain!important;
   object-position:center center!important;
   transform:none!important;
 }
@@ -84,6 +86,16 @@ body:has(#app>.boot){
 }
 
 @media(max-width:760px), (max-device-width:760px), (pointer:coarse) and (max-width:1400px){
+  #app>.boot>.boot-crest{
+    inset:0 0 46px!important;
+  }
+
+  #app>.boot>.boot-crest>img{
+    width:80%!important;
+    max-width:80%!important;
+    max-height:90%!important;
+  }
+
   #app>.boot>.boot-text{
     min-height:46px!important;
     padding:9px 12px calc(9px + env(safe-area-inset-bottom,0px))!important;
