@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="stylesheet" href="../../src/css/pages/calendar-person-switcher.css">
+</head>
+<body>
+  <div class="calendar-page-head">
+    <div></div>
+    <div class="calendar-person-switcher" role="group" aria-label="Чей календарь показывать">
+      <button type="button" class="calendar-person-option is-active" data-calendar-person="husband" aria-pressed="true"><span>Михаил</span><small>Муж</small></button>
+      <button type="button" class="calendar-person-option" data-calendar-person="wife" aria-pressed="false"><span>Огонек</span><small>Жена</small></button>
+    </div>
+  </div>
+  <div id="selected">husband</div>
+  <script>
+    document.querySelectorAll('[data-calendar-person]').forEach(button=>button.addEventListener('click',()=>{
+      document.querySelectorAll('[data-calendar-person]').forEach(item=>{const active=item===button;item.classList.toggle('is-active',active);item.setAttribute('aria-pressed',active?'true':'false')});
+      document.getElementById('selected').textContent=button.dataset.calendarPerson;
+    }));
+  </script>
+</body>
+</html>
