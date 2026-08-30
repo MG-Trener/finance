@@ -12,6 +12,10 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: web-vendor-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   vendor:
     runs-on: ubuntu-latest
@@ -26,8 +30,16 @@ jobs:
         with:
           node-version: 22
 
+      - name: Cache npm packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-npm-${{ hashFiles('package.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-
+
       - name: Install dependencies
-        run: npm install --ignore-scripts --no-audit --no-fund
+        run: npm install --ignore-scripts --no-audit --no-fund --prefer-offline
 
       - name: Prepare local vendor files
         run: npm run web:vendor
