@@ -48,4 +48,4 @@
 /* Must be last among application UI rules: spouse messaging and action-icon alignment. */
 @import url('./components/family-messages.css?v=familymsg2');
 /* Final loading-screen override: keep the dedication and full crest composed above the compact status strip. */
-@import url('./components/boot-splash.css?v=boot6');
+@import url('./components/boot-splash.css?v=boot7');
