@@ -1,17 +1,32 @@
 // In-app APK update checker for sideloaded Android builds.
 (function(){
   const RELEASE_API='https://api.github.com/repos/MG-Trener/finance/releases/tags/latest-apk';
-  const DOWNLOAD_URL='https://github.com/MG-Trener/finance/releases/download/latest-apk/family-treasury.apk';
+  const RELEASE_DOWNLOAD_BASE='https://github.com/MG-Trener/finance/releases/download/latest-apk';
   const CHECK_INTERVAL=15*60*1000;
   const native=Boolean(window.__FINANCE_NATIVE__);
   const currentBuild=Number(window.__FINANCE_BUILD__||0);
   let runtimeInstalledBuild=currentBuild;
   let checked=false,checking=false,available=false,latestBuild=0,lastError='';
   let nativeState='idle',nativeInstallAllowed=true,permissionRequired=false;
+  let downloadUrl=`${RELEASE_DOWNLOAD_BASE}/family-treasury.apk`;
 
   function nativeUpdater(){return window.Capacitor?.Plugins?.AppUpdater}
   function cachedLatest(){return Number(localStorage.getItem('finance.latestApkBuild')||0)}
   function effectiveBuild(){return Math.max(currentBuild,Number(runtimeInstalledBuild||0))}
+  function versionedDownloadUrl(build){
+    return build>0?`${RELEASE_DOWNLOAD_BASE}/family-treasury-${build}.apk`:`${RELEASE_DOWNLOAD_BASE}/family-treasury.apk`;
+  }
+  function cacheBustedUrl(url,build,stamp=Date.now()){
+    try{
+      const parsed=new URL(url);
+      if(build>0)parsed.searchParams.set('build',String(build));
+      parsed.searchParams.set('v',String(stamp||Date.now()));
+      return parsed.toString();
+    }catch(_){
+      const join=url.includes('?')?'&':'?';
+      return `${url}${join}build=${encodeURIComponent(build||0)}&v=${encodeURIComponent(stamp||Date.now())}`;
+    }
+  }
   function reconcileAvailability(){
     const installed=effectiveBuild();
     available=native&&installed>0&&latestBuild>installed;
@@ -25,6 +40,7 @@
   }
   function applyCached(){
     latestBuild=cachedLatest();
+    if(latestBuild>0)downloadUrl=versionedDownloadUrl(latestBuild);
     reconcileAvailability();
   }
   function label(){
@@ -55,7 +71,7 @@
     document.querySelectorAll('[data-app-update-label]').forEach(el=>el.textContent=label());
     document.querySelectorAll('[data-app-update-detail]').forEach(el=>el.textContent=detail());
     document.querySelectorAll('[data-app-update-link]').forEach(el=>{
-      el.href=DOWNLOAD_URL;
+      el.href=downloadUrl;
       el.classList.toggle('has-update',confirmedUpdate);
       el.setAttribute('aria-label',`${label()}. ${detail()}`);
     });
@@ -93,7 +109,7 @@
     if(status?.state==='downloading'||status?.state==='downloaded')return true;
     if(status?.installAllowed===false){permissionRequired=true;refreshUi();return false}
     try{
-      const result=await updater.downloadAndInstall({url:DOWNLOAD_URL,build:latestBuild,automatic:true});
+      const result=await updater.downloadAndInstall({url:downloadUrl,build:latestBuild,automatic:true});
       const installedFromAndroid=Number(result?.installedBuild||0);
       if(installedFromAndroid>0)runtimeInstalledBuild=Math.max(runtimeInstalledBuild,installedFromAndroid);
       nativeState=String(result?.state||nativeState||'idle');
@@ -110,6 +126,7 @@
   async function check({force=false}={}){
     if(!native){refreshUi();return false}
     latestBuild=cachedLatest();
+    if(latestBuild>0)downloadUrl=versionedDownloadUrl(latestBuild);
     await syncNativeState();
     reconcileAvailability();
     refreshUi();
@@ -130,6 +147,17 @@
       const match=String(release?.body||'').match(/Build:\s*(\d+)/i);
       latestBuild=Number(match?.[1]||0);
       if(latestBuild){
+        const assets=Array.isArray(release?.assets)?release.assets:[];
+        const versionedName=`family-treasury-${latestBuild}.apk`;
+        const versionedAsset=assets.find(asset=>asset?.name===versionedName&&asset?.browser_download_url);
+        const genericAsset=assets.find(asset=>asset?.name==='family-treasury.apk'&&asset?.browser_download_url);
+        if(versionedAsset?.browser_download_url){
+          downloadUrl=versionedAsset.browser_download_url;
+        }else if(genericAsset?.browser_download_url){
+          downloadUrl=cacheBustedUrl(genericAsset.browser_download_url,latestBuild,Date.parse(release?.updated_at||'')||Date.now());
+        }else{
+          downloadUrl=versionedDownloadUrl(latestBuild);
+        }
         localStorage.setItem('finance.latestApkBuild',String(latestBuild));
         localStorage.setItem('finance.appUpdateCheckedAt',String(Date.now()));
       }
@@ -156,7 +184,7 @@
       const updater=nativeUpdater();
       if(updater?.downloadAndInstall){
         try{
-          const result=await updater.downloadAndInstall({url:DOWNLOAD_URL,build:latestBuild,automatic:false});
+          const result=await updater.downloadAndInstall({url:downloadUrl,build:latestBuild,automatic:false});
           const installedFromAndroid=Number(result?.installedBuild||0);
           if(installedFromAndroid>0)runtimeInstalledBuild=Math.max(runtimeInstalledBuild,installedFromAndroid);
           nativeState=String(result?.state||nativeState||'idle');
@@ -170,13 +198,13 @@
     }
     try{
       const browser=window.Capacitor?.Plugins?.Browser;
-      if(native&&browser?.open){await browser.open({url:DOWNLOAD_URL});return true}
+      if(native&&browser?.open){await browser.open({url:downloadUrl});return true}
     }catch(error){console.warn('Не удалось открыть системный браузер для обновления',error)}
-    window.open(DOWNLOAD_URL,'_blank','noopener');
+    window.open(downloadUrl,'_blank','noopener');
     return true;
   }
 
-  window.FinanceAppUpdate={check,refreshUi,openDownload,downloadUrl:DOWNLOAD_URL,get native(){return native},get currentBuild(){return effectiveBuild()},get latestBuild(){return latestBuild},get checked(){return checked},get checking(){return checking},get available(){return available&&checked},get nativeState(){return nativeState},get label(){return label()},get detail(){return detail()}};
+  window.FinanceAppUpdate={check,refreshUi,openDownload,get downloadUrl(){return downloadUrl},get native(){return native},get currentBuild(){return effectiveBuild()},get latestBuild(){return latestBuild},get checked(){return checked},get checking(){return checking},get available(){return available&&checked},get nativeState(){return nativeState},get label(){return label()},get detail(){return detail()}};
   applyCached();
   window.addEventListener('online',()=>check({force:true}));
   document.addEventListener('visibilitychange',()=>{
