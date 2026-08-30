@@ -43,7 +43,7 @@
 .treasury-splash-title{
   position:absolute;
   z-index:5;
-  top:max(10vh,calc(env(safe-area-inset-top) + 34px));
+  top:max(9vh,calc(env(safe-area-inset-top) + 30px));
   left:50%;
   width:min(900px,90vw);
   text-align:center;
@@ -51,28 +51,46 @@
   animation:treasury-title-in 1.05s cubic-bezier(.2,.8,.2,1) both;
 }
 
-.treasury-splash-kicker{
-  display:block;
-  margin-bottom:clamp(8px,1.6vh,16px);
-  color:#dcae57;
-  font:700 clamp(11px,1.6vw,15px)/1.2 Inter,system-ui,sans-serif;
-  letter-spacing:.34em;
-  text-transform:uppercase;
-}
-
 .treasury-splash-title h1{
   margin:0;
-  color:#f5e3b4;
-  font:700 clamp(25px,5vw,56px)/1.12 Cinzel,Georgia,serif;
-  letter-spacing:.025em;
-  text-shadow:0 2px 0 #1f1002,0 0 22px rgba(255,187,67,.22);
+  color:#f0d398;
+  font:400 clamp(38px,7vw,76px)/1 'Pirata One',Georgia,serif;
+  letter-spacing:.018em;
+  white-space:nowrap;
+  text-shadow:0 2px 0 #1f1002,0 0 24px rgba(255,187,67,.28),0 5px 18px rgba(0,0,0,.88);
 }
 
-.treasury-splash-title h1 span{color:#ffd978;text-shadow:0 2px 0 #301700,0 0 28px rgba(255,159,24,.4)}
-.treasury-splash-rule{display:flex;align-items:center;gap:12px;width:min(430px,72vw);margin:clamp(16px,3vh,28px) auto 0}
+.treasury-splash-rule{display:flex;align-items:center;gap:12px;width:min(430px,72vw);margin:clamp(12px,2.2vh,22px) auto 0}
 .treasury-splash-rule::before,.treasury-splash-rule::after{content:"";height:1px;flex:1;background:linear-gradient(90deg,transparent,#d49736)}
 .treasury-splash-rule::after{transform:scaleX(-1)}
 .treasury-splash-rule i{width:8px;height:8px;border:1px solid #ffd274;transform:rotate(45deg);box-shadow:0 0 13px #ff9d18}
+
+.treasury-splash-crest{
+  position:absolute;
+  z-index:3;
+  top:clamp(178px,25vh,260px);
+  bottom:calc(clamp(82px,17vh,155px) + var(--coin-size) + 20px);
+  left:50%;
+  width:min(23vw,240px);
+  display:grid;
+  place-items:center;
+  transform:translateX(-50%);
+  pointer-events:none;
+  animation:treasury-crest-in 1.25s .28s cubic-bezier(.2,.75,.2,1) both;
+}
+
+.treasury-splash-crest img{
+  display:block;
+  width:100%;
+  max-width:100%;
+  max-height:100%;
+  object-fit:contain;
+  border:1px solid rgba(205,158,78,.34);
+  border-radius:clamp(9px,1.3vw,16px);
+  opacity:.84;
+  filter:saturate(.86) brightness(.78) contrast(1.05) drop-shadow(0 18px 30px rgba(0,0,0,.8)) drop-shadow(0 0 14px rgba(211,151,57,.2));
+  box-shadow:inset 0 0 20px rgba(0,0,0,.45);
+}
 
 .treasury-splash-track{
   position:absolute;
@@ -133,26 +151,32 @@
 .treasury-splash .sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
 
 @keyframes treasury-title-in{from{opacity:0;transform:translate(-50%,-20px);filter:blur(7px)}to{opacity:1;transform:translate(-50%,0);filter:blur(0)}}
+@keyframes treasury-crest-in{from{opacity:0;transform:translate(-50%,18px) scale(.94);filter:blur(5px)}to{opacity:1;transform:translate(-50%,0) scale(1);filter:blur(0)}}
 @keyframes treasury-ambient{0%{transform:rotate(-2deg) scale(.96);opacity:.18}55%{opacity:.5}100%{transform:rotate(2deg) scale(1.05);opacity:.3}}
 @keyframes treasury-final-flash{0%{opacity:0;transform:scale(.32)}32%{opacity:1}100%{opacity:0;transform:scale(1.12)}}
 
+@media (min-width:601px){
+  .treasury-splash-crest{place-items:start center}
+}
+
 @media (max-width:600px){
   .treasury-splash{--coin-size:clamp(82px,27vw,126px)}
-  .treasury-splash-title{top:max(11vh,calc(env(safe-area-inset-top) + 28px));width:92vw}
-  .treasury-splash-title h1{font-size:clamp(24px,8.2vw,38px)}
+  .treasury-splash-title{top:max(10vh,calc(env(safe-area-inset-top) + 25px));width:94vw}
+  .treasury-splash-title h1{font-size:clamp(38px,12vw,52px)}
+  .treasury-splash-crest{top:clamp(170px,23vh,215px);bottom:calc(max(14vh,calc(env(safe-area-inset-bottom) + 68px)) + var(--coin-size) + 18px);width:min(54vw,220px)}
   .treasury-splash-track{bottom:max(14vh,calc(env(safe-area-inset-bottom) + 68px))}
 }
 
 @media (max-height:560px) and (orientation:landscape){
   .treasury-splash{--coin-size:clamp(72px,19vh,108px)}
   .treasury-splash-title{top:7vh}
-  .treasury-splash-title h1{font-size:clamp(22px,6vh,35px)}
-  .treasury-splash-kicker{margin-bottom:5px}
+  .treasury-splash-title h1{font-size:clamp(34px,10vh,50px)}
   .treasury-splash-rule{margin-top:10px}
+  .treasury-splash-crest{top:24vh;bottom:calc(18vh + var(--coin-size) + 10px);width:min(22vw,190px)}
   .treasury-splash-track{bottom:18vh}
 }
 
 @media (prefers-reduced-motion:reduce){
-  .treasury-splash::before,.treasury-splash-title{animation:none}
+  .treasury-splash::before,.treasury-splash-title,.treasury-splash-crest{animation:none}
   .treasury-splash{transition-duration:.2s}
 }

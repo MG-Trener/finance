@@ -46,7 +46,7 @@ await copyFirst([
 ],'xlsx.full.min.js','XLSX');
 
 async function bundleMobileFonts(){
-  const cssUrl='https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Inter:wght@400;500;600;700;800&display=swap';
+  const cssUrl='https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Inter:wght@400;500;600;700;800&family=Pirata+One&display=swap';
   const fontDir=path.join(out,'assets','fonts');
   await mkdir(fontDir,{recursive:true});
   try{
@@ -67,7 +67,7 @@ async function bundleMobileFonts(){
     console.log(`Bundled ${urls.length} local webfont files for Android.`);
     return 'assets/fonts/mobile-fonts.css';
   }catch(error){
-    const fallback=`/* Build-time font download was unavailable. Keep Android typography deterministic. */\n.native-app{font-family:Roboto,Arial,sans-serif}\n.native-app .auth-hero h1,.native-app .title h1,.native-app .card h3,.native-app .auth-card h2,.native-app .onboarding-card h2,.native-app .modal h2{font-family:Georgia,'Times New Roman',serif}\n`;
+    const fallback=`/* Build-time font download was unavailable. Keep Android typography deterministic. */\n.native-app{font-family:Roboto,Arial,sans-serif}\n.native-app .auth-hero h1,.native-app .title h1,.native-app .card h3,.native-app .auth-card h2,.native-app .onboarding-card h2,.native-app .modal h2,.native-app .treasury-splash-title h1{font-family:Georgia,'Times New Roman',serif}\n`;
     await writeFile(path.join(fontDir,'mobile-fonts.css'),fallback,'utf8');
     console.warn(`Local font bundle fallback used: ${error.message}`);
     return 'assets/fonts/mobile-fonts.css';

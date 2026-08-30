@@ -51,6 +51,9 @@ assert(!/\.(?:gif|mp4|webm)["']/.test(splashJs),'splash must not use GIF or vide
 
 // Every local script/stylesheet/manifest/icon referenced by index.html must exist.
 const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
+assert(html.includes('class="treasury-splash-crest"'),'family crest must be present in the splash composition');
+assert(html.includes('assets/gerb-runtime.webp'),'splash must use the optimized runtime crest');
+assert(html.includes('family=Pirata+One'),'splash pirate font must be requested for the web build');
 const refs=[...html.matchAll(/(?:src|href)="([^"]+)"/g)].map(m=>m[1]);
 for(const ref of refs){
   if(/^(?:https?:|data:|#)/.test(ref))continue;
