@@ -4,6 +4,7 @@
   let initialResolved=false;
   let renderedUserId=null;
   let slowStartTimer=null;
+  let offlinePrompt=null;
   const SLOW_START_DELAY=15000;
 
   function runAfterAuthCallback(fn){setTimeout(()=>Promise.resolve().then(fn).catch(error=>console.error('Ошибка запуска приложения',error)),0)}
@@ -18,16 +19,17 @@
       const nativeApp=window.Capacitor?.Plugins?.App;
       if(window.__FINANCE_NATIVE__&&nativeApp?.exitApp){
         await nativeApp.exitApp();
-        return;
+        return true;
       }
     }catch(error){
       console.warn('Не удалось закрыть Android-приложение через Capacitor',error);
     }
     try{window.close()}catch(_){ }
+    return false;
   }
   function showSlowStartPrompt(){
     const boot=bootElement();
-    if(!boot||boot.querySelector('.boot-wait-panel'))return;
+    if(!boot||boot.querySelector('.boot-wait-panel')||offlinePrompt)return;
     const panel=document.createElement('div');
     panel.className='boot-wait-panel';
     panel.setAttribute('role','status');
@@ -44,6 +46,39 @@
     };
     document.getElementById('bootCloseApp').onclick=exitApplication;
   }
+  function confirmOfflineStart(){
+    if(navigator.onLine)return Promise.resolve(true);
+    if(offlinePrompt)return offlinePrompt;
+    clearTimeout(slowStartTimer);
+    offlinePrompt=new Promise(resolve=>{
+      const boot=bootElement();
+      if(!boot){offlinePrompt=null;resolve(true);return}
+      boot.querySelector('.boot-wait-panel')?.remove();
+      const panel=document.createElement('div');
+      panel.className='boot-wait-panel boot-offline-panel';
+      panel.setAttribute('role','alertdialog');
+      panel.setAttribute('aria-modal','true');
+      panel.setAttribute('aria-labelledby','bootOfflineTitle');
+      panel.innerHTML=`<div class="boot-wait-message" id="bootOfflineTitle">Нет подключения к базе данных</div>
+        <div class="boot-wait-detail">Интернет-соединение отсутствует. Можно продолжить работу с сохранённой на телефоне копией данных. После восстановления связи приложение автоматически подключится к базе и синхронизирует изменения.</div>
+        <div class="boot-wait-actions">
+          <button type="button" class="boot-wait-button boot-wait-primary" id="bootContinueOffline">Продолжить работу</button>
+          <button type="button" class="boot-wait-button" id="bootCloseOffline">Закрыть приложение</button>
+        </div>`;
+      boot.appendChild(panel);
+      const finish=value=>{panel.remove();offlinePrompt=null;resolve(value)};
+      document.getElementById('bootContinueOffline').onclick=()=>finish(true);
+      document.getElementById('bootCloseOffline').onclick=async()=>{
+        const button=document.getElementById('bootCloseOffline');
+        if(button){button.disabled=true;button.textContent='Закрываем…'}
+        const closed=await exitApplication();
+        // Browsers cannot reliably close a tab they did not open. Keep the
+        // choice visible there instead of silently continuing offline.
+        if(!closed&&button){button.disabled=false;button.textContent='Закрыть приложение'}
+      };
+    });
+    return offlinePrompt;
+  }
   async function openUserSession(user){
     if(!user)return false;
     const unlocked=browserUsesLocalLock()?await window.FinanceLocalLock?.unlockIfNeeded?.(user):true;
@@ -52,6 +87,8 @@
   }
   async function openWithoutServerSession(){
     if(!navigator.onLine){
+      const proceed=await confirmOfflineStart();
+      if(!proceed)return false;
       const restored=await window.FinanceOfflineSession?.tryOpen?.();
       if(restored){renderedUserId=state.user?.id||null;return true}
     }
