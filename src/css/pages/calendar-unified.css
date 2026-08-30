@@ -1,0 +1,71 @@
+/* Unified family calendar: identical month view, wife-specific day booking modal. */
+.wife-month-calendar-page .wife-unified-calendar-card{padding-bottom:0}
+.wife-month-calendar-page .calendar-day.is-weekend{background:linear-gradient(180deg,rgba(93,39,38,.28),rgba(35,24,27,.64));border-color:rgba(180,74,65,.22)}
+.wife-month-calendar-page .calendar-day.has-entry{border-color:rgba(218,171,80,.65);background:radial-gradient(circle at 84% 18%,rgba(216,169,77,.22),transparent 27%),linear-gradient(180deg,rgba(59,45,28,.78),rgba(24,27,28,.78))}
+.wife-month-calendar-page .calendar-day.is-weekend.has-entry{background:radial-gradient(circle at 84% 18%,rgba(225,177,83,.24),transparent 27%),linear-gradient(180deg,rgba(94,49,37,.58),rgba(39,26,28,.72))}
+
+.wife-month-summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;padding:0;overflow:hidden;background:rgba(199,163,96,.14)}
+.wife-month-summary-item{min-width:0;padding:18px 20px;background:rgba(8,15,21,.92)}
+.wife-month-summary-item span{display:block;color:#929da4;font-size:12px}
+.wife-month-summary-item strong{display:block;margin-top:5px;color:#f0d39b;font-family:Cinzel,serif;font-size:22px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+.calendar-modal:has(.salon-day-schedule){width:min(720px,calc(100vw - 24px));max-height:min(90vh,900px)}
+.salon-day-summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:0 0 12px}
+.salon-day-summary>span{display:flex;align-items:baseline;gap:5px;padding:10px 12px;border:1px solid rgba(199,163,96,.18);border-radius:11px;background:rgba(14,23,29,.62);color:#909ca2;font-size:12px}
+.salon-day-summary strong{color:#efd198;font-size:16px}
+.salon-day-schedule{display:flex;flex-direction:column;border-top:1px solid rgba(199,163,96,.14)}
+.salon-day-slot{display:grid;grid-template-columns:64px minmax(0,1fr) auto;align-items:center;gap:10px;min-height:52px;padding:5px 7px;border:0;border-bottom:1px solid rgba(130,143,152,.13);background:transparent;color:#dce1e3;text-align:left}
+button.salon-day-slot{width:100%;cursor:pointer}
+.salon-day-slot.is-free:hover{background:rgba(84,110,126,.10)}
+.salon-day-slot.is-free .salon-free-label{color:#82959f;font-size:12px}
+.salon-day-slot.has-appointment{margin:4px 0;padding:6px 7px;border:1px solid rgba(211,168,89,.42);border-radius:11px;background:linear-gradient(90deg,rgba(88,59,29,.58),rgba(34,31,27,.38))}
+.salon-day-slot.is-covered{opacity:.68;background:rgba(77,58,34,.09)}
+.salon-day-continuation{color:#8b969c;font-size:11px}
+.salon-day-appointment{min-width:0;border:0;background:transparent;color:#e7eaeb;text-align:left;padding:3px 0;cursor:pointer}
+.salon-day-appointment strong,.salon-day-appointment small{display:block;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.salon-day-appointment strong{font-size:14px}
+.salon-day-appointment small{margin-top:2px;color:#9da6aa;font-size:11px}
+.salon-call-button{display:inline-flex;align-items:center;justify-content:center;gap:5px;min-height:36px;padding:0 10px;border:1px solid rgba(83,155,111,.38);border-radius:10px;background:rgba(32,92,58,.20);color:#9fe0b7;text-decoration:none;font-size:11px;font-weight:800;white-space:nowrap}
+.salon-call-button:hover{border-color:rgba(115,199,145,.62);background:rgba(38,112,69,.28);color:#c0f2d0}
+.salon-day-closing{display:grid;grid-template-columns:64px 1fr;gap:10px;padding:10px 7px 2px;color:#737e85;font-size:11px}
+.salon-day-closing span:first-child{color:#aa966f;font-weight:800}
+
+.salon-editor-head{align-items:flex-start}
+.salon-editor-heading{display:flex;align-items:flex-start;gap:9px;min-width:0}
+.salon-editor-heading>div{min-width:0}
+.salon-back-button{flex:0 0 auto;width:36px;height:36px;margin-top:1px;border:1px solid rgba(199,163,96,.28);border-radius:10px;background:rgba(20,29,36,.72);color:#e7c985;font-size:27px;line-height:1;cursor:pointer}
+.salon-back-button:hover{border-color:#b88b4c;background:rgba(91,59,30,.42)}
+.salon-client-form{gap:13px}
+.salon-phone-control{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:stretch}
+.salon-call-form-button{min-width:116px;display:inline-flex;align-items:center;justify-content:center;gap:5px}
+.salon-call-form-button.is-disabled,.salon-call-form-button:disabled{opacity:.42;cursor:not-allowed}
+.salon-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.salon-form-actions{align-items:center}
+
+@media(max-width:760px){
+  .wife-month-summary-item{padding:14px 12px}
+  .wife-month-summary-item span{font-size:10px}
+  .wife-month-summary-item strong{font-size:17px}
+  .calendar-modal:has(.salon-day-schedule){width:calc(100vw - 12px);max-height:calc(100dvh - 24px)}
+  .salon-day-summary{gap:6px;margin-bottom:8px}
+  .salon-day-summary>span{padding:8px 9px;font-size:10px}
+  .salon-day-summary strong{font-size:14px}
+  .salon-day-slot{grid-template-columns:53px minmax(0,1fr) auto;gap:6px;min-height:49px;padding:4px 4px}
+  .salon-day-slot.has-appointment{padding:5px 5px}
+  .salon-time{font-size:11px}
+  .salon-day-appointment strong{font-size:13px}
+  .salon-day-appointment small{font-size:10px}
+  .salon-call-button{width:36px;min-height:34px;padding:0;border-radius:9px}
+  .salon-call-button span:last-child{display:none}
+  .salon-day-closing{grid-template-columns:53px 1fr;padding-left:4px}
+  .salon-phone-control{grid-template-columns:minmax(0,1fr) 48px}
+  .salon-call-form-button{min-width:0;width:48px;padding:0;font-size:0}
+  .salon-call-form-button span{font-size:17px}
+  .salon-form-grid{grid-template-columns:1fr}
+}
+
+@media(max-width:420px){
+  .wife-month-summary{grid-template-columns:1fr 1fr}
+  .salon-day-slot{grid-template-columns:49px minmax(0,1fr) 34px}
+  .salon-call-button{width:34px;padding:0}
+}
