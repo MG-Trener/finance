@@ -31,6 +31,7 @@ create index if not exists calendar_entries_appointment_time_idx
 alter table public.calendar_entries enable row level security;
 
 revoke all on table public.calendar_entries from anon;
+revoke all on table public.calendar_entries from authenticated;
 grant select, insert, update, delete on table public.calendar_entries to authenticated;
 grant all on table public.calendar_entries to service_role;
 
