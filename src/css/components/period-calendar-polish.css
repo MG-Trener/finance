@@ -16,11 +16,15 @@
 .journal-period-filter #filterMonth{flex:1.35}
 .journal-period-filter #filterYear{flex:.8}
 
-.salon-period-controls{display:flex;align-items:flex-end;gap:10px;padding:14px 18px 8px}
+.salon-period-controls{display:flex;align-items:stretch;gap:10px;padding:14px 18px 8px}
+.salon-month-swipe{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:3px;min-height:76px;padding:10px 14px;border:1px solid rgba(199,163,96,.34);border-radius:12px;background:linear-gradient(180deg,rgba(26,36,44,.86),rgba(12,21,28,.88));touch-action:pan-y;user-select:none;-webkit-user-select:none;cursor:grab}
+.salon-month-swipe:active{cursor:grabbing}
+.salon-month-swipe:focus{outline:2px solid rgba(212,170,97,.28);outline-offset:1px;border-color:#d4aa61}
+.salon-month-swipe-label,.salon-period-controls label>span{color:#90999f;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.salon-month-swipe strong{color:#f0dfbd;font-family:Cinzel,serif;font-size:20px;line-height:1.15}
+.salon-month-swipe small{color:#8f999f;font-size:11px;line-height:1.25}
 .salon-period-controls label{display:flex;flex-direction:column;gap:5px;min-width:0}
-.salon-period-controls label:first-child{flex:1 1 220px}
-.salon-period-controls label:last-child{flex:0 0 130px}
-.salon-period-controls span{color:#90999f;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.salon-year-control{flex:0 0 130px}
 .salon-period-controls select{width:100%;min-height:42px;border:1px solid rgba(199,163,96,.34);border-radius:10px;background:#101a22;color:#f0dfbd;padding:9px 11px;font:inherit}
 .salon-period-controls select:focus{outline:2px solid rgba(212,170,97,.28);outline-offset:1px;border-color:#d4aa61}
 
@@ -39,9 +43,11 @@
   .boot-crest{width:min(62vw,230px);max-height:34vh}
   .boot-crest img{max-height:34vh}
   .salon-period-controls{padding:10px 11px 6px;gap:7px}
-  .salon-period-controls label:first-child{flex:1 1 auto}
-  .salon-period-controls label:last-child{flex:0 0 104px}
-  .salon-period-controls span{font-size:9px}
+  .salon-month-swipe{min-height:68px;padding:8px 10px}
+  .salon-month-swipe strong{font-size:17px}
+  .salon-month-swipe-label,.salon-period-controls label>span{font-size:9px}
+  .salon-month-swipe small{font-size:9px}
+  .salon-year-control{flex:0 0 104px}
   .salon-period-controls select{min-height:39px;padding:8px 9px;font-size:13px}
 }
 
@@ -55,6 +61,6 @@
   .boot-crest{width:min(60vw,205px)}
   .journal-period-filter{grid-template-columns:1fr}
   .journal-period-filter #filterPeriod{grid-column:auto}
-  .salon-period-controls{display:grid;grid-template-columns:minmax(0,1fr) 96px}
-  .salon-period-controls label:last-child{flex-basis:auto}
+  .salon-period-controls{grid-template-columns:minmax(0,1fr) 96px}
+  .salon-year-control{flex-basis:auto}
 }
