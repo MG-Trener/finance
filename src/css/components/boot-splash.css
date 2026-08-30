@@ -91,6 +91,55 @@ body:has(#app>.boot){
   white-space:nowrap!important;
 }
 
+#app>.boot>.boot-wait-panel{
+  position:absolute;
+  left:50%;
+  bottom:88px;
+  z-index:4;
+  width:min(520px,calc(100vw - 32px));
+  transform:translateX(-50%);
+  padding:18px;
+  border:1px solid rgba(210,170,98,.48);
+  border-radius:18px;
+  background:rgba(8,15,22,.96);
+  box-shadow:0 16px 48px rgba(0,0,0,.58);
+  text-shadow:none;
+}
+
+.boot-wait-message{
+  color:#f1d7a2;
+  font-family:Inter,system-ui,sans-serif;
+  font-size:15px;
+  font-weight:700;
+  line-height:1.45;
+  letter-spacing:0;
+  text-align:center;
+}
+
+.boot-wait-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin-top:15px;
+}
+
+.boot-wait-button{
+  min-height:44px;
+  padding:10px 12px;
+  border:1px solid rgba(210,170,98,.34);
+  border-radius:12px;
+  background:rgba(24,34,42,.86);
+  color:#e7d2aa;
+  font:700 13px/1.2 Inter,system-ui,sans-serif;
+  cursor:pointer;
+}
+
+.boot-wait-button.boot-wait-primary{
+  background:linear-gradient(180deg,rgba(132,91,43,.95),rgba(84,54,27,.95));
+  border-color:rgba(232,192,113,.62);
+  color:#fff0c8;
+}
+
 @media(max-width:760px), (max-device-width:760px), (pointer:coarse) and (max-width:1400px){
   #app>.boot>.boot-crest{
     bottom:62px!important;
@@ -108,5 +157,16 @@ body:has(#app>.boot){
     min-height:46px!important;
     padding:9px 12px calc(9px + env(safe-area-inset-bottom,0px))!important;
     font-size:16px!important;
+  }
+
+  #app>.boot>.boot-wait-panel{
+    bottom:76px;
+    width:calc(100vw - 24px);
+    padding:15px;
+    border-radius:15px;
+  }
+
+  .boot-wait-actions{
+    grid-template-columns:1fr;
   }
 }
