@@ -1,5 +1,14 @@
-/* Period controls and calendar readability refinements. */
+/* Period controls, calendar readability and launch-screen refinements. */
 [hidden]{display:none!important}
+
+/* The same family crest used on the website is scaled for the app launch screen. */
+.boot{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:calc(24px + env(safe-area-inset-top,0px)) 24px calc(24px + env(safe-area-inset-bottom,0px));text-align:center}
+.boot-crest{width:min(58vw,280px);max-height:40vh;display:grid;place-items:center;filter:drop-shadow(0 12px 28px rgba(0,0,0,.62));animation:bootCrestIn .55s ease-out both}
+.boot-crest img{display:block;width:100%;height:auto;max-height:40vh;object-fit:contain}
+.boot-text{font-size:clamp(17px,4.5vw,24px);line-height:1.35;animation:bootTextIn .45s .12s ease-out both}
+@keyframes bootCrestIn{from{opacity:0;transform:translateY(10px) scale(.96)}to{opacity:1;transform:none}}
+@keyframes bootTextIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.boot-crest,.boot-text{animation:none}}
 
 .journal-period-filter{display:flex;gap:8px;flex:2 1 430px;min-width:min(430px,100%)}
 .journal-period-filter select{min-width:120px}
@@ -26,6 +35,9 @@
 .salon-slot.is-covered .salon-time{color:#d9bd87}
 
 @media(max-width:760px){
+  .boot{gap:15px;padding-left:20px;padding-right:20px}
+  .boot-crest{width:min(62vw,230px);max-height:34vh}
+  .boot-crest img{max-height:34vh}
   .salon-period-controls{padding:10px 11px 6px;gap:7px}
   .salon-period-controls label:first-child{flex:1 1 auto}
   .salon-period-controls label:last-child{flex:0 0 104px}
@@ -40,6 +52,7 @@
 }
 
 @media(max-width:390px){
+  .boot-crest{width:min(60vw,205px)}
   .journal-period-filter{grid-template-columns:1fr}
   .journal-period-filter #filterPeriod{grid-column:auto}
   .salon-period-controls{display:grid;grid-template-columns:minmax(0,1fr) 96px}
