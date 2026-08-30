@@ -82,26 +82,79 @@
     if(year)year.onchange=event=>{filters.periodYear=Number(event.target.value);state.journalLimit=50;renderApp()};
   };
 
+  function salonCalendarYears(){
+    const years=new Set((availableYears?.()||[]).map(Number).filter(Number.isFinite));
+    years.add(new Date().getFullYear());
+    years.add(Number(state.year)||new Date().getFullYear());
+    return [...years].sort((a,b)=>a-b);
+  }
+
   const baseWifeCalendarPage=wifeCalendarPage;
   wifeCalendarPage=function(person){
-    const controls=`<div class="salon-period-controls" role="group" aria-label="Период календаря салона">
-      <label><span>Месяц</span><select id="salonMonthSelect" aria-label="Месяц календаря">${MONTHS.map((name,index)=>`<option value="${index+1}" ${index+1===Number(state.month)?'selected':''}>${name}</option>`).join('')}</select></label>
-      <label><span>Год</span><select id="salonYearSelect" aria-label="Год календаря">${availableYears().map(value=>`<option value="${value}" ${value===Number(state.year)?'selected':''}>${value}</option>`).join('')}</select></label>
+    const monthName=MONTHS[Number(state.month)-1]||'';
+    const controls=`<div class="salon-period-controls salon-swipe-period-controls" role="group" aria-label="Период календаря салона">
+      <div class="salon-month-swipe" id="salonMonthSwipe" role="group" tabindex="0" aria-label="${esc(monthName)}. Проведите влево или вправо для смены месяца">
+        <span class="salon-month-swipe-label">Месяц</span>
+        <strong>${esc(monthName)}</strong>
+        <small>Свайп влево или вправо для смены месяца</small>
+      </div>
+      <label class="salon-year-control"><span>Год</span><select id="salonYearSelect" aria-label="Год календаря">${salonCalendarYears().map(value=>`<option value="${value}" ${value===Number(state.year)?'selected':''}>${value}</option>`).join('')}</select></label>
     </div>`;
     return baseWifeCalendarPage(person).replace(/<div class="salon-month-title">[\s\S]*?<\/div>\s*(<div class="salon-date-ribbon")/,`${controls}$1`);
   };
 
+  function bindSalonMonthSwipe(){
+    const swipe=document.getElementById('salonMonthSwipe');
+    if(!swipe)return;
+    let startX=0,startY=0;
+    swipe.addEventListener('touchstart',event=>{
+      const touch=event.changedTouches?.[0];
+      if(!touch)return;
+      startX=touch.clientX;
+      startY=touch.clientY;
+    },{passive:true});
+    swipe.addEventListener('touchend',event=>{
+      const touch=event.changedTouches?.[0];
+      if(!touch)return;
+      const dx=touch.clientX-startX,dy=touch.clientY-startY;
+      if(Math.abs(dx)<55||Math.abs(dx)<Math.abs(dy)*1.2)return;
+      calendarShiftMonth(dx<0?1:-1);
+    },{passive:true});
+    swipe.addEventListener('keydown',event=>{
+      if(event.key!=='ArrowLeft'&&event.key!=='ArrowRight')return;
+      event.preventDefault();
+      calendarShiftMonth(event.key==='ArrowRight'?1:-1);
+    });
+  }
+
   const baseBindWifeCalendar=bindWifeCalendar;
   bindWifeCalendar=function(){
     baseBindWifeCalendar();
-    const month=document.getElementById('salonMonthSelect');
     const year=document.getElementById('salonYearSelect');
-    if(month)month.onchange=event=>{state.month=Number(event.target.value);calendarUi.selectedDate=null;renderApp()};
     if(year)year.onchange=event=>{state.year=Number(event.target.value);calendarUi.selectedDate=null;renderApp()};
+    bindSalonMonthSwipe();
     document.querySelectorAll('.salon-date[data-salon-date]').forEach(button=>{
       const date=calendarDateFromKey(button.dataset.salonDate);
       const weekday=date.getDay();
       button.classList.toggle('is-weekend',weekday===0||weekday===6);
+    });
+  };
+
+  // When switching from the husband's calendar to the wife's calendar, start
+  // from today's month. Subsequent swipes keep the selected month until the
+  // user leaves or switches calendars again.
+  const baseBindCalendarPersonSwitcher=bindCalendarPersonSwitcher;
+  bindCalendarPersonSwitcher=function(){
+    baseBindCalendarPersonSwitcher();
+    document.querySelectorAll('[data-calendar-person]').forEach(button=>{
+      const target=byId(state.people,button.dataset.calendarPerson);
+      if(target?.label!=='wife')return;
+      button.onclick=()=>{
+        if(button.dataset.calendarPerson===calendarUi.personId)return;
+        calendarUi.personId=button.dataset.calendarPerson;
+        resetCalendarToToday();
+        renderApp();
+      };
     });
   };
 })();
