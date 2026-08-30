@@ -1,0 +1,79 @@
+name: Optimize runtime assets
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'assets/gerb.png'
+      - '.github/workflows/optimize-assets.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: optimize-runtime-assets-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  optimize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install Pillow
+        run: python -m pip install --disable-pip-version-check --quiet Pillow
+
+      - name: Build lightweight crest asset
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from PIL import Image
+
+          source = Path('assets/gerb.png')
+          target = Path('assets/gerb-runtime.webp')
+          before = source.stat().st_size
+
+          with Image.open(source) as original:
+              original.load()
+              image = original.copy()
+
+          max_edge = 1600
+          if max(image.size) > max_edge:
+              image.thumbnail((max_edge, max_edge), Image.Resampling.LANCZOS, reducing_gap=3.0)
+
+          if image.mode not in ('RGB', 'RGBA'):
+              image = image.convert('RGBA' if 'transparency' in image.info else 'RGB')
+
+          image.save(target, format='WEBP', quality=82, method=6)
+          after = target.stat().st_size
+
+          print(
+              f'Runtime family crest: {before / 1024:.1f} KiB -> {after / 1024:.1f} KiB; '
+              f'{image.width}x{image.height}px'
+          )
+
+          if after >= before:
+              raise SystemExit('Runtime crest optimization did not reduce file size')
+          if after > 1024 * 1024:
+              raise SystemExit(f'Runtime crest is unexpectedly large: {after} bytes')
+          PY
+
+      - name: Commit optimized asset
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add assets/gerb-runtime.webp
+          if git diff --cached --quiet; then
+            echo 'Optimized crest is already up to date.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'Generate optimized family crest asset'
+          git push origin HEAD:main
