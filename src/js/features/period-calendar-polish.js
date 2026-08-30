@@ -1,22 +1,24 @@
 // Period filters and calendar presentation refinements.
 (() => {
-  const hiddenHeaderViews=new Set(['operations','goals','recurring','settings','categories','calendar']);
-  const localPeriodViews=new Set(['operations','calendar']);
+  // The compact top row duplicated the section titles and occupied valuable
+  // vertical space on phones. Keep period selectors inside the sections that
+  // actually need them instead of rendering a global application header.
+  header=function(){return ''};
 
-  header=function(){
-    if(hiddenHeaderViews.has(state.view))return '';
-    const overview=state.view==='overview';
-    const annualAnalytics=state.view==='analytics';
-    const noPeriodControls=state.view==='settings'||state.view==='categories'||localPeriodViews.has(state.view);
-    const connection=window.FinanceOffline?.statusMarkup?.()||'';
-    const authState=window.FinanceOfflineSession?.statusMarkup?.()||'';
-    const periodLabel=overview||noPeriodControls?'':annualAnalytics?`${state.year} год`:`${MONTHS[state.month-1]} ${state.year}`;
-    const periodControls=overview||noPeriodControls
-      ?''
-      :annualAnalytics
-        ?`<select class="pill" id="yearSelect" aria-label="Год аналитики">${availableYears().map(y=>`<option ${y===+state.year?'selected':''}>${y}</option>`).join('')}</select>`
-        :`<select class="pill" id="monthSelect" aria-label="Месяц">${MONTHS.map((m,i)=>`<option value="${i+1}" ${i+1===+state.month?'selected':''}>${m}</option>`).join('')}</select><select class="pill" id="yearSelect" aria-label="Год">${availableYears().map(y=>`<option ${y===+state.year?'selected':''}>${y}</option>`).join('')}</select>`;
-    return `<header class="topbar compact-topbar"><div class="title compact-title"><div class="title-line"><h1>Семейная казна</h1><span class="header-date">${esc(headerDateText())}</span></div>${periodLabel?`<p>${periodLabel}</p>`:''}</div><div class="top-actions">${periodControls}${authState}${connection}</div></header>`;
+  // Analytics still needs a year selector after removing the global header.
+  const baseAnalyticsPage=analyticsPage;
+  analyticsPage=function(){
+    const years=availableYears();
+    const year=Number(state.year)||new Date().getFullYear();
+    return `<div class="filters analytics-year-filter" role="group" aria-label="Год аналитики"><select class="pill" id="analyticsYearSelect" aria-label="Год аналитики">${years.map(value=>`<option value="${value}" ${value===year?'selected':''}>${value}</option>`).join('')}</select></div>${baseAnalyticsPage()}`;
+  };
+
+  const baseBindAnalyticsRoute=bindAnalyticsRoute;
+  bindAnalyticsRoute=async function(){
+    const result=await baseBindAnalyticsRoute();
+    const year=document.getElementById('analyticsYearSelect');
+    if(year)year.onchange=event=>{state.year=Number(event.target.value);renderApp()};
+    return result;
   };
 
   function journalPeriodYear(filters){
