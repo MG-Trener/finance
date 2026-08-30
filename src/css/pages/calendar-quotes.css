@@ -1,0 +1,116 @@
+/* Compact finance quote in the calendar title row. */
+.calendar-heading-copy{
+  position:relative;
+  flex:1 1 420px;
+  min-width:0;
+}
+.calendar-heading-copy>.page-title{
+  position:relative;
+  z-index:1;
+  width:max-content;
+  max-width:30%;
+}
+.finance-launch-quote{
+  position:absolute;
+  top:-7px;
+  left:clamp(132px,31vw,220px);
+  right:0;
+  min-width:0;
+  height:58px;
+  box-sizing:border-box;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  gap:2px;
+  padding:7px 12px 6px;
+  overflow:hidden;
+  border:1px solid rgba(209,165,86,.42);
+  border-radius:12px;
+  background:
+    linear-gradient(180deg,rgba(44,34,21,.34),rgba(11,18,23,.55)),
+    rgba(8,16,22,.42);
+  box-shadow:
+    inset 0 1px 0 rgba(255,231,180,.05),
+    0 5px 16px rgba(0,0,0,.12);
+  pointer-events:none;
+}
+.finance-launch-quote-text,
+.finance-launch-quote-author{
+  display:block;
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  color:#d9b66f;
+  text-shadow:0 1px 5px rgba(0,0,0,.45);
+}
+.finance-launch-quote-text{
+  font-family:Georgia,'Times New Roman',serif;
+  font-size:11px;
+  line-height:1.12;
+  font-style:italic;
+  font-weight:600;
+  display:-webkit-box;
+  -webkit-box-orient:vertical;
+  -webkit-line-clamp:2;
+  line-clamp:2;
+}
+.finance-launch-quote-author{
+  white-space:nowrap;
+  font-size:9px;
+  line-height:1.05;
+  font-weight:700;
+  letter-spacing:.01em;
+  color:#c99f51;
+}
+.calendar-heading-copy>.page-subtitle{
+  position:relative;
+  z-index:1;
+}
+
+@media(max-width:760px){
+  .calendar-heading-copy{
+    width:100%;
+    flex:none;
+  }
+  .calendar-heading-copy>.page-title{
+    max-width:34%;
+  }
+  .finance-launch-quote{
+    top:-6px;
+    left:clamp(128px,31vw,214px);
+    height:56px;
+    padding:6px 9px 5px;
+    border-radius:10px;
+  }
+  .finance-launch-quote-text{
+    font-size:9.7px;
+    line-height:1.08;
+  }
+  .finance-launch-quote-author{
+    font-size:8.2px;
+  }
+}
+
+@media(max-width:430px){
+  .finance-launch-quote{
+    left:126px;
+    height:54px;
+    padding:5px 7px 4px;
+  }
+  .finance-launch-quote-text{
+    font-size:8.4px;
+    line-height:1.06;
+  }
+  .finance-launch-quote-author{
+    font-size:7.4px;
+  }
+}
+
+@media(max-width:360px){
+  .finance-launch-quote{
+    left:118px;
+    right:0;
+  }
+  .finance-launch-quote-text{font-size:7.9px}
+  .finance-launch-quote-author{font-size:7px}
+}
