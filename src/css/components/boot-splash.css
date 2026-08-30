@@ -168,6 +168,19 @@ body:has(#app>.boot){
   text-align:center;
 }
 
+.boot-wait-detail{
+  margin-top:8px;
+  color:#b9b1a3;
+  font:500 13px/1.45 Inter,system-ui,sans-serif;
+  letter-spacing:0;
+  text-align:center;
+}
+
+.boot-offline-panel{
+  border-color:rgba(222,177,91,.62)!important;
+  background:linear-gradient(180deg,rgba(19,25,30,.98),rgba(8,14,20,.98))!important;
+}
+
 .boot-wait-actions{
   display:grid;
   grid-template-columns:1fr 1fr;
@@ -237,6 +250,8 @@ body:has(#app>.boot){
     padding:15px;
     border-radius:15px;
   }
+
+  .boot-wait-detail{font-size:12px}
 
   .boot-wait-actions{
     grid-template-columns:1fr;
