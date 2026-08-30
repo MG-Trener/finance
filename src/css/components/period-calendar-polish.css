@@ -61,6 +61,6 @@
   .boot-crest{width:min(60vw,205px)}
   .journal-period-filter{grid-template-columns:1fr}
   .journal-period-filter #filterPeriod{grid-column:auto}
-  .salon-period-controls{grid-template-columns:minmax(0,1fr) 96px}
+  .salon-period-controls{display:grid;grid-template-columns:minmax(0,1fr) 96px}
   .salon-year-control{flex-basis:auto}
 }
