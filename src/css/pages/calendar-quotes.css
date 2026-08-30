@@ -22,7 +22,7 @@
   flex-direction:column;
   justify-content:center;
   gap:2px;
-  padding:7px 12px 6px;
+  padding:6px 12px 5px;
   overflow:hidden;
   border:1px solid rgba(209,165,86,.42);
   border-radius:12px;
@@ -45,19 +45,19 @@
 }
 .finance-launch-quote-text{
   font-family:Georgia,'Times New Roman',serif;
-  font-size:11px;
-  line-height:1.12;
+  font-size:12px;
+  line-height:1.08;
   font-style:italic;
   font-weight:600;
   display:-webkit-box;
   -webkit-box-orient:vertical;
-  -webkit-line-clamp:2;
-  line-clamp:2;
+  -webkit-line-clamp:3;
+  line-clamp:3;
 }
 .finance-launch-quote-author{
   white-space:nowrap;
-  font-size:9px;
-  line-height:1.05;
+  font-size:10px;
+  line-height:1;
   font-weight:700;
   letter-spacing:.01em;
   color:#c99f51;
@@ -79,15 +79,15 @@
     top:-6px;
     left:clamp(128px,31vw,214px);
     height:56px;
-    padding:6px 9px 5px;
+    padding:5px 9px 4px;
     border-radius:10px;
   }
   .finance-launch-quote-text{
-    font-size:9.7px;
-    line-height:1.08;
+    font-size:10.7px;
+    line-height:1.04;
   }
   .finance-launch-quote-author{
-    font-size:8.2px;
+    font-size:9.2px;
   }
 }
 
@@ -95,14 +95,14 @@
   .finance-launch-quote{
     left:126px;
     height:54px;
-    padding:5px 7px 4px;
+    padding:4px 7px 3px;
   }
   .finance-launch-quote-text{
-    font-size:8.4px;
-    line-height:1.06;
+    font-size:9.4px;
+    line-height:1.03;
   }
   .finance-launch-quote-author{
-    font-size:7.4px;
+    font-size:8.4px;
   }
 }
 
@@ -111,6 +111,6 @@
     left:118px;
     right:0;
   }
-  .finance-launch-quote-text{font-size:7.9px}
-  .finance-launch-quote-author{font-size:7px}
+  .finance-launch-quote-text{font-size:8.9px}
+  .finance-launch-quote-author{font-size:8px}
 }
