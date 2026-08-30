@@ -1,0 +1,55 @@
+/* Shared spouse switcher and husband's monthly event register. */
+.calendar-owner-switch-wrap{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;padding:2px 2px 0}
+.calendar-owner-switch{display:inline-grid;grid-template-columns:repeat(2,minmax(132px,1fr));gap:4px;padding:4px;border:1px solid rgba(199,163,96,.22);border-radius:15px;background:rgba(8,15,21,.52);box-shadow:inset 0 1px 0 rgba(255,255,255,.025)}
+.calendar-owner-option{min-height:50px;border:1px solid transparent;border-radius:11px;background:transparent;color:#9da7ad;padding:6px 18px;display:flex;align-items:center;justify-content:center;gap:9px;cursor:pointer;transition:.16s ease}
+.calendar-owner-option:hover{color:#e4d2ad;background:rgba(89,65,37,.2)}
+.calendar-owner-option.is-active{border-color:rgba(211,170,97,.56);background:linear-gradient(180deg,rgba(111,73,34,.72),rgba(48,37,28,.68));color:#fff0c8;box-shadow:0 3px 10px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,224,171,.08)}
+.calendar-owner-role{font-family:Cinzel,serif;font-weight:800;font-size:14px}
+.calendar-owner-option small{font-size:11px;color:inherit;opacity:.78;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px}
+.calendar-owner-hint{color:#869198;font-size:12px}
+
+.husband-month-events{overflow:hidden}
+.husband-month-events-title{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:16px 18px;border-bottom:1px solid rgba(199,163,96,.16)}
+.husband-month-events-title h3{margin:0;color:#eed096;font-family:Cinzel,serif;font-size:18px}
+.husband-month-events-title p{margin:4px 0 0;color:#8f999f;font-size:12px}
+.husband-month-events-count{display:grid;place-items:center;min-width:34px;height:34px;padding:0 10px;border-radius:999px;border:1px solid rgba(211,170,97,.38);background:rgba(211,170,97,.12);color:#efce91;font-weight:800;font-variant-numeric:tabular-nums}
+.husband-month-events-table{min-width:0}
+.husband-month-events-head,.husband-month-event-row{display:grid;grid-template-columns:minmax(118px,.85fr) minmax(160px,1.25fr) minmax(110px,.7fr) minmax(180px,1.5fr);gap:12px;align-items:center}
+.husband-month-events-head{padding:9px 16px;color:#7f8b92;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;background:rgba(10,18,24,.38);border-bottom:1px solid rgba(132,146,155,.11)}
+.husband-month-events-body{display:flex;flex-direction:column}
+.husband-month-event-row{width:100%;min-height:58px;border:0;border-bottom:1px solid rgba(132,146,155,.11);background:transparent;color:#dce1e3;padding:9px 16px;text-align:left;cursor:pointer}
+.husband-month-event-row:last-child{border-bottom:0}
+.husband-month-event-row:hover{background:rgba(90,70,43,.16)}
+.husband-month-event-row>span{min-width:0}
+.husband-event-date{color:#cbb076;font-size:12px;font-weight:800;text-transform:capitalize}
+.husband-event-title{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.husband-event-amount{color:#e5c88e;font-size:13px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}
+.husband-event-comment{color:#9ba4a9;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.husband-month-events-empty{padding:22px 18px;color:#89949a;font-size:12px;text-align:center}
+
+@media(max-width:760px){
+  .calendar-owner-switch-wrap{gap:8px}
+  .calendar-owner-switch{width:100%;grid-template-columns:repeat(2,minmax(0,1fr));border-radius:13px}
+  .calendar-owner-option{min-width:0;min-height:46px;padding:5px 8px;gap:6px}
+  .calendar-owner-role{font-size:13px}
+  .calendar-owner-option small{font-size:10px;max-width:88px}
+  .calendar-owner-hint{width:100%;text-align:center;font-size:10px;margin-top:-2px}
+  .husband-month-events-title{padding:12px 12px}
+  .husband-month-events-title h3{font-size:15px}
+  .husband-month-events-title p{font-size:10px}
+  .husband-month-events-count{min-width:30px;height:30px;font-size:12px}
+  .husband-month-events-head{display:none}
+  .husband-month-events-body{gap:7px;padding:8px}
+  .husband-month-event-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:7px 12px;align-items:start;min-height:0;border:1px solid rgba(132,146,155,.16);border-radius:11px;background:rgba(14,22,28,.52);padding:10px 11px}
+  .husband-month-event-row:last-child{border-bottom:1px solid rgba(132,146,155,.16)}
+  .husband-event-date{grid-column:1;color:#cbb076;font-size:11px}
+  .husband-event-title{grid-column:1;grid-row:2;font-size:13px;white-space:normal}
+  .husband-event-amount{grid-column:2;grid-row:1 / span 2;align-self:center;text-align:right;font-size:12px}
+  .husband-event-comment{grid-column:1 / -1;grid-row:3;white-space:normal;line-height:1.35;padding-top:2px}
+  .husband-event-comment::before{content:'Комментарий: ';color:#727f86}
+  .husband-month-events-empty{padding:18px 12px}
+}
+@media(max-width:370px){
+  .calendar-owner-option small{display:none}
+  .calendar-owner-switch{grid-template-columns:1fr 1fr}
+}
