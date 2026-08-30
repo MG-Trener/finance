@@ -139,6 +139,14 @@ jobs:
       - name: Add native background updater
         run: node scripts/inject-native-updater.mjs
 
+      - name: Verify Android status-bar inset protection
+        shell: bash
+        run: |
+          MAIN_ACTIVITY='android/app/src/main/java/kz/mgtrener/familyfinance/MainActivity.java'
+          grep -q 'setOnApplyWindowInsetsListener' "$MAIN_ACTIVITY"
+          grep -q 'Type.statusBars()' "$MAIN_ACTIVITY"
+          echo 'Android status-bar inset protection is present in final MainActivity.'
+
       - name: Verify Android target API
         shell: bash
         run: |
@@ -226,7 +234,11 @@ jobs:
 
       - name: Prepare downloadable APK
         shell: bash
-        run: cp android/app/build/outputs/apk/debug/app-debug.apk family-treasury.apk
+        env:
+          BUILD_NUMBER: ${{ github.run_number }}
+        run: |
+          cp android/app/build/outputs/apk/debug/app-debug.apk family-treasury.apk
+          cp android/app/build/outputs/apk/debug/app-debug.apk "family-treasury-${BUILD_NUMBER}.apk"
 
       - name: Prepare production APK
         if: env.RELEASE_SIGNING_AVAILABLE == 'true'
@@ -260,10 +272,12 @@ jobs:
             Автоматически собранная версия Android-приложения для установки без Google Play.
             Build: ${{ github.run_number }}
             Version: 1.0.${{ github.run_number }}
-            Файл `family-treasury.apk` подписан стабильным sideload-ключом и устанавливается поверх предыдущей тестовой версии.
+            Файлы APK подписаны стабильным sideload-ключом и устанавливаются поверх предыдущей тестовой версии.
             Приложение работает только в вертикальной ориентации экрана.
             Приложение само проверяет эту сборку и предлагает обновление.
           prerelease: true
           make_latest: false
-          files: family-treasury.apk
+          files: |
+            family-treasury.apk
+            family-treasury-${{ github.run_number }}.apk
           overwrite_files: true
