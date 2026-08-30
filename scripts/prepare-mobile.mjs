@@ -10,9 +10,15 @@ try{await access(path.join(root,'mobile-assets','google-services.json'));pushCon
 await rm(out,{recursive:true,force:true});
 await mkdir(out,{recursive:true});
 
-for(const entry of ['src','assets']){
-  await cp(path.join(root,entry),path.join(out,entry),{recursive:true});
-}
+await cp(path.join(root,'src'),path.join(out,'src'),{recursive:true});
+const assetsRoot=path.join(root,'assets');
+await cp(assetsRoot,path.join(out,'assets'),{
+  recursive:true,
+  // assets/gerb.png is the 3 MB master artwork. Runtime UI uses the generated WebP copy.
+  filter:source=>path.relative(assetsRoot,source)!=='gerb.png'
+});
+await access(path.join(out,'assets','gerb-runtime.webp'));
+
 for(const file of ['styles.css','hotfix.css','manifest.webmanifest','sw.js','privacy.html','delete-account.html']){
   try{await copyFile(path.join(root,file),path.join(out,file))}catch(error){if(error?.code!=='ENOENT')throw error}
 }
@@ -88,4 +94,4 @@ let exporter=await readFile(exportPath,'utf8');
 exporter=exporter.replace('https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js','vendor/xlsx.full.min.js');
 await writeFile(exportPath,exporter,'utf8');
 
-console.log(`Android web assets prepared in www/; embedded build ${buildNumber}; push ${pushConfigured?'configured':'not configured'}`);
+console.log(`Android web assets prepared in www/; embedded build ${buildNumber}; push ${pushConfigured?'configured':'not configured'}; master crest excluded`);
