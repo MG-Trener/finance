@@ -40,6 +40,15 @@ assert(exists('assets/backgrounds/site-bg.webp'),'optimized application backgrou
 const hotfix=fs.readFileSync(path.join(root,'hotfix.css'),'utf8');
 assert(hotfix.includes("assets/backgrounds/site-bg.webp"),'hotfix.css must use the optimized WebP background');
 
+// The startup scene must stay a real code-driven animation, not a video/GIF or frame sequence.
+assert(exists('assets/splash-medallion.png'),'splash medallion PNG is missing');
+assert(exists('src/js/ui/splash.js'),'programmatic splash animation is missing');
+assert(exists('src/css/components/splash.css'),'splash styles are missing');
+const splashJs=fs.readFileSync(path.join(root,'src/js/ui/splash.js'),'utf8');
+assert(splashJs.includes('requestAnimationFrame'),'splash must be animated programmatically');
+assert(splashJs.includes('rotationDeg'),'medallion rotation must be synchronized with distance');
+assert(!/\.(?:gif|mp4|webm)["']/.test(splashJs),'splash must not use GIF or video frames');
+
 // Every local script/stylesheet/manifest/icon referenced by index.html must exist.
 const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
 const refs=[...html.matchAll(/(?:src|href)="([^"]+)"/g)].map(m=>m[1]);

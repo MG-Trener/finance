@@ -1,4 +1,4 @@
-const CACHE='family-finance-shell-v7';
+const CACHE='family-finance-shell-v8';
 const PRECACHE=[
   './',
   './index.html',
@@ -8,7 +8,8 @@ const PRECACHE=[
   './vendor/supabase.js',
   './assets/app-icon.svg',
   './assets/icon-192.png',
-  './assets/icon-512.png'
+  './assets/icon-512.png',
+  './assets/splash-medallion.png'
 ];
 
 self.addEventListener('install',event=>{

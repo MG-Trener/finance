@@ -28,6 +28,7 @@
 @import url('./components/offline.css?v=offline42');
 @import url('./components/local-lock.css?v=lock40');
 @import url('./components/compact-header.css?v=header1');
+@import url('./components/splash.css?v=splash1');
 
 /* Optimized application and authorization artwork. */
 @import url('./backgrounds.css');
