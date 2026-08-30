@@ -62,11 +62,30 @@ jobs:
         with:
           node-version: 22
 
+      - name: Cache npm packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-npm-${{ hashFiles('package.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-
+
       - name: Use Java 21
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '21'
+
+      - name: Cache Gradle packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-capacitor-${{ hashFiles('package.json', 'capacitor.config.json') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-capacitor-
+            ${{ runner.os }}-gradle-
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
@@ -78,7 +97,7 @@ jobs:
           sdkmanager 'platforms;android-36' 'build-tools;36.0.0' 'platform-tools'
 
       - name: Install JavaScript dependencies
-        run: npm install --no-audit --no-fund
+        run: npm install --no-audit --no-fund --prefer-offline
 
       - name: Prepare bundled offline web app
         env:
