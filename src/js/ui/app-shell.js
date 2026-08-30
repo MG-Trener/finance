@@ -38,7 +38,7 @@ function header(){
 
 function shell(content){
   const local=window.FinanceOfflineSession?.isLocalSession?.();
-  return `<div class="app-shell"><aside class="sidebar"><div class="side-brand"><div class="brand"><div class="brand-badge">₸</div><span class="brand-text">Казна</span></div></div><nav class="side-nav" aria-label="Разделы приложения">${NAV_ITEMS.map(x=>navMarkup(x)).join('')}</nav><div class="family-crest" aria-label="Семейный герб"><img src="assets/gerb.png" loading="lazy" decoding="async" alt="Герб семьи"></div><div class="side-footer"><div class="side-copy"><b>${esc(state.family.name)}</b><div>${local?'Локальная копия · нужна авторизация для синхронизации':'Данные в Supabase'}</div></div></div></aside><main class="main">${header()}${content}</main></div>`;
+  return `<div class="app-shell"><aside class="sidebar"><div class="side-brand"><div class="brand"><div class="brand-badge">₸</div><span class="brand-text">Казна</span></div></div><nav class="side-nav" aria-label="Разделы приложения">${NAV_ITEMS.map(x=>navMarkup(x)).join('')}</nav><div class="family-crest" aria-label="Семейный герб"><img src="assets/gerb-runtime.webp" loading="lazy" decoding="async" alt="Герб семьи"></div><div class="side-footer"><div class="side-copy"><b>${esc(state.family.name)}</b><div>${local?'Локальная копия · нужна авторизация для синхронизации':'Данные в Supabase'}</div></div></div></aside><main class="main">${header()}${content}</main></div>`;
 }
 
 async function bindAnalyticsRoute(){
