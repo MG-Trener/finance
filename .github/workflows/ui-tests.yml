@@ -3,10 +3,40 @@ name: UI regressions
 on:
   push:
     branches: [main]
+    paths:
+      - 'index.html'
+      - 'styles.css'
+      - 'hotfix.css'
+      - 'manifest.webmanifest'
+      - 'sw.js'
+      - 'src/**'
+      - 'assets/**'
+      - 'vendor/**'
+      - 'tests/**'
+      - 'package.json'
+      - 'playwright.config.mjs'
+      - '.github/workflows/ui-tests.yml'
   pull_request:
+    paths:
+      - 'index.html'
+      - 'styles.css'
+      - 'hotfix.css'
+      - 'manifest.webmanifest'
+      - 'sw.js'
+      - 'src/**'
+      - 'assets/**'
+      - 'vendor/**'
+      - 'tests/**'
+      - 'package.json'
+      - 'playwright.config.mjs'
+      - '.github/workflows/ui-tests.yml'
 
 permissions:
   contents: read
+
+concurrency:
+  group: ui-regressions-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   playwright:
@@ -14,13 +44,25 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
+
+      - name: Cache npm packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-npm-${{ hashFiles('package.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-
+
       - name: Install dependencies
-        run: npm install --ignore-scripts --no-audit --no-fund
+        run: npm install --ignore-scripts --no-audit --no-fund --prefer-offline
+
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
+
       - name: Run UI tests
         run: npm run test:ui
