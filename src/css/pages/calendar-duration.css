@@ -1,0 +1,8 @@
+/* Visual continuation for salon appointments longer than 30 minutes. */
+.salon-slot.is-covered{
+  opacity:1;
+  background:linear-gradient(90deg,rgba(88,59,29,.34),rgba(34,31,27,.2));
+  border-left:2px solid rgba(211,168,89,.42);
+}
+.salon-slot.is-covered .salon-time{color:#dfc183}
+.salon-slot.is-covered .salon-slot-content small{color:#bba77e}
