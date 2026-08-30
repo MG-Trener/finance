@@ -42,6 +42,7 @@ assert(hotfix.includes("assets/backgrounds/site-bg.webp"),'hotfix.css must use t
 
 // The startup scene must stay a real code-driven animation, not a video/GIF or frame sequence.
 assert(exists('assets/splash-medallion.png'),'splash medallion PNG is missing');
+assert(exists('assets/splash-title-pirate.png'),'pirate splash title PNG is missing');
 assert(exists('src/js/ui/splash.js'),'programmatic splash animation is missing');
 assert(exists('src/css/components/splash.css'),'splash styles are missing');
 const splashJs=fs.readFileSync(path.join(root,'src/js/ui/splash.js'),'utf8');
@@ -53,7 +54,7 @@ assert(!/\.(?:gif|mp4|webm)["']/.test(splashJs),'splash must not use GIF or vide
 const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
 assert(html.includes('class="treasury-splash-crest"'),'family crest must be present in the splash composition');
 assert(html.includes('assets/gerb-runtime.webp'),'splash must use the optimized runtime crest');
-assert(html.includes('family=Pirata+One'),'splash pirate font must be requested for the web build');
+assert(html.includes('assets/splash-title-pirate.png'),'splash must use the pirate title artwork');
 const refs=[...html.matchAll(/(?:src|href)="([^"]+)"/g)].map(m=>m[1]);
 for(const ref of refs){
   if(/^(?:https?:|data:|#)/.test(ref))continue;
