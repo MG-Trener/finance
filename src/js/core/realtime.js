@@ -1,11 +1,15 @@
 // Live synchronization between family devices. Primary path: Supabase Realtime.
 // Transactions, goals, recurring payments and categories update across both family devices.
 (function(){
+  const FULL_REFRESH_INTERVAL=60000;
   let channel=null;
   let subscribedFamilyId=null;
   let pendingRender=false;
+  let pendingFullRefresh=false;
   let refreshInFlight=false;
+  let fullRefreshInFlight=false;
   let lastForegroundRefresh=0;
+  let lastFullRefresh=0;
 
   const ENTITY_CHANNELS=[
     {table:'recurring_payments',stateKey:'recurring'},
@@ -28,8 +32,12 @@
   }
 
   function flushPendingRender(){
-    if(!pendingRender||!canRerenderSafely())return;
-    pendingRender=false;renderApp();
+    if(pendingRender&&canRerenderSafely()){
+      pendingRender=false;renderApp();
+    }
+    if(pendingFullRefresh&&canRerenderSafely()){
+      pendingFullRefresh=false;refreshFamilyData(true);
+    }
   }
 
   function applyRealtimeTransaction(payload){
@@ -100,7 +108,10 @@
     }
 
     channel=next.subscribe(status=>{
-      if(status==='CHANNEL_ERROR'||status==='TIMED_OUT')lastForegroundRefresh=0;
+      if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'){
+        lastForegroundRefresh=0;
+        lastFullRefresh=0;
+      }
     });
   }
 
@@ -112,7 +123,7 @@
 
   async function refreshRecentTransactions(force=false){
     const familyId=state.family?.id;
-    if(!familyId||state.user?._offlineLocal||refreshInFlight)return;
+    if(!familyId||state.user?._offlineLocal||refreshInFlight||!navigator.onLine)return;
     const now=Date.now();if(!force&&now-lastForegroundRefresh<20000)return;
     refreshInFlight=true;
     try{
@@ -127,6 +138,43 @@
     }catch(error){console.warn('Фоновая синхронизация операций недоступна',error)}finally{refreshInFlight=false}
   }
 
+  async function refreshFamilyData(force=false){
+    if(!navigator.onLine||document.hidden||!state.family?.id||state.user?._offlineLocal||fullRefreshInFlight)return false;
+    const now=Date.now();
+    if(!force&&now-lastFullRefresh<FULL_REFRESH_INTERVAL)return false;
+    if(!canRerenderSafely()){
+      pendingFullRefresh=true;
+      return false;
+    }
+    fullRefreshInFlight=true;
+    pendingFullRefresh=false;
+    try{
+      // Upload local mutations before reading the authoritative snapshot. This
+      // makes recovery after an offline period deterministic and prevents a
+      // stale server read from temporarily hiding the user's offline edits.
+      await window.FinanceOffline?.flushQueue?.();
+      await loadData();
+      lastFullRefresh=Date.now();
+      lastForegroundRefresh=lastFullRefresh;
+      waitForFamily();
+      return true;
+    }catch(error){
+      console.warn('Полная фоновая синхронизация недоступна',error);
+      return false;
+    }finally{fullRefreshInFlight=false}
+  }
+
+  function reconnectAndRefresh(){
+    if(!navigator.onLine)return;
+    if(state.user?._offlineLocal){
+      window.FinanceOfflineSession?.scheduleReconnectBurst?.();
+      return;
+    }
+    stopChannel();waitForFamily();
+    window.FinanceOffline?.flushQueue?.();
+    refreshFamilyData(true);
+  }
+
   sb.auth.onAuthStateChange((event,session)=>{
     if(event==='SIGNED_OUT'||!session?.user){stopChannel();return}
     setTimeout(()=>waitForFamily(),0);
@@ -135,10 +183,28 @@
   document.addEventListener('focusout',()=>setTimeout(flushPendingRender,80),true);
   document.addEventListener('visibilitychange',()=>{
     if(document.hidden)return;
-    waitForFamily();refreshRecentTransactions();
+    waitForFamily();
+    if(state.user?._offlineLocal)window.FinanceOfflineSession?.scheduleReconnectBurst?.();
+    else refreshFamilyData();
   });
-  window.addEventListener('pageshow',()=>{waitForFamily();refreshRecentTransactions()});
-  window.addEventListener('focus',()=>refreshRecentTransactions());
+  window.addEventListener('pageshow',()=>{waitForFamily();if(!state.user?._offlineLocal)refreshFamilyData()});
+  window.addEventListener('focus',()=>{if(state.user?._offlineLocal)window.FinanceOfflineSession?.scheduleReconnectBurst?.();else refreshRecentTransactions()});
+  window.addEventListener('online',reconnectAndRefresh);
+  window.addEventListener('offline',()=>{lastForegroundRefresh=0;lastFullRefresh=0});
 
-  window.FinanceRealtime={refresh:()=>refreshRecentTransactions(true),reconnect:()=>{stopChannel();waitForFamily()}};
+  // Realtime remains the fast path. This one-minute check is only a safety net
+  // for missed websocket events, Android network transitions and long-running
+  // sessions. It runs only while the app is visible and online.
+  setInterval(()=>{
+    if(document.hidden||!navigator.onLine)return;
+    if(state.user?._offlineLocal)window.FinanceOfflineSession?.reconnectIfPossible?.();
+    else refreshFamilyData();
+  },FULL_REFRESH_INTERVAL);
+
+  window.FinanceRealtime={
+    refresh:()=>refreshFamilyData(true),
+    refreshRecent:()=>refreshRecentTransactions(true),
+    reconnect:()=>{stopChannel();waitForFamily()},
+    get lastFullRefresh(){return lastFullRefresh}
+  };
 })();
