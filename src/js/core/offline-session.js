@@ -3,7 +3,10 @@
 // authenticated user may still open the encrypted-by-device app shell with the local PIN.
 (function(){
   const KEY='finance.offlineIdentity.v1';
+  const RECONNECT_DELAYS=[350,1500,4000,9000,18000,30000];
   let opening=false;
+  let reconnecting=false;
+  let reconnectTimers=[];
 
   function nativeLike(){
     return Boolean(window.__FINANCE_NATIVE__||window.matchMedia?.('(display-mode: standalone)').matches);
@@ -55,19 +58,59 @@
         const {data,error}=await sb.auth.signInWithPassword({email,password});
         if(error)return notice('offlineReauthNotice',error.message);
         if(identity?.userId&&data.user?.id!==identity.userId){await sb.auth.signOut();return notice('offlineReauthNotice','Это другой аккаунт. Войдите тем же пользователем, чья офлайн-копия хранится на телефоне.')}
-        state.user=data.user;remember(data.user);closeModal();await loadData();
+        state.user=data.user;remember(data.user);closeModal();
+        await window.FinanceOffline?.flushQueue?.();
+        await loadData();
+        window.FinanceRealtime?.reconnect?.();
       }catch(error){notice('offlineReauthNotice',error?.message||String(error))}
       finally{if(button&&document.body.contains(button)){button.disabled=false;button.textContent='Войти и синхронизировать'}}
     };
   }
 
+  function cancelReconnectTimers(){
+    reconnectTimers.forEach(clearTimeout);reconnectTimers=[];
+  }
+
   async function reconnectIfPossible(){
-    if(!isLocalSession()||!navigator.onLine)return false;
+    if(reconnecting||!isLocalSession()||!navigator.onLine)return false;
+    reconnecting=true;
+    const localUserId=state.user?.id;
     try{
-      const {data:{session}}=await sb.auth.getSession();
-      if(session?.user?.id===state.user.id){state.user=session.user;remember(session.user);await loadData();return true}
-    }catch(_){ }
-    if(typeof renderApp==='function')renderApp();return false;
+      const {data:{session},error}=await sb.auth.getSession();
+      if(error)throw error;
+      if(!session?.user||session.user.id!==localUserId){
+        if(typeof renderApp==='function')renderApp();
+        return false;
+      }
+
+      state.user=session.user;
+      remember(session.user);
+      // First send everything that was created/edited while offline. Then load
+      // a fresh server snapshot so the screen reflects both devices immediately.
+      await window.FinanceOffline?.flushQueue?.();
+      await loadData();
+      await window.FinanceOffline?.flushQueue?.();
+      window.FinanceRealtime?.reconnect?.();
+      window.FinanceRealtime?.refresh?.();
+      cancelReconnectTimers();
+      return true;
+    }catch(error){
+      console.warn('Автоматическое восстановление онлайн-сессии пока недоступно',error);
+      return false;
+    }finally{reconnecting=false}
+  }
+
+  function scheduleReconnectBurst(){
+    cancelReconnectTimers();
+    if(!navigator.onLine||!isLocalSession())return;
+    RECONNECT_DELAYS.forEach(delay=>{
+      const timer=setTimeout(async()=>{
+        reconnectTimers=reconnectTimers.filter(x=>x!==timer);
+        const restored=await reconnectIfPossible();
+        if(restored)cancelReconnectTimers();
+      },delay);
+      reconnectTimers.push(timer);
+    });
   }
 
   function bindStatus(){const el=document.getElementById('offlineAuthStatus');if(el)el.onclick=openReauth}
@@ -76,7 +119,14 @@
     if(session?.user)remember(session.user);
     if(event==='SIGNED_OUT'&&!state.user?._offlineLocal){/* keep identity for future PIN-protected offline opening */}
   });
-  window.addEventListener('online',()=>setTimeout(()=>reconnectIfPossible(),250));
 
-  window.FinanceOfflineSession={tryOpen,remember,clear,isLocalSession,statusMarkup,bindStatus,openReauth,reconnectIfPossible};
+  window.addEventListener('online',scheduleReconnectBurst);
+  window.addEventListener('offline',cancelReconnectTimers);
+  window.addEventListener('focus',()=>{if(navigator.onLine&&isLocalSession())scheduleReconnectBurst()});
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden&&navigator.onLine&&isLocalSession())scheduleReconnectBurst()});
+  // Safety net: if Android reports the online event before the network is truly
+  // usable, retry while the app remains open instead of requiring a restart.
+  setInterval(()=>{if(!document.hidden&&navigator.onLine&&isLocalSession())reconnectIfPossible()},60000);
+
+  window.FinanceOfflineSession={tryOpen,remember,clear,isLocalSession,statusMarkup,bindStatus,openReauth,reconnectIfPossible,scheduleReconnectBurst};
 })();
