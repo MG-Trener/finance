@@ -4,6 +4,9 @@ node_modules/
 www/
 android/
 coverage/
+test-results/
+playwright-report/
+.cache/
 *.log
 *.jks
 *.keystore
