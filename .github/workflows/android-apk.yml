@@ -14,6 +14,7 @@ on:
       - 'sw.js'
       - 'src/**'
       - 'assets/**'
+      - '!assets/gerb.png'
       - 'package.json'
       - 'capacitor.config.json'
       - 'scripts/**'
@@ -31,6 +32,7 @@ on:
       - 'sw.js'
       - 'src/**'
       - 'assets/**'
+      - '!assets/gerb.png'
       - 'package.json'
       - 'capacitor.config.json'
       - 'scripts/**'
@@ -104,39 +106,17 @@ jobs:
           FINANCE_BUILD_NUMBER: ${{ github.run_number }}
         run: npm run mobile:prepare
 
-      - name: Optimize family crest for Android
+      - name: Verify lightweight Android crest
         shell: bash
         run: |
-          python -m pip install --disable-pip-version-check --quiet Pillow
-          python - <<'PY'
-          from pathlib import Path
-          from PIL import Image
-
-          crest = Path('www/assets/gerb.png')
-          before = crest.stat().st_size
-
-          with Image.open(crest) as source:
-              source.load()
-              image = source.copy()
-
-          max_edge = 512
-          if max(image.size) > max_edge:
-              image.thumbnail((max_edge, max_edge), Image.Resampling.LANCZOS, reducing_gap=3.0)
-
-          image.save(crest, format='PNG', optimize=True, compress_level=9)
-          after = crest.stat().st_size
-
-          print(
-              f'Family crest for Android: '
-              f'{before / 1024:.1f} KiB -> {after / 1024:.1f} KiB; '
-              f'{image.width}x{image.height}px'
-          )
-
-          if after >= before:
-              raise SystemExit('Android crest optimization did not reduce the file size')
-          if after > 1024 * 1024:
-              raise SystemExit(f'Android crest is still too large: {after} bytes')
-          PY
+          test ! -f www/assets/gerb.png
+          test -f www/assets/gerb-runtime.webp
+          BYTES=$(stat -c%s www/assets/gerb-runtime.webp)
+          echo "Android runtime crest: ${BYTES} bytes"
+          if [ "$BYTES" -gt 1048576 ]; then
+            echo 'Runtime crest must stay below 1 MiB.'
+            exit 1
+          fi
 
       - name: Verify local Android fonts
         shell: bash
