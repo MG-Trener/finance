@@ -5,6 +5,7 @@
   "description": "Семейная казна: статический веб-интерфейс и Android-оболочка Capacitor",
   "scripts": {
     "web:vendor": "node scripts/prepare-web-vendor.mjs",
+    "test:repo-size": "node tests/repository-size-budget.mjs",
     "test:ui": "playwright test",
     "mobile:prepare": "node scripts/prepare-mobile.mjs",
     "android:add": "npm run mobile:prepare && npx cap add android",
