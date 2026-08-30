@@ -81,6 +81,29 @@
   }
   async function openUserSession(user){
     if(!user)return false;
+
+    // Supabase may restore a cached auth session even with no network. In that
+    // case INITIAL_SESSION still contains a user, so checking only the
+    // "no session" branch lets the application open silently offline. Require
+    // an explicit choice before unlocking or displaying cached family data.
+    if(!navigator.onLine){
+      const proceed=await confirmOfflineStart();
+      if(!proceed)return false;
+
+      const unlocked=browserUsesLocalLock()?await window.FinanceLocalLock?.unlockIfNeeded?.(user):true;
+      if(unlocked===false)return false;
+
+      // Do not wait for doomed network requests after the user explicitly chose
+      // offline work. Restore the last local snapshot immediately.
+      const restored=await window.FinanceOffline?.restoreSnapshot?.(user.id);
+      if(restored)return true;
+
+      // A fresh installation may have a cached auth token but no data snapshot
+      // yet. Fall back to the normal loader so it can show the existing error.
+      await loadData();
+      return Boolean(state.family);
+    }
+
     const unlocked=browserUsesLocalLock()?await window.FinanceLocalLock?.unlockIfNeeded?.(user):true;
     if(unlocked===false)return false;
     await loadData();return true;
