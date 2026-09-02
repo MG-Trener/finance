@@ -70,6 +70,7 @@
   const LEGACY_TOTAL=Number(legacy.total)||200;
   const TOTAL=LEGACY_TOTAL+EXTRA_QUOTES.length;
   const MIX_DECK_KEY='finance.launchQuote.mixDeck.v2';
+  const MIX_CURRENT_KEY='finance.launchQuote.mixCurrent.v2';
   const LEGACY_DECK_KEY='finance.launchQuote.deck.v1';
   const LEGACY_CURRENT_KEY='finance.launchQuote.current.v1';
   const LEGACY_MIRROR_KEY='finance.launchQuote.legacyMirror.v2';
@@ -98,9 +99,27 @@
     try{localStorage.setItem(key,JSON.stringify(deck))}catch(_ ){}
   }
 
+  function readCurrentSlot(){
+    const value=Number(localStorage.getItem(MIX_CURRENT_KEY));
+    return Number.isInteger(value)&&value>=0&&value<TOTAL?value:null;
+  }
+
+  function startShuffledCycle(previousSlot){
+    const deck=shuffledIndexes(TOTAL);
+    // The new cycle contains all 500 slots again, but its first shown slot must
+    // not be the same slot that closed the previous cycle.
+    if(deck.length>1&&previousSlot!=null&&deck[deck.length-1]===previousSlot){
+      [deck[0],deck[deck.length-1]]=[deck[deck.length-1],deck[0]];
+    }
+    return deck;
+  }
+
   function chooseMixSlot(){
+    const previousSlot=readCurrentSlot();
     let deck=readDeck(MIX_DECK_KEY,TOTAL);
-    if(!deck.length)deck=shuffledIndexes(TOTAL);
+    const startingNewCycle=!deck.length;
+    if(startingNewCycle)deck=startShuffledCycle(previousSlot);
+
     const firstExpandedLaunch=localStorage.getItem(LEGACY_MIRROR_KEY)===null;
     let slot;
     if(firstExpandedLaunch){
@@ -109,8 +128,10 @@
     }else{
       slot=deck.pop();
     }
+
     writeDeck(MIX_DECK_KEY,deck);
-    return {slot,firstExpandedLaunch};
+    try{localStorage.setItem(MIX_CURRENT_KEY,String(slot))}catch(_ ){}
+    return {slot,firstExpandedLaunch,startingNewCycle};
   }
 
   function currentLegacyIndex(){
@@ -188,6 +209,7 @@
     total:TOTAL,
     classic:LEGACY_TOTAL,
     aphorisms:EXTRA_QUOTES.length,
+    remainingInCycle:readDeck(MIX_DECK_KEY,TOTAL).length,
     source:useLegacy?'classic':'aphorism'
   };
 })();
