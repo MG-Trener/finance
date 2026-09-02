@@ -5,18 +5,22 @@
 .husband-month-events-title p{margin:4px 0 0;color:#8f999f;font-size:12px}
 .husband-month-events-count{display:grid;place-items:center;min-width:34px;height:34px;padding:0 10px;border-radius:999px;border:1px solid rgba(211,170,97,.38);background:rgba(211,170,97,.12);color:#efce91;font-weight:800;font-variant-numeric:tabular-nums}
 .husband-month-events-table{min-width:0}
-.husband-month-events-head,.husband-month-event-row{display:grid;grid-template-columns:minmax(118px,.85fr) minmax(160px,1.25fr) minmax(110px,.7fr) minmax(180px,1.5fr);gap:12px;align-items:center}
-.husband-month-events-head{padding:9px 16px;color:#7f8b92;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;background:rgba(10,18,24,.38);border-bottom:1px solid rgba(132,146,155,.11)}
+.husband-month-events-head{display:grid;grid-template-columns:minmax(118px,.85fr) minmax(160px,1.25fr) minmax(110px,.7fr) minmax(180px,1.5fr) 92px;gap:12px;align-items:center;padding:9px 16px;color:#7f8b92;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;background:rgba(10,18,24,.38);border-bottom:1px solid rgba(132,146,155,.11)}
 .husband-month-events-body{display:flex;flex-direction:column}
-.husband-month-event-row{width:100%;min-height:58px;border:0;border-bottom:1px solid rgba(132,146,155,.11);background:transparent;color:#dce1e3;padding:9px 16px;text-align:left;cursor:pointer}
+.husband-month-event-row{display:grid;grid-template-columns:minmax(0,1fr) 92px;gap:10px;align-items:center;min-height:58px;border-bottom:1px solid rgba(132,146,155,.11);padding:0 16px}
 .husband-month-event-row:last-child{border-bottom:0}
 .husband-month-event-row:hover{background:rgba(90,70,43,.16)}
-.husband-month-event-row:focus-visible{outline:2px solid #d7b36d;outline-offset:-3px}
-.husband-month-event-row>span{min-width:0}
+.husband-month-event-main{display:grid;grid-template-columns:minmax(118px,.85fr) minmax(160px,1.25fr) minmax(110px,.7fr) minmax(180px,1.5fr);gap:12px;align-items:center;width:100%;min-width:0;min-height:58px;border:0;background:transparent;color:#dce1e3;padding:9px 0;text-align:left;cursor:pointer}
+.husband-month-event-main:focus-visible{outline:2px solid #d7b36d;outline-offset:-3px;border-radius:8px}
+.husband-month-event-main>span{min-width:0}
 .husband-event-date{color:#cbb076;font-size:12px;font-weight:800;text-transform:capitalize}
 .husband-event-title{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .husband-event-amount{color:#e5c88e;font-size:13px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}
 .husband-event-comment{color:#9ba4a9;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.husband-event-call{justify-self:end;width:88px;box-sizing:border-box}
+.husband-event-no-phone{display:block;text-align:center;color:#69757c;font-size:12px}
+.husband-phone-control{align-items:stretch}
+.husband-call-form-button.is-disabled,.husband-call-form-button:disabled{opacity:.42;cursor:not-allowed}
 .husband-month-events-empty{padding:22px 18px;color:#89949a;font-size:12px;text-align:center}
 
 @media(max-width:760px){
@@ -26,12 +30,19 @@
   .husband-month-events-count{min-width:30px;height:30px;font-size:12px}
   .husband-month-events-head{display:none}
   .husband-month-events-body{gap:7px;padding:8px}
-  .husband-month-event-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:7px 12px;align-items:start;min-height:0;border:1px solid rgba(132,146,155,.16);border-radius:11px;background:rgba(14,22,28,.52);padding:10px 11px}
+  .husband-month-event-row{grid-template-columns:minmax(0,1fr) 36px;gap:8px;align-items:center;min-height:0;border:1px solid rgba(132,146,155,.16);border-radius:11px;background:rgba(14,22,28,.52);padding:10px 10px 10px 11px}
   .husband-month-event-row:last-child{border-bottom:1px solid rgba(132,146,155,.16)}
+  .husband-month-event-main{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:7px 12px;align-items:start;min-height:0;padding:0}
   .husband-event-date{grid-column:1;font-size:11px}
   .husband-event-title{grid-column:1;grid-row:2;font-size:13px;white-space:normal}
   .husband-event-amount{grid-column:2;grid-row:1 / span 2;align-self:center;text-align:right;font-size:12px}
   .husband-event-comment{grid-column:1 / -1;grid-row:3;white-space:normal;line-height:1.35;padding-top:2px}
   .husband-event-comment::before{content:'Комментарий: ';color:#727f86}
+  .husband-event-call{width:36px;min-height:34px;padding:0;border-radius:9px}
+  .husband-event-call span:last-child{display:none}
+  .husband-event-no-phone{width:36px}
+  .husband-phone-control{grid-template-columns:minmax(0,1fr) 48px}
+  .husband-call-form-button{min-width:0;width:48px;padding:0;font-size:0}
+  .husband-call-form-button span{font-size:17px}
   .husband-month-events-empty{padding:18px 12px}
 }
