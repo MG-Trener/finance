@@ -170,14 +170,14 @@ function analyticsPage(){
 function destroyCharts(){state.charts.forEach(chart=>{try{chart.destroy()}catch(_){}});state.charts=[]}
 
 function analyticsCategoryChartOptions(total){
-  return{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'#d8c6a5',usePointStyle:true,padding:12,boxWidth:9}},tooltip:{callbacks:{label:ctx=>{const value=Number(ctx.raw||0),share=total?Math.round(value/total*100):0;return `${ctx.label}: ${money(value)} · ${share}%`;}}}}};
+  return{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',align:'start',labels:{color:'#d8c6a5',usePointStyle:true,pointStyle:'circle',textAlign:'left',padding:10,boxWidth:9,boxHeight:9}},tooltip:{callbacks:{label:ctx=>{const value=Number(ctx.raw||0),share=total?Math.round(value/total*100):0;return `${ctx.label}: ${money(value)} · ${share}%`;}}}}};
 }
 
 function drawAnalyticsCategoryChart(canvasId,buckets,type){
   const ChartLib=window.Chart,canvas=document.getElementById(canvasId);if(!ChartLib||!canvas||!buckets.length)return;
   const data=analyticsChartBuckets(buckets),total=buckets.reduce((sum,[,value])=>sum+value,0);
-  const incomeColors=['#2F9E6F','#55B98A','#7ACA9F','#A5DDBB','#3D8B72','#80BFA1','#B7E4C7','#5AAE89'];
-  const expenseColors=['#D85C5C','#E37862','#D99A5B','#C96F82','#E6A15C','#C85A6A','#D98972','#B85D68'];
+  const incomeColors=['#20C997','#38BDF8','#4D7CFE','#84CC16','#06B6D4','#8B5CF6','#34D399','#A3E635'];
+  const expenseColors=['#FF5A5F','#FF922B','#F6C445','#D946EF','#F43F5E','#A855F7','#FB7185','#C2410C'];
   state.charts.push(new ChartLib(canvas,{type:'doughnut',data:{labels:data.map(([id])=>analyticsCategoryLabel(id)),datasets:[{data:data.map(([,value])=>value),backgroundColor:type==='income'?incomeColors:expenseColors,borderColor:'#081118',borderWidth:3,hoverBorderColor:'#f2d39a',hoverOffset:8}]},options:analyticsCategoryChartOptions(total)}));
 }
 
