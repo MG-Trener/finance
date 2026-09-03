@@ -59,12 +59,17 @@ function analyticsMonthSeries(year=+state.year,scope=analyticsScope){
   return{income,expense,count,balance:income.map((value,index)=>value-expense[index])};
 }
 
+function analyticsSavingsRate(income,expense){
+  if(income>0)return Math.round((income-expense)/income*100);
+  return expense>0?-100:0;
+}
+
 function analyticsYearSummary(year=+state.year,scope=analyticsScope){
   const tx=analyticsTransactions(year,scope),series=analyticsMonthSeries(year,scope);
   const income=series.income.reduce((sum,value)=>sum+value,0);
   const expense=series.expense.reduce((sum,value)=>sum+value,0);
   const balance=income-expense;
-  const savingsRate=income?Math.round(balance/income*100):0;
+  const savingsRate=analyticsSavingsRate(income,expense);
   const positiveMonths=series.balance.filter((value,index)=>series.count[index]>0&&value>0).length;
   const negativeMonths=series.balance.filter((value,index)=>series.count[index]>0&&value<0).length;
   const activeMonths=series.count.filter(Boolean).length;
@@ -99,13 +104,13 @@ function analyticsScopeSwitcherMarkup(){
 }
 
 function analyticsYearStatsMarkup(summary){
-  const balanceTone=summary.balance>=0?'positive':'negative';
-  const savingTone=summary.savingsRate>=0?'positive':'negative';
+  const savingsTone=summary.balance>=0?'savings-positive':'negative';
+  const rateTone=summary.savingsRate>=0?'savings-positive':'negative';
   return `<section class="analytics-year-stats" aria-label="Статистика за ${state.year} год">
     <article class="analytics-stat-card"><span>Доход за год</span><b class="positive">${money(summary.income)}</b></article>
     <article class="analytics-stat-card"><span>Расход за год</span><b class="negative">${money(summary.expense)}</b></article>
-    <article class="analytics-stat-card"><span>Результат за год</span><b class="${balanceTone}">${money(summary.balance)}</b></article>
-    <article class="analytics-stat-card"><span>Доля сбережений</span><b class="${savingTone}">${summary.savingsRate}%</b></article>
+    <article class="analytics-stat-card"><span>Сбережения</span><b class="${savingsTone}">${money(summary.balance)}</b></article>
+    <article class="analytics-stat-card"><span>% сбережений</span><b class="${rateTone}">${summary.savingsRate}%</b></article>
   </section>
   <section class="analytics-year-facts">
     <div><span>Операций</span><b>${summary.tx.length}</b></div>
@@ -118,14 +123,19 @@ function analyticsYearStatsMarkup(summary){
 function analyticsMonthCard(monthIndex,summary){
   const now=new Date(),isCurrent=+state.year===now.getFullYear()&&monthIndex===now.getMonth();
   const income=summary.series.income[monthIndex],expense=summary.series.expense[monthIndex],balance=summary.series.balance[monthIndex],count=summary.series.count[monthIndex];
+  const savingsRate=analyticsSavingsRate(income,expense);
   const tone=count?(balance>0?'month-positive':balance<0?'month-negative':'month-neutral'):'month-empty';
   const selected=analyticsSelectedMonth===monthIndex?'is-selected':'';
   const current=isCurrent?'is-current':'';
   const status=isCurrent?'<span class="analytics-month-current">Текущий</span>':'';
-  return `<button type="button" class="analytics-month-card ${tone} ${current} ${selected}" data-analytics-month="${monthIndex}" aria-label="${MONTHS[monthIndex]} ${state.year}: доход ${money(income)}, расход ${money(expense)}">
+  const savingsTone=savingsRate>=0?'savings-positive':'negative';
+  return `<button type="button" class="analytics-month-card ${tone} ${current} ${selected}" data-analytics-month="${monthIndex}" aria-label="${MONTHS[monthIndex]} ${state.year}: доход ${money(income)}, расход ${money(expense)}, сбережения ${savingsRate}%">
     <div class="analytics-month-head"><h3>${MONTHS[monthIndex]}</h3>${status}</div>
-    <div class="analytics-month-values"><div><span>Доход</span><b class="positive">${money(income)}</b></div><div><span>Расход</span><b class="negative">${money(expense)}</b></div></div>
-    <div class="analytics-month-result"><span>Итог</span><b class="${balance>=0?'positive':'negative'}">${money(balance)}</b></div>
+    <div class="analytics-month-values">
+      <div><span>Доход</span><b class="positive">${money(income)}</b></div>
+      <div><span>Расход</span><b class="negative">${money(expense)}</b></div>
+      <div class="analytics-month-savings"><span>Сбережения</span><b class="${savingsTone}">${savingsRate}%</b></div>
+    </div>
   </button>`;
 }
 
@@ -151,6 +161,8 @@ function analyticsMonthDetailsMarkup(){
 }
 
 function analyticsPage(){
+  const first=2026,current=Math.max(first,new Date().getFullYear());
+  state.year=Math.min(current,Math.max(first,+state.year||current));
   const summary=analyticsYearSummary();
   return `<div class="page-head analytics-page-head"><div><h2 class="page-title">Аналитика</h2><div class="page-subtitle">${esc(analyticsScopeTitle())} · ${state.year} год</div></div>${analyticsScopeSwitcherMarkup()}</div>${analyticsYearStatsMarkup(summary)}${analyticsCalendarMarkup(summary)}${analyticsMonthDetailsMarkup()}`;
 }
