@@ -1,5 +1,4 @@
 name: Static integrity
-# Verification trigger after optimizing the splash medallion asset.
 
 on:
   push:
