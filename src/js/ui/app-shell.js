@@ -3,7 +3,6 @@ const NAV_ITEMS=[
   {view:'overview',label:'Обзор',icon:'compass',primary:true},
   {view:'operations',label:'Операции',icon:'journal',primary:true},
   {view:'analytics',label:'Аналитика',icon:'map',primary:true},
-  {view:'goals',label:'Цели',icon:'chest',primary:true},
   {view:'recurring',label:'План',icon:'hourglass',primary:true},
   {view:'settings',label:'Настройки',icon:'settings',primary:true}
 ];
@@ -26,7 +25,7 @@ function headerDateText(){
 }
 
 function header(){
-  const overview=state.view==='overview',annualAnalytics=state.view==='analytics',noPeriodControls=state.view==='settings'||state.view==='categories',connection=window.FinanceOffline?.statusMarkup?.()||'',authState=window.FinanceOfflineSession?.statusMarkup?.()||'';
+  const overview=state.view==='overview',annualAnalytics=state.view==='analytics',noPeriodControls=state.view==='settings'||state.view==='categories'||state.view==='recurring'||state.view==='goals',connection=window.FinanceOffline?.statusMarkup?.()||'',authState=window.FinanceOfflineSession?.statusMarkup?.()||'';
   const periodLabel=overview||noPeriodControls?'':annualAnalytics?`${state.year} год`:`${MONTHS[state.month-1]} ${state.year}`;
   const periodControls=overview||noPeriodControls
     ?''
@@ -59,8 +58,8 @@ const ROUTES={
   operations:{page:()=>operationsPage(),bind:()=>bindOperations?.()},
   categories:{page:()=>categoriesPage(),bind:()=>bindCategories?.()},
   analytics:{page:()=>analyticsPage(),bind:()=>{bindAnalyticsRoute()}},
-  goals:{page:()=>goalsPage(),bind:()=>bindGoals?.()},
-  recurring:{page:()=>recurringPage(),bind:()=>bindRecurring?.()},
+  goals:{page:()=>planPage(),bind:()=>bindPlan?.()},
+  recurring:{page:()=>planPage(),bind:()=>bindPlan?.()},
   settings:{page:()=>settingsPage(),bind:()=>bindSettings?.()}
 };
 
@@ -91,6 +90,10 @@ function scrollOverviewTop(){
 function renderApp(){
   releaseMobileScrollLock();
   destroyCharts?.();
+  if(state.view==='goals'){
+    if(typeof planSection!=='undefined')planSection='goals';
+    state.view='recurring';
+  }
   const route=ROUTES[state.view]||ROUTES.overview;
   app.innerHTML=shell(route.page());
   bindCommon();
