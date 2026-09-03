@@ -1,67 +1,192 @@
-// Annual analytics with actionable insights. Chart.js is loaded only when this page opens.
+// Calendar-first annual analytics for husband, wife and the whole family.
 let chartJsPromise=null;
+let analyticsScope='combined';
+let analyticsSelectedMonth=null;
+
+// Analytics starts in 2026. A new year appears here only when it actually begins.
+if(typeof availableYears==='function'){
+  const defaultAvailableYears=availableYears;
+  availableYears=function(){
+    if(state?.view!=='analytics')return defaultAvailableYears();
+    const first=2026,current=Math.max(first,new Date().getFullYear());
+    return Array.from({length:current-first+1},(_,index)=>first+index);
+  };
+}
+
 function ensureChartJs(){
   if(window.Chart)return Promise.resolve(window.Chart);
   if(chartJsPromise)return chartJsPromise;
-  chartJsPromise=new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js';s.async=true;s.onload=()=>window.Chart?resolve(window.Chart):reject(new Error('Chart.js не инициализирован'));s.onerror=()=>reject(new Error('Не удалось загрузить графики'));document.head.appendChild(s)}).finally(()=>{if(!window.Chart)chartJsPromise=null});
+  chartJsPromise=new Promise((resolve,reject)=>{
+    const script=document.createElement('script');
+    script.src='vendor/chart.umd.js?v=analytics-calendar1';
+    script.async=true;
+    script.onload=()=>window.Chart?resolve(window.Chart):reject(new Error('Chart.js не инициализирован'));
+    script.onerror=()=>reject(new Error('Не удалось загрузить графики'));
+    document.head.appendChild(script);
+  }).finally(()=>{if(!window.Chart)chartJsPromise=null});
   return chartJsPromise;
 }
 
-function yearTx(year=+state.year){return state.transactions.filter(x=>new Date(x.occurred_at).getFullYear()===+year)}
-function yearSeries(year=+state.year){const income=Array(12).fill(0),expense=Array(12).fill(0),count=Array(12).fill(0);yearTx(year).forEach(x=>{const m=new Date(x.occurred_at).getMonth();(x.type==='income'?income:expense)[m]+=Number(x.amount||0);count[m]++});const balance=income.map((v,i)=>v-expense[i]);let running=0;const cumulative=balance.map(v=>(running+=v));return{income,expense,balance,cumulative,count}}
-function yearSummary(year=+state.year){
-  const tx=yearTx(year),income=tx.filter(x=>x.type==='income').reduce((s,x)=>s+Number(x.amount||0),0),expense=tx.filter(x=>x.type==='expense').reduce((s,x)=>s+Number(x.amount||0),0),balance=income-expense,saved=income?Math.round(balance/income*100):0,series=yearSeries(year),now=new Date(),months=year===now.getFullYear()?Math.max(1,now.getMonth()+1):12,avgExpense=expense/months,avgIncome=income/months;
-  const bestIndex=series.balance.reduce((best,v,i)=>v>series.balance[best]?i:best,0),worstIndex=series.balance.reduce((worst,v,i)=>v<series.balance[worst]?i:worst,0),categorySums={};tx.filter(x=>x.type==='expense').forEach(x=>categorySums[x.category_id]=(categorySums[x.category_id]||0)+Number(x.amount||0));const categories=Object.entries(categorySums).sort((a,b)=>b[1]-a[1]),largestExpense=tx.filter(x=>x.type==='expense').sort((a,b)=>Number(b.amount)-Number(a.amount))[0]||null;
-  return{year,tx,income,expense,balance,saved,avgExpense,avgIncome,series,bestIndex,worstIndex,categories,largestExpense,months};
-}
-function yearPersonStats(personId,year=+state.year){
-  const tx=yearTx(year).filter(x=>x.person_id===personId),incomeSeries=Array(12).fill(0),expenseSeries=Array(12).fill(0);
-  tx.forEach(x=>{const month=new Date(x.occurred_at).getMonth();(x.type==='income'?incomeSeries:expenseSeries)[month]+=Number(x.amount||0)});
-  const income=incomeSeries.reduce((a,b)=>a+b,0),expense=expenseSeries.reduce((a,b)=>a+b,0),balance=income-expense,savedRate=income?Math.round(balance/income*100):0;
-  return{income,expense,balance,savedRate,incomeSeries,expenseSeries};
-}
-function personRoleLabel(person){return person?.label==='husband'?'Муж':person?.label==='wife'?'Жена':person?.display_name||'Участник'}
-function percentDelta(current,previous){if(!previous)return current?null:0;return Math.round((current-previous)/Math.abs(previous)*100)}
-function deltaText(value){if(value==null)return'нет базы сравнения';if(value===0)return'без изменений';return `${value>0?'+':''}${value}% к прошлому году`}
-function savingsDescription(stats){if(!stats.income)return stats.expense?'Доходов за год нет':'Нет операций за год';if(stats.savedRate<0)return `Расходы превысили доходы на ${money(Math.abs(stats.balance))}`;if(stats.savedRate===0)return 'Доходы и расходы равны';return `Сохранено ${money(stats.balance)} из полученных доходов`}
-
-function yearlyExpenseList(categories,total){if(!categories.length)return `<div class="empty">Расходов за ${state.year} год пока нет</div>`;const max=categories[0][1]||1;return categories.slice(0,7).map(([id,val],i)=>`<div class="annual-category"><span class="annual-rank">${i+1}</span><div class="annual-category-main"><div><b>${esc(catName(id))}</b><span>${money(val)} · ${total?Math.round(val/total*100):0}%</span></div><div class="bar-track"><div class="bar" style="width:${Math.max(3,val/max*100)}%"></div></div></div></div>`).join('')}
-
-function analyticsInsights(y,prev){
-  const top=y.categories[0],topShare=top&&y.expense?Math.round(top[1]/y.expense*100):0,expenseDelta=percentDelta(y.expense,prev.expense),incomeDelta=percentDelta(y.income,prev.income),rateText=y.saved>=20?'Сбережения на хорошем уровне':y.saved>=10?'Есть запас для накоплений':y.saved>=0?'Расходы почти равны доходам':'Расходы выше доходов',rateClass=y.saved>=10?'positive':y.saved<0?'negative':'warning-text';
-  return `<div class="analytics-insights"><div class="analytics-insight"><span>Доля сбережений семьи</span><b class="${rateClass}">${y.saved}%</b><small>${rateText}</small></div><div class="analytics-insight"><span>Доходы</span><b>${money(y.avgIncome)} / мес.</b><small>${deltaText(incomeDelta)}</small></div><div class="analytics-insight"><span>Расходы</span><b>${money(y.avgExpense)} / мес.</b><small>${deltaText(expenseDelta)}</small></div><div class="analytics-insight"><span>Главная статья</span><b>${top?esc(catName(top[0])):'—'}</b><small>${top?`${topShare}% всех расходов`:''}</small></div>${y.largestExpense?`<div class="analytics-insight"><span>Крупнейшая покупка</span><b>${money(y.largestExpense.amount)}</b><small>${esc(catName(y.largestExpense.category_id))} · ${new Date(y.largestExpense.occurred_at).toLocaleDateString('ru-RU',{day:'2-digit',month:'short'})}</small></div>`:''}<div class="analytics-insight"><span>Лучший / слабый месяц</span><b>${MONTHS[y.bestIndex]} / ${MONTHS[y.worstIndex]}</b><small>${money(y.series.balance[y.bestIndex])} / ${money(y.series.balance[y.worstIndex])}</small></div></div>`;
+function analyticsPerson(scope=analyticsScope){
+  if(scope==='combined')return null;
+  return state.people.find(person=>person.label===scope)||null;
 }
 
-function personalSavingsMarkup(){
-  if(!state.people.length)return '';
-  return `<section class="personal-savings"><div class="analytics-section-head"><div><h3>Сбережения мужа и жены</h3><p>Доля сбережений показывает, какой процент личных доходов остался после личных расходов.</p></div></div><div class="personal-savings-grid">${state.people.map(person=>{const stats=yearPersonStats(person.id),rate=stats.savedRate,bar=Math.max(0,Math.min(100,rate)),tone=rate>=20?'positive':rate>=0?'warning-text':'negative';return `<article class="personal-saving-card"><div class="personal-saving-head"><div class="avatar small-avatar">${person.label==='husband'?'М':person.label==='wife'?'Ж':'•'}</div><div><b>${esc(person.display_name)}</b><small>${personRoleLabel(person)}</small></div><strong class="${tone}">${rate}%</strong></div><div class="saving-track" aria-label="Доля сбережений ${rate}%"><span style="width:${bar}%"></span></div><div class="personal-saving-numbers"><div><span>Доход</span><b class="positive">${money(stats.income)}</b></div><div><span>Расход</span><b class="negative">${money(stats.expense)}</b></div><div><span>Осталось</span><b class="${stats.balance>=0?'positive':'negative'}">${money(stats.balance)}</b></div></div><p>${esc(savingsDescription(stats))}</p></article>`}).join('')}</div></section>`;
+function analyticsScopeTitle(scope=analyticsScope){
+  if(scope==='combined')return 'Сводный отчёт';
+  const person=analyticsPerson(scope);
+  return scope==='husband'?`Муж${person?.display_name?` · ${person.display_name}`:''}`:`Жена${person?.display_name?` · ${person.display_name}`:''}`;
 }
 
-function personalChartsMarkup(){return state.people.map((person,index)=>`<div class="card annual-person-chart"><div class="chart-card-head"><div><h3>${esc(personRoleLabel(person))}: доходы и расходы</h3><p>${esc(person.display_name)} · по месяцам ${state.year} года</p></div></div><div class="chart-box person-chart-box"><canvas id="personYearChart${index}"></canvas></div></div>`).join('')}
+function analyticsTransactions(year=+state.year,scope=analyticsScope){
+  const person=analyticsPerson(scope);
+  return state.transactions.filter(tx=>{
+    if(tx.type!=='income'&&tx.type!=='expense')return false;
+    const date=new Date(tx.occurred_at);
+    if(date.getFullYear()!==+year)return false;
+    return scope==='combined'||(person&&tx.person_id===person.id);
+  });
+}
+
+function analyticsMonthSeries(year=+state.year,scope=analyticsScope){
+  const income=Array(12).fill(0),expense=Array(12).fill(0),count=Array(12).fill(0);
+  analyticsTransactions(year,scope).forEach(tx=>{
+    const month=new Date(tx.occurred_at).getMonth(),amount=Number(tx.amount||0);
+    if(tx.type==='income')income[month]+=amount;
+    if(tx.type==='expense')expense[month]+=amount;
+    count[month]++;
+  });
+  return{income,expense,count,balance:income.map((value,index)=>value-expense[index])};
+}
+
+function analyticsYearSummary(year=+state.year,scope=analyticsScope){
+  const tx=analyticsTransactions(year,scope),series=analyticsMonthSeries(year,scope);
+  const income=series.income.reduce((sum,value)=>sum+value,0);
+  const expense=series.expense.reduce((sum,value)=>sum+value,0);
+  const balance=income-expense;
+  const savingsRate=income?Math.round(balance/income*100):0;
+  const positiveMonths=series.balance.filter((value,index)=>series.count[index]>0&&value>0).length;
+  const negativeMonths=series.balance.filter((value,index)=>series.count[index]>0&&value<0).length;
+  const activeMonths=series.count.filter(Boolean).length;
+  const averageExpense=expense/(activeMonths||1);
+  return{tx,series,income,expense,balance,savingsRate,positiveMonths,negativeMonths,activeMonths,averageExpense};
+}
+
+function analyticsCategoryName(id){return id==='__none__'?'Без категории':catName(id)}
+
+function analyticsCategoryBuckets(type,monthIndex,year=+state.year,scope=analyticsScope){
+  const sums={};
+  analyticsTransactions(year,scope)
+    .filter(tx=>tx.type===type&&new Date(tx.occurred_at).getMonth()===+monthIndex)
+    .forEach(tx=>{
+      const key=tx.category_id||'__none__';
+      sums[key]=(sums[key]||0)+Number(tx.amount||0);
+    });
+  return Object.entries(sums).sort((a,b)=>b[1]-a[1]);
+}
+
+function analyticsChartBuckets(buckets){
+  if(buckets.length<=8)return buckets;
+  const top=buckets.slice(0,7),other=buckets.slice(7).reduce((sum,[,value])=>sum+value,0);
+  return [...top,['__other__',other]];
+}
+
+function analyticsCategoryLabel(id){return id==='__other__'?'Другие категории':analyticsCategoryName(id)}
+
+function analyticsScopeSwitcherMarkup(){
+  const options=[['husband','Муж'],['wife','Жена'],['combined','Сводный']];
+  return `<div class="analytics-scope-switch" role="group" aria-label="Режим аналитики">${options.map(([value,label])=>`<button type="button" class="analytics-scope-btn ${analyticsScope===value?'active':''}" data-analytics-scope="${value}" aria-pressed="${analyticsScope===value}">${label}</button>`).join('')}</div>`;
+}
+
+function analyticsYearStatsMarkup(summary){
+  const balanceTone=summary.balance>=0?'positive':'negative';
+  const savingTone=summary.savingsRate>=0?'positive':'negative';
+  return `<section class="analytics-year-stats" aria-label="Статистика за ${state.year} год">
+    <article class="analytics-stat-card"><span>Доход за год</span><b class="positive">${money(summary.income)}</b></article>
+    <article class="analytics-stat-card"><span>Расход за год</span><b class="negative">${money(summary.expense)}</b></article>
+    <article class="analytics-stat-card"><span>Результат за год</span><b class="${balanceTone}">${money(summary.balance)}</b></article>
+    <article class="analytics-stat-card"><span>Доля сбережений</span><b class="${savingTone}">${summary.savingsRate}%</b></article>
+  </section>
+  <section class="analytics-year-facts">
+    <div><span>Операций</span><b>${summary.tx.length}</b></div>
+    <div><span>Месяцев в плюсе</span><b class="positive">${summary.positiveMonths}</b></div>
+    <div><span>Месяцев в минусе</span><b class="negative">${summary.negativeMonths}</b></div>
+    <div><span>Средний расход активного месяца</span><b>${money(summary.averageExpense)}</b></div>
+  </section>`;
+}
+
+function analyticsMonthCard(monthIndex,summary){
+  const now=new Date(),isCurrent=+state.year===now.getFullYear()&&monthIndex===now.getMonth();
+  const income=summary.series.income[monthIndex],expense=summary.series.expense[monthIndex],balance=summary.series.balance[monthIndex],count=summary.series.count[monthIndex];
+  const tone=count?(balance>0?'month-positive':balance<0?'month-negative':'month-neutral'):'month-empty';
+  const selected=analyticsSelectedMonth===monthIndex?'is-selected':'';
+  const current=isCurrent?'is-current':'';
+  const status=isCurrent?'<span class="analytics-month-current">Текущий</span>':'';
+  return `<button type="button" class="analytics-month-card ${tone} ${current} ${selected}" data-analytics-month="${monthIndex}" aria-label="${MONTHS[monthIndex]} ${state.year}: доход ${money(income)}, расход ${money(expense)}">
+    <div class="analytics-month-head"><h3>${MONTHS[monthIndex]}</h3>${status}</div>
+    <div class="analytics-month-values"><div><span>Доход</span><b class="positive">${money(income)}</b></div><div><span>Расход</span><b class="negative">${money(expense)}</b></div></div>
+    <div class="analytics-month-result"><span>Итог</span><b class="${balance>=0?'positive':'negative'}">${money(balance)}</b></div>
+  </button>`;
+}
+
+function analyticsCalendarMarkup(summary){
+  return `<section class="analytics-calendar-section"><div class="analytics-section-head"><div><h3>${state.year} по месяцам</h3><p>Нажмите на месяц, чтобы увидеть отдельные графики доходов и расходов по категориям.</p></div></div><div class="analytics-month-grid">${MONTHS.map((_,index)=>analyticsMonthCard(index,summary)).join('')}</div></section>`;
+}
+
+function analyticsCategoryList(buckets,total,type){
+  if(!buckets.length)return `<div class="analytics-category-empty">${type==='income'?'Доходов':'Расходов'} в этом месяце нет.</div>`;
+  return `<div class="analytics-category-list">${buckets.slice(0,6).map(([id,value])=>`<div><span>${esc(analyticsCategoryName(id))}</span><b>${money(value)}${total?` · ${Math.round(value/total*100)}%`:''}</b></div>`).join('')}</div>`;
+}
+
+function analyticsMonthChartCard(type,buckets,total){
+  const isIncome=type==='income',title=isIncome?'Доходы по категориям':'Расходы по категориям',canvasId=isIncome?'analyticsIncomeCategoryChart':'analyticsExpenseCategoryChart';
+  return `<article class="card analytics-category-card"><div class="analytics-category-card-head"><div><span>${isIncome?'Доход':'Расход'} за месяц</span><h3>${title}</h3></div><b class="${isIncome?'positive':'negative'}">${money(total)}</b></div>${buckets.length?`<div class="analytics-category-chart"><canvas id="${canvasId}"></canvas></div>`:''}${analyticsCategoryList(buckets,total,type)}</article>`;
+}
+
+function analyticsMonthDetailsMarkup(){
+  if(analyticsSelectedMonth==null)return `<section class="analytics-month-placeholder"><span>Выберите месяц</span><p>После выбора здесь появятся два отдельных графика: источники доходов и статьи расходов.</p></section>`;
+  const incomeBuckets=analyticsCategoryBuckets('income',analyticsSelectedMonth),expenseBuckets=analyticsCategoryBuckets('expense',analyticsSelectedMonth);
+  const incomeTotal=incomeBuckets.reduce((sum,[,value])=>sum+value,0),expenseTotal=expenseBuckets.reduce((sum,[,value])=>sum+value,0);
+  return `<section class="analytics-month-detail" id="analyticsMonthDetail"><div class="analytics-month-detail-head"><div><span>Детализация месяца</span><h2>${MONTHS[analyticsSelectedMonth]} ${state.year}</h2><p>${esc(analyticsScopeTitle())}</p></div><button type="button" class="btn btn-soft analytics-month-close" data-analytics-close-month>Скрыть</button></div><div class="analytics-month-chart-grid">${analyticsMonthChartCard('income',incomeBuckets,incomeTotal)}${analyticsMonthChartCard('expense',expenseBuckets,expenseTotal)}</div></section>`;
+}
 
 function analyticsPage(){
-  const y=yearSummary(+state.year),prev=yearSummary(+state.year-1),topCategory=y.categories[0];
-  return `<div class="page-head"><div><h2 class="page-title">Аналитика ${state.year}</h2><div class="page-subtitle">Доходы, расходы, личные результаты мужа и жены и накопления семьи.</div></div></div>
-  <section class="grid kpis annual-kpis"><div class="card"><div class="kpi-label">Доходы за год</div><div class="kpi-value positive">${money(y.income)}</div><small>${deltaText(percentDelta(y.income,prev.income))}</small></div><div class="card"><div class="kpi-label">Расходы за год</div><div class="kpi-value negative">${money(y.expense)}</div><small>${deltaText(percentDelta(y.expense,prev.expense))}</small></div><div class="card"><div class="kpi-label">Финансовый результат</div><div class="kpi-value ${y.balance>=0?'positive':'negative'}">${money(y.balance)}</div></div><div class="card"><div class="kpi-label">Доля сбережений семьи</div><div class="kpi-value ${y.saved>=0?'positive':'negative'}">${y.saved}%</div></div></section>
-  ${analyticsInsights(y,prev)}
-  ${personalSavingsMarkup()}
-  <section class="annual-facts"><div class="annual-fact"><span>Операций</span><b>${y.tx.length}</b></div><div class="annual-fact"><span>Средний расход / месяц</span><b>${money(y.avgExpense)}</b></div><div class="annual-fact"><span>Лучший месяц</span><b>${MONTHS[y.bestIndex]}</b><small class="${y.series.balance[y.bestIndex]>=0?'positive':'negative'}">${money(y.series.balance[y.bestIndex])}</small></div><div class="annual-fact"><span>Крупнейшая статья расходов</span><b>${topCategory?esc(catName(topCategory[0])):'—'}</b><small>${topCategory?money(topCategory[1]):''}</small></div></section>
-  <div class="grid analytics-grid annual-analytics-grid"><div class="card annual-wide"><div class="chart-card-head"><div><h3>Доходы и расходы семьи по месяцам</h3><p>Динамика всей семьи за выбранный год</p></div></div><div class="chart-box"><canvas id="yearChart"></canvas></div></div><div class="card annual-wide monthly-ribbon-card"><div class="chart-card-head"><div><h3>Финансовая лента года</h3><p>Чистый результат каждого месяца: доходы минус расходы. Точки выше нуля — месяц в плюсе, ниже нуля — в минусе.</p><span class="chart-swipe-hint">↔ Листайте ленту пальцем по горизонтали</span></div></div><div class="monthly-ribbon-scroll" id="monthlyRibbonScroll"><div class="monthly-ribbon-axis" id="monthlyRibbonAxis" aria-hidden="true"></div><div class="chart-box monthly-ribbon-track" id="monthlyRibbonTrack"><canvas id="monthlyBalanceRibbonChart"></canvas></div></div></div><div class="card annual-wide people-comparison-card"><div class="chart-card-head"><div><h3>Муж и жена: итог за год</h3><p>Сравнение доходов, расходов и суммы, которая осталась после расходов. Столбец «Сбережения» может быть отрицательным.</p></div></div><div class="chart-box people-comparison-box"><canvas id="peopleChart"></canvas></div></div>${personalChartsMarkup()}<div class="card"><h3>Накопленный результат семьи</h3><div class="chart-box small"><canvas id="balanceChart"></canvas></div></div><div class="card"><h3>Расходы за год по категориям</h3><div class="chart-box small"><canvas id="categoryChart"></canvas></div></div><div class="card"><h3>Куда ушло больше всего</h3>${yearlyExpenseList(y.categories,y.expense)}</div></div>`;
+  const summary=analyticsYearSummary();
+  return `<div class="page-head analytics-page-head"><div><h2 class="page-title">Аналитика</h2><div class="page-subtitle">${esc(analyticsScopeTitle())} · ${state.year} год</div></div>${analyticsScopeSwitcherMarkup()}</div>${analyticsYearStatsMarkup(summary)}${analyticsCalendarMarkup(summary)}${analyticsMonthDetailsMarkup()}`;
 }
 
-function destroyCharts(){state.charts.forEach(c=>{try{c.destroy()}catch(_){}});state.charts=[]}
-function compactMoney(value){const n=Number(value||0),abs=Math.abs(n);if(abs>=1000000)return `${(n/1000000).toLocaleString('ru-RU',{maximumFractionDigits:1})} млн ₸`;if(abs>=1000)return `${(n/1000).toLocaleString('ru-RU',{maximumFractionDigits:0})} тыс. ₸`;return `${n.toLocaleString('ru-RU',{maximumFractionDigits:0})} ₸`}
-function chartCommon({beginAtZero=true}={}){return{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{labels:{color:'#d8c6a5',usePointStyle:true,boxWidth:10}},tooltip:{callbacks:{label:ctx=>`${ctx.dataset.label||''}: ${money(ctx.parsed?.y??ctx.raw)}`}}},scales:{x:{grid:{display:false},ticks:{color:'#a99a81'}},y:{beginAtZero,ticks:{color:'#a99a81',callback:value=>compactMoney(value)}}}}}
-function renderRibbonScale(chart){
-  const axis=document.getElementById('monthlyRibbonAxis'),scale=chart?.scales?.y;if(!axis||!scale)return;
-  axis.innerHTML=scale.ticks.map((tick,index)=>{const top=Math.round(scale.getPixelForTick(index)),zero=Number(tick.value)===0?' zero':'';return `<span class="monthly-ribbon-axis-tick${zero}" style="top:${top}px">${esc(compactMoney(tick.value))}</span>`}).join('');
+function destroyCharts(){state.charts.forEach(chart=>{try{chart.destroy()}catch(_){}});state.charts=[]}
+
+function analyticsCategoryChartOptions(total){
+  return{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'#d8c6a5',usePointStyle:true,padding:12,boxWidth:9}},tooltip:{callbacks:{label:ctx=>{const value=Number(ctx.raw||0),share=total?Math.round(value/total*100):0;return `${ctx.label}: ${money(value)} · ${share}%`;}}}}};
 }
+
+function drawAnalyticsCategoryChart(canvasId,buckets,type){
+  const ChartLib=window.Chart,canvas=document.getElementById(canvasId);if(!ChartLib||!canvas||!buckets.length)return;
+  const data=analyticsChartBuckets(buckets),total=buckets.reduce((sum,[,value])=>sum+value,0);
+  const incomeColors=['#2F9E6F','#55B98A','#7ACA9F','#A5DDBB','#3D8B72','#80BFA1','#B7E4C7','#5AAE89'];
+  const expenseColors=['#D85C5C','#E37862','#D99A5B','#C96F82','#E6A15C','#C85A6A','#D98972','#B85D68'];
+  state.charts.push(new ChartLib(canvas,{type:'doughnut',data:{labels:data.map(([id])=>analyticsCategoryLabel(id)),datasets:[{data:data.map(([,value])=>value),backgroundColor:type==='income'?incomeColors:expenseColors,borderColor:'#081118',borderWidth:3,hoverBorderColor:'#f2d39a',hoverOffset:8}]},options:analyticsCategoryChartOptions(total)}));
+}
+
+function bindAnalyticsControls(){
+  document.querySelectorAll('[data-analytics-scope]').forEach(button=>button.onclick=()=>{
+    const next=button.dataset.analyticsScope;
+    if(!['husband','wife','combined'].includes(next)||next===analyticsScope)return;
+    analyticsScope=next;analyticsSelectedMonth=null;renderApp();
+  });
+  document.querySelectorAll('[data-analytics-month]').forEach(button=>button.onclick=()=>{
+    analyticsSelectedMonth=Number(button.dataset.analyticsMonth);renderApp();
+    requestAnimationFrame(()=>document.getElementById('analyticsMonthDetail')?.scrollIntoView({behavior:'smooth',block:'start'}));
+  });
+  document.querySelector('[data-analytics-close-month]')?.addEventListener('click',()=>{analyticsSelectedMonth=null;renderApp()});
+}
+
 function drawAnalytics(){
-  const ChartLib=window.Chart;if(!ChartLib)return;ChartLib.defaults.color='#cbb994';ChartLib.defaults.borderColor='rgba(177,139,82,.20)';const y=yearSummary(),series=y.series;
-  const yearEl=document.getElementById('yearChart');if(yearEl)state.charts.push(new ChartLib(yearEl,{type:'line',data:{labels:MONTHS,datasets:[{label:'Доходы',data:series.income,borderColor:'#67d29d',backgroundColor:'rgba(103,210,157,.14)',tension:.32,fill:false,pointRadius:3,pointHoverRadius:5},{label:'Расходы',data:series.expense,borderColor:'#ff766f',backgroundColor:'rgba(255,118,111,.10)',tension:.32,fill:false,pointRadius:3,pointHoverRadius:5}]},options:chartCommon()}));
-  const ribbonEl=document.getElementById('monthlyBalanceRibbonChart');if(ribbonEl){const visibleMonths=Math.max(1,Math.min(12,y.months||12)),ribbonValues=series.balance.slice(0,visibleMonths),ribbonTrack=document.getElementById('monthlyRibbonTrack');if(ribbonTrack)ribbonTrack.style.setProperty('--ribbon-months',visibleMonths);const base=chartCommon({beginAtZero:true}),ribbonChart=new ChartLib(ribbonEl,{type:'line',data:{labels:MONTHS.slice(0,visibleMonths),datasets:[{label:'Результат месяца',data:ribbonValues,borderColor:'#f2c14e',backgroundColor:'rgba(242,193,78,.16)',borderWidth:3,tension:.36,fill:'origin',pointRadius:4,pointHoverRadius:6,pointBackgroundColor:ribbonValues.map(v=>v>=0?'#67d29d':'#ff766f'),pointBorderColor:'#0b151c',pointBorderWidth:2}]},options:{...base,plugins:{...base.plugins,legend:{display:false},tooltip:{callbacks:{label:ctx=>`${Number(ctx.raw)>=0?'Плюс':'Минус'} за месяц: ${money(ctx.raw)}`}}},scales:{x:base.scales.x,y:{...base.scales.y,display:false,beginAtZero:true}}}});state.charts.push(ribbonChart);renderRibbonScale(ribbonChart);requestAnimationFrame(()=>renderRibbonScale(ribbonChart));const ribbonScroll=document.getElementById('monthlyRibbonScroll');if(ribbonScroll)requestAnimationFrame(()=>{if(ribbonScroll.scrollWidth>ribbonScroll.clientWidth)ribbonScroll.scrollLeft=ribbonScroll.scrollWidth-ribbonScroll.clientWidth});}
-  const ps=state.people.map(p=>yearPersonStats(p.id)),peopleEl=document.getElementById('peopleChart');if(peopleEl)state.charts.push(new ChartLib(peopleEl,{type:'bar',data:{labels:['Доходы','Расходы','Сбережения'],datasets:state.people.map((p,i)=>({label:personRoleLabel(p),data:[ps[i].income,ps[i].expense,ps[i].balance],backgroundColor:p.label==='wife'?'rgba(214,173,98,.72)':'rgba(105,156,194,.72)',borderColor:p.label==='wife'?'#d6ad62':'#699cc2',borderWidth:1,borderRadius:6}))},options:{...chartCommon({beginAtZero:false}),plugins:{...chartCommon().plugins,tooltip:{callbacks:{label:ctx=>`${ctx.dataset.label}: ${money(ctx.raw)}`}}}}}));
-  state.people.forEach((person,index)=>{const el=document.getElementById(`personYearChart${index}`);if(!el)return;const stats=yearPersonStats(person.id);state.charts.push(new ChartLib(el,{type:'line',data:{labels:MONTHS,datasets:[{label:'Доходы',data:stats.incomeSeries,borderColor:'#67d29d',backgroundColor:'rgba(103,210,157,.12)',tension:.3,fill:false,pointRadius:3,pointHoverRadius:5},{label:'Расходы',data:stats.expenseSeries,borderColor:'#ff766f',backgroundColor:'rgba(255,118,111,.10)',tension:.3,fill:false,pointRadius:3,pointHoverRadius:5}]},options:chartCommon()}))});
-  const balanceEl=document.getElementById('balanceChart');if(balanceEl)state.charts.push(new ChartLib(balanceEl,{type:'line',data:{labels:MONTHS,datasets:[{label:'Накопленный баланс',data:series.cumulative,borderColor:'#d6ad62',backgroundColor:'rgba(214,173,98,.12)',tension:.3,fill:true,pointRadius:3}]},options:chartCommon({beginAtZero:false})}));
-  const top=y.categories.slice(0,8),catEl=document.getElementById('categoryChart'),categoryColors=['#FFD166','#3B82F6','#EF4444','#22C55E','#A855F7','#F97316','#06B6D4','#EC4899'];if(catEl)state.charts.push(new ChartLib(catEl,{type:'doughnut',data:{labels:top.map(x=>catName(x[0])),datasets:[{data:top.map(x=>x[1]),backgroundColor:categoryColors,borderColor:'#071019',borderWidth:3,hoverBorderColor:'#f6e2bd',hoverBorderWidth:2,hoverOffset:10}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'#d8c6a5',usePointStyle:true,padding:14}},tooltip:{callbacks:{label:ctx=>`${ctx.label}: ${money(ctx.raw)}`}}}}}));
+  bindAnalyticsControls();
+  if(!window.Chart||analyticsSelectedMonth==null)return;
+  window.Chart.defaults.color='#cbb994';
+  window.Chart.defaults.borderColor='rgba(177,139,82,.20)';
+  drawAnalyticsCategoryChart('analyticsIncomeCategoryChart',analyticsCategoryBuckets('income',analyticsSelectedMonth),'income');
+  drawAnalyticsCategoryChart('analyticsExpenseCategoryChart',analyticsCategoryBuckets('expense',analyticsSelectedMonth),'expense');
 }
