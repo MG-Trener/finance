@@ -14,8 +14,8 @@
 .analytics-section-head{display:flex;align-items:end;justify-content:space-between;gap:12px;margin-bottom:10px}
 .analytics-section-head h3{margin:0;color:#f0ddba;font:700 16px Cinzel,serif}
 .analytics-section-head p{margin:4px 0 0;color:#8f836f;font-size:10px;line-height:1.4}
-.analytics-month-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
-.analytics-month-card{position:relative;display:grid;align-content:start;gap:8px;min-width:0;min-height:112px;padding:12px 11px;text-align:left;border:1px solid rgba(177,139,82,.28);border-radius:13px;background:linear-gradient(180deg,rgba(13,23,30,.97),rgba(7,14,19,.95));color:#d9c5a2;box-shadow:0 7px 18px rgba(0,0,0,.24),inset 0 1px rgba(255,255,255,.015);cursor:pointer;overflow:hidden;transition:transform .16s ease,border-color .16s ease,box-shadow .16s ease}
+.analytics-month-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;width:calc(100% - 10px);max-width:880px;margin:0 auto}
+.analytics-month-card{position:relative;display:grid;align-content:start;gap:8px;min-width:0;min-height:124px;padding:12px 10px;text-align:left;border:1px solid rgba(177,139,82,.28);border-radius:13px;background:linear-gradient(180deg,rgba(13,23,30,.97),rgba(7,14,19,.95));color:#d9c5a2;box-shadow:0 7px 18px rgba(0,0,0,.24),inset 0 1px rgba(255,255,255,.015);cursor:pointer;overflow:hidden;transition:transform .16s ease,border-color .16s ease,box-shadow .16s ease}
 .analytics-month-card::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:1}
 .analytics-month-card.month-positive{border-color:rgba(92,171,116,.46)}
 .analytics-month-card.month-positive::before{background:linear-gradient(145deg,rgba(26,103,65,.30),rgba(17,58,42,.10) 62%,transparent)}
@@ -26,15 +26,17 @@
 .analytics-month-card:hover{transform:translateY(-2px);border-color:rgba(214,173,98,.62);box-shadow:0 11px 24px rgba(0,0,0,.34)}
 .analytics-month-card.is-current,.analytics-month-card.is-selected{border-color:#f1c861;box-shadow:0 0 0 2px rgba(241,200,97,.28),0 0 22px rgba(241,185,71,.24),0 10px 22px rgba(0,0,0,.32)}
 .analytics-month-card.is-selected{background:linear-gradient(180deg,rgba(18,34,37,.98),rgba(7,18,22,.96))}
-.analytics-month-head,.analytics-month-values,.analytics-month-result{position:relative;z-index:1}
+.analytics-month-head,.analytics-month-values{position:relative;z-index:1}
 .analytics-month-head{display:flex;align-items:center;justify-content:space-between;gap:6px}
 .analytics-month-head h3{margin:0;color:#fff4df;font:700 15px Cinzel,serif;line-height:1.1}
 .analytics-month-current{padding:2px 5px;border:1px solid rgba(241,200,97,.45);border-radius:999px;background:rgba(151,105,43,.22);color:#f4d792;font-size:7px;font-weight:800;letter-spacing:.04em;text-transform:uppercase}
-.analytics-month-values{display:grid;grid-template-columns:1fr;gap:4px}
+.analytics-month-values{display:grid;grid-template-columns:1fr;gap:5px}
 .analytics-month-values>div{display:flex;align-items:center;justify-content:space-between;gap:6px;min-width:0;padding:0;border:0;border-radius:0;background:transparent}
 .analytics-month-values span{color:#d8c8ac;font-size:10px;font-weight:700;letter-spacing:0;text-transform:none}
 .analytics-month-values b{min-width:0;overflow:hidden;font-size:11px;text-align:right;text-overflow:ellipsis;white-space:nowrap}
-.analytics-month-result{display:none}
+.analytics-month-savings{margin-top:2px;padding-top:5px!important;border-top:1px solid rgba(213,169,83,.16)!important}
+.analytics-month-savings span{color:#e2c68f}
+.analytics-month-savings b.savings-positive,.analytics-stat-card b.savings-positive{color:#ffd56f;text-shadow:0 0 12px rgba(255,195,72,.28)}
 .analytics-month-placeholder{display:grid;place-items:center;min-height:110px;padding:18px;border:1px dashed rgba(177,139,82,.34);border-radius:14px;background:rgba(6,13,18,.48);text-align:center}
 .analytics-month-placeholder span{color:#dec69a;font:700 15px Cinzel,serif}
 .analytics-month-placeholder p{max-width:520px;margin:6px 0 0;color:#8f836f;font-size:11px;line-height:1.5}
@@ -57,7 +59,7 @@
 .analytics-category-list b{color:#ddc9a6;font-size:9px;white-space:nowrap}
 .analytics-category-empty{display:grid;place-items:center;min-height:210px;color:#8f836f;font-size:10px;text-align:center}
 .analytics-stat-card b.positive{color:#69d49f}
-.analytics-stat-card b.negative{color:#ff746b}
+.analytics-stat-card b.negative,.analytics-month-savings b.negative{color:#ff746b;text-shadow:none}
 @media(max-width:760px){
   .analytics-page-head{align-items:stretch;flex-direction:column;gap:9px}
   .analytics-scope-switch{width:100%}
@@ -66,14 +68,16 @@
   .analytics-stat-card{padding:9px 4px}
   .analytics-stat-card span{font-size:7px}
   .analytics-stat-card b{font-size:12px}
-  .analytics-calendar-section{padding:9px}
+  .analytics-calendar-section{padding:9px 7px}
   .analytics-section-head p{display:none}
-  .analytics-month-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
-  .analytics-month-card{min-height:100px;gap:7px;padding:10px 8px;border-radius:11px}
+  .analytics-month-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;width:calc(100% - 6px)}
+  .analytics-month-card{min-height:111px;gap:6px;padding:9px 7px;border-radius:11px}
   .analytics-month-head h3{font-size:12px}
   .analytics-month-current{display:none}
+  .analytics-month-values{gap:4px}
   .analytics-month-values span{font-size:8px}
   .analytics-month-values b{font-size:9px}
+  .analytics-month-savings{padding-top:4px!important}
   .analytics-month-detail{padding:9px}
   .analytics-month-detail-head h2{font-size:16px}
   .analytics-month-chart-grid{grid-template-columns:1fr 1fr;gap:7px}
@@ -90,8 +94,8 @@
   .analytics-stat-card{padding:8px 2px}
   .analytics-stat-card span{font-size:6.5px}
   .analytics-stat-card b{font-size:10px}
-  .analytics-month-grid{gap:6px}
-  .analytics-month-card{min-height:91px;padding:9px 7px}
+  .analytics-month-grid{gap:5px;width:calc(100% - 8px)}
+  .analytics-month-card{min-height:104px;padding:8px 6px}
   .analytics-month-head h3{font-size:11px}
   .analytics-month-values span{font-size:7px}
   .analytics-month-values b{font-size:8px}
