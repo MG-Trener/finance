@@ -5,8 +5,8 @@
 /* Pages */
 @import url('./pages/overview.css?v=overview30');
 @import url('./pages/recurring.css?v=plan3');
-@import url('./pages/journal.css?v=journal26');
-@import url('./pages/journal-enhancements.css?v=journal32');
+@import url('./pages/journal.css?v=journal27');
+@import url('./pages/journal-enhancements.css?v=journal33');
 @import url('./pages/analytics.css?v=analytics59');
 @import url('./pages/goals.css?v=goals57');
 @import url('./pages/settings.css?v=settings1');
@@ -46,6 +46,8 @@
 @import url('./mobile-scroll-nav.css?v=scroll63');
 /* Keep this late: semantic modal layouts and narrow-scope sticky rules. */
 @import url('./mobile-stability.css?v=stability3');
+/* Operations density must win over Android desktop-viewport fallback sizing. */
+@import url('./pages/journal-mobile-density.css?v=journal-mobile1');
 /* Must be last among application UI rules: spouse messaging and action-icon alignment. */
 @import url('./components/family-messages.css?v=familymsg2');
 /* Final loading-screen override: keep the dedication and full crest composed above the compact status strip. */
