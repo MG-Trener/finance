@@ -50,3 +50,6 @@
 @import url('./components/family-messages.css?v=familymsg2');
 /* Final loading-screen override: keep the dedication and full crest composed above the compact status strip. */
 @import url('./components/boot-splash.css?v=boot7');
+
+/* Analytics month tiles should hug their content instead of reserving empty space below savings. */
+.analytics-month-card{min-height:auto}
