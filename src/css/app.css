@@ -5,7 +5,6 @@
 /* Pages */
 @import url('./pages/overview.css?v=overview30');
 @import url('./pages/recurring.css?v=plan4');
-@import url('./pages/piggy-bank.css?v=piggy1');
 @import url('./pages/journal.css?v=journal27');
 @import url('./pages/journal-enhancements.css?v=journal33');
 @import url('./pages/analytics.css?v=analytics59');
@@ -50,6 +49,8 @@
 @import url('./pages/journal-mobile-density.css?v=journal-mobile1');
 /* Must be last among application UI rules: spouse messaging and action-icon alignment. */
 @import url('./components/family-messages.css?v=familymsg2');
+/* Piggy Bank intentionally loads after generic mobile rules so its compact layout wins. */
+@import url('./pages/piggy-bank.css?v=piggy2');
 
 /* Analytics month tiles should hug their content instead of reserving empty space below savings. */
 .analytics-month-card{min-height:auto}
