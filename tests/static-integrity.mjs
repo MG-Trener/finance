@@ -40,21 +40,35 @@ assert(exists('assets/backgrounds/site-bg.webp'),'optimized application backgrou
 const hotfix=fs.readFileSync(path.join(root,'hotfix.css'),'utf8');
 assert(hotfix.includes("assets/backgrounds/site-bg.webp"),'hotfix.css must use the optimized WebP background');
 
-// The startup scene must stay a real code-driven animation, not a video/GIF or frame sequence.
-assert(exists('assets/splash-medallion.png'),'splash medallion PNG is missing');
-assert(exists('assets/splash-title-pirate.png'),'pirate splash title PNG is missing');
-assert(exists('src/js/ui/splash.js'),'programmatic splash animation is missing');
-assert(exists('src/css/components/splash.css'),'splash styles are missing');
-const splashJs=fs.readFileSync(path.join(root,'src/js/ui/splash.js'),'utf8');
-assert(splashJs.includes('requestAnimationFrame'),'splash must be animated programmatically');
-assert(splashJs.includes('rotationDeg'),'medallion rotation must be synchronized with distance');
-assert(!/\.(?:gif|mp4|webm)["']/.test(splashJs),'splash must not use GIF or video frames');
+// App startup must not show the former custom splash scene. Keep only the empty
+// boot host so auth/offline startup messages can still be rendered when needed.
+const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
+assert(!html.includes('treasury-splash'),'custom startup splash must remain removed');
+assert(!html.includes('src/js/ui/splash.js'),'splash animation script must not be loaded');
+assert(!html.includes('assets/splash-title-pirate.png'),'splash title artwork must not be loaded at startup');
+assert(html.includes('<div id="app"><div class="boot"></div></div>'),'startup must use the empty boot host');
+
+// Piggy Bank must remain a first-class third Plan section with four supported currencies.
+const piggyMigration='supabase/migrations/20260904_019_piggy_bank_balances.sql';
+const piggyIndexMigration='supabase/migrations/20260904_020_piggy_bank_actor_indexes.sql';
+assert(exists(piggyMigration),'piggy bank migration is missing');
+assert(exists(piggyIndexMigration),'piggy bank actor index migration is missing');
+assert(exists('src/js/features/piggy-bank.js'),'piggy bank UI module is missing');
+assert(exists('src/css/pages/piggy-bank.css'),'piggy bank styles are missing');
+assert(exists('assets/piggy-chest.svg'),'piggy bank treasure chest artwork is missing');
+assert(html.includes('src/js/features/piggy-bank.js'),'piggy bank UI module is not loaded');
+const piggyJs=fs.readFileSync(path.join(root,'src/js/features/piggy-bank.js'),'utf8');
+for(const code of ['KZT','RUB','USD','CNY'])assert(piggyJs.includes(code),`piggy bank currency is missing: ${code}`);
+assert(piggyJs.includes('Копилка'),'Plan third tab must be labelled Копилка');
+assert(piggyJs.includes("uiSound(edit?'success':'income')"),'piggy bank add action must use the coin sound');
+if(exists(piggyMigration)){
+  const sql=fs.readFileSync(path.join(root,piggyMigration),'utf8');
+  assert(sql.includes('create table if not exists public.piggy_bank_balances'),'piggy bank table is missing');
+  assert(sql.includes('function public.add_piggy_bank_amount'),'piggy bank additive RPC is missing');
+  assert(sql.includes('security invoker'),'piggy bank RPC must preserve caller RLS');
+}
 
 // Every local script/stylesheet/manifest/icon referenced by index.html must exist.
-const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
-assert(html.includes('class="treasury-splash-crest"'),'family crest must be present in the splash composition');
-assert(html.includes('assets/gerb-runtime.webp'),'splash must use the optimized runtime crest');
-assert(html.includes('assets/splash-title-pirate.png'),'splash must use the pirate title artwork');
 const refs=[...html.matchAll(/(?:src|href)="([^"]+)"/g)].map(m=>m[1]);
 for(const ref of refs){
   if(/^(?:https?:|data:|#)/.test(ref))continue;
@@ -133,7 +147,7 @@ if(precacheMatch){
   }
 }else fail.push('service worker: PRECACHE list not found');
 
-// Income confirmation must use the licensed, mobile-bundled coin sample and keep it short.
+// Income confirmation and Piggy Bank deposits use the licensed, mobile-bundled coin sample and keep it short.
 const incomeSound='assets/sounds/income-coins.wav';
 assert(exists(incomeSound),'income coin sound is missing');
 if(exists(incomeSound)){
