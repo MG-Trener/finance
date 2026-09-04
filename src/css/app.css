@@ -5,6 +5,7 @@
 /* Pages */
 @import url('./pages/overview.css?v=overview30');
 @import url('./pages/recurring.css?v=plan4');
+@import url('./pages/piggy-bank.css?v=piggy1');
 @import url('./pages/journal.css?v=journal27');
 @import url('./pages/journal-enhancements.css?v=journal33');
 @import url('./pages/analytics.css?v=analytics59');
@@ -28,7 +29,6 @@
 @import url('./components/offline.css?v=offline42');
 @import url('./components/local-lock.css?v=lock40');
 @import url('./components/compact-header.css?v=header1');
-@import url('./components/splash.css?v=splash3');
 
 /* Optimized application and authorization artwork. */
 @import url('./backgrounds.css');
@@ -50,8 +50,6 @@
 @import url('./pages/journal-mobile-density.css?v=journal-mobile1');
 /* Must be last among application UI rules: spouse messaging and action-icon alignment. */
 @import url('./components/family-messages.css?v=familymsg2');
-/* Final loading-screen override: keep the dedication and full crest composed above the compact status strip. */
-@import url('./components/boot-splash.css?v=boot7');
 
 /* Analytics month tiles should hug their content instead of reserving empty space below savings. */
 .analytics-month-card{min-height:auto}
