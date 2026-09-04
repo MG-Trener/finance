@@ -43,11 +43,12 @@
           ${events.map(row=>{
             const phone=husbandEventPhone(row);
             const callHref=husbandPhoneHref(phone);
+            const amount=row.amount!=null&&row.amount!==''?money(row.amount):'—';
             return `<div class="husband-month-event-row">
               <button type="button" class="husband-month-event-main" data-husband-month-event="${row.id}" data-husband-month-date="${row.entry_date}" aria-label="Открыть ${esc(row.title||'мероприятие')} за ${esc(husbandEventDateLabel(row.entry_date))}">
                 <span class="husband-event-date">${esc(husbandEventDateLabel(row.entry_date))}</span>
                 <span class="husband-event-title">${esc(row.title||'Мероприятие')}</span>
-                <span class="husband-event-amount">${row.amount!=null&&row.amount!==''?money(row.amount):'—'}</span>
+                <span class="husband-event-amount"><span>${amount}</span>${row.is_paid?'<span class="husband-event-paid" title="Оплачено" aria-label="Оплачено">✓</span>':''}</span>
                 <span class="husband-event-comment">${row.comment?esc(row.comment):'—'}</span>
               </button>
               ${callHref?`<a class="salon-call-button husband-event-call" href="${callHref}" aria-label="Позвонить по номеру ${esc(phone)}" title="${esc(phone)}"><span aria-hidden="true">☎</span><span>Позвонить</span></a>`:'<span class="husband-event-no-phone">—</span>'}
@@ -72,25 +73,26 @@
     });
   };
 
-  // The table already has client_phone for the wife's appointments. Reuse the
-  // same field for husband events and inject it into the existing editor so no
-  // schema change is required.
-  const baseSaveCalendarRowWithHusbandPhone=saveCalendarRow;
+  // Husband event-specific fields are layered onto the existing calendar editor
+  // so the base calendar module stays shared with the wife's appointments.
+  const baseSaveCalendarRowWithHusbandFields=saveCalendarRow;
   saveCalendarRow=async function(options){
     const form=document.getElementById('husbandCalendarForm');
     const phoneInput=document.getElementById('husbandCalendarPhone');
-    const husbandEventSave=!!form&&!!phoneInput&&(options?.createPayload?.kind==='event'||options?.updatePayload);
-    if(!husbandEventSave)return baseSaveCalendarRowWithHusbandPhone(options);
+    const paidInput=document.getElementById('husbandCalendarPaid');
+    const husbandEventSave=!!form&&(!!phoneInput||!!paidInput)&&(options?.createPayload?.kind==='event'||options?.updatePayload);
+    if(!husbandEventSave)return baseSaveCalendarRowWithHusbandFields(options);
 
-    const phone=phoneInput.value.trim();
+    const phone=phoneInput?.value.trim()||'';
     if(phone&&!normalizeHusbandPhone(phone)){
       notice(options?.noticeId||'calendarNotice','Номер телефона указан неверно.');
       return null;
     }
-    return baseSaveCalendarRowWithHusbandPhone({
+    const isPaid=!!paidInput?.checked;
+    return baseSaveCalendarRowWithHusbandFields({
       ...options,
-      createPayload:options.createPayload?{...options.createPayload,client_phone:phone||null}:options.createPayload,
-      updatePayload:options.updatePayload?{...options.updatePayload,client_phone:phone||null}:options.updatePayload
+      createPayload:options.createPayload?{...options.createPayload,client_phone:phone||null,is_paid:isPaid}:options.createPayload,
+      updatePayload:options.updatePayload?{...options.updatePayload,client_phone:phone||null,is_paid:isPaid}:options.updatePayload
     });
   };
 
@@ -112,19 +114,25 @@
     update();
   }
 
-  const baseOpenHusbandDayWithPhone=openHusbandDay;
+  const baseOpenHusbandDayWithFields=openHusbandDay;
   openHusbandDay=function(dateKey,editId=null){
-    baseOpenHusbandDayWithPhone(dateKey,editId);
+    baseOpenHusbandDayWithFields(dateKey,editId);
     const form=document.getElementById('husbandCalendarForm');
     if(!form)return;
     const person=calendarCurrentPerson();
     const edit=editId&&person?calendarEntriesOn(person.id,dateKey,'event').find(row=>row.id===editId):null;
     const comment=document.getElementById('calendarComment')?.closest('.field');
     if(!comment)return;
-    const field=document.createElement('div');
-    field.className='field husband-phone-field';
-    field.innerHTML=`<label>Контактный телефон <span class="field-hint">необязательно</span></label><div class="salon-phone-control husband-phone-control"><input id="husbandCalendarPhone" type="tel" maxlength="40" inputmode="tel" value="${esc(husbandEventPhone(edit))}" placeholder="+7 700 000 00 00" autocomplete="tel"><button type="button" class="btn btn-soft salon-call-form-button husband-call-form-button" id="husbandCalendarCall"><span aria-hidden="true">☎</span> Позвонить</button></div>`;
-    comment.before(field);
+
+    const phoneField=document.createElement('div');
+    phoneField.className='field husband-phone-field';
+    phoneField.innerHTML=`<label>Контактный телефон <span class="field-hint">необязательно</span></label><div class="salon-phone-control husband-phone-control"><input id="husbandCalendarPhone" type="tel" maxlength="40" inputmode="tel" value="${esc(husbandEventPhone(edit))}" placeholder="+7 700 000 00 00" autocomplete="tel"><button type="button" class="btn btn-soft salon-call-form-button husband-call-form-button" id="husbandCalendarCall"><span aria-hidden="true">☎</span> Позвонить</button></div>`;
+    comment.before(phoneField);
+
+    const paidField=document.createElement('div');
+    paidField.className='field husband-paid-field';
+    paidField.innerHTML=`<label class="husband-paid-toggle"><input id="husbandCalendarPaid" type="checkbox" ${edit?.is_paid?'checked':''}><span class="husband-paid-check" aria-hidden="true">✓</span><span class="husband-paid-copy"><strong>ОПЛАЧЕНО</strong><small>Отметьте, если сумма по мероприятию уже оплачена</small></span></label>`;
+    comment.before(paidField);
     bindHusbandPhoneAction();
   };
 })();
