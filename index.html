@@ -14,12 +14,11 @@
   <link rel="icon" href="assets/icon-192.png" type="image/png" sizes="192x192" />
   <link rel="icon" href="assets/app-icon.svg" type="image/svg+xml" />
   <link rel="apple-touch-icon" href="assets/icon-192.png" />
-  <link rel="preload" href="assets/splash-title-pirate.png" as="image" type="image/png" />
   <link rel="preload" href="assets/gerb-runtime.webp" as="image" type="image/webp" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="src/css/app.css?v=plan7" />
+  <link rel="stylesheet" href="src/css/app.css?v=piggy1" />
   <link rel="stylesheet" href="src/css/pages/calendar.css?v=calendar1" />
   <link rel="stylesheet" href="src/css/pages/calendar-duration.css?v=calendar-duration1" />
   <link rel="stylesheet" href="src/css/pages/calendar-person-switcher.css?v=calendar2" />
@@ -30,24 +29,7 @@
   <link rel="stylesheet" href="src/css/components/period-calendar-polish.css?v=period4" />
 </head>
 <body>
-  <div class="treasury-splash" id="financeSplash" role="status" aria-live="polite" aria-label="Загрузка приложения «Семейная казна»">
-    <canvas class="treasury-splash-canvas" id="financeSplashCanvas" aria-hidden="true"></canvas>
-    <div class="treasury-splash-vignette" aria-hidden="true"></div>
-    <div class="treasury-splash-title">
-      <h1><img class="treasury-splash-wordmark" src="assets/splash-title-pirate.png" alt="Семейная казна" decoding="async" fetchpriority="high"></h1>
-      <div class="treasury-splash-rule" aria-hidden="true"><i></i></div>
-    </div>
-    <div class="treasury-splash-crest" aria-hidden="true">
-      <img src="assets/gerb-runtime.webp" alt="" decoding="async" fetchpriority="high">
-    </div>
-    <div class="treasury-splash-track" id="financeSplashTrack" aria-hidden="true"></div>
-    <div class="treasury-splash-reflection" id="financeSplashReflection" aria-hidden="true"></div>
-    <img class="treasury-splash-medallion" id="financeSplashMedallion" src="assets/splash-medallion.png" alt="" decoding="async" fetchpriority="high">
-    <div class="treasury-splash-flash" aria-hidden="true"></div>
-    <span class="sr-only">Приложение загружается</span>
-  </div>
-  <div id="app"><div class="boot"><div class="boot-dedication"><span>Моей супруге посвящается</span></div><div class="boot-crest" aria-hidden="true"><img src="assets/gerb-runtime.webp" alt="" fetchpriority="high" /></div><div class="boot-text">Открываем семейную казну…</div></div></div>
-  <script src="src/js/ui/splash.js?v=splash1"></script>
+  <div id="app"><div class="boot"></div></div>
   <script src="vendor/supabase.js?v=refactor80"></script>
 
   <script src="src/js/core/runtime.js?v=refactor80"></script>
@@ -77,6 +59,7 @@
   <script src="src/js/features/transaction-entry.js?v=refactor81"></script>
   <script src="src/js/features/overview.js?v=refactor80"></script>
   <script src="src/js/features/recurring.js?v=plan3"></script>
+  <script src="src/js/features/piggy-bank.js?v=piggy1"></script>
   <script src="src/js/features/recurring-actions.js?v=plan3"></script>
   <script src="src/js/features/journal.js?v=refactor80"></script>
   <script src="src/js/features/export.js?v=refactor80"></script>
