@@ -51,8 +51,33 @@
   .plan-page-head{margin-bottom:6px}.plan-page-head .page-subtitle{display:none}.plan-tabs{position:sticky;top:0;z-index:12;max-width:none;margin-bottom:7px;background:rgba(5,12,17,.96);backdrop-filter:blur(10px)}
   .plan-tab{min-height:36px;padding:6px 7px;font-size:10px}.plan-summary-strip{margin-bottom:7px}.plan-summary-strip>div{padding:5px 4px}.plan-summary-strip span{font-size:6.5px}.plan-summary-strip b{font-size:10px}
   .plan-workspace{grid-template-columns:1fr;gap:7px}.plan-editor-card{position:static;padding:8px!important}.plan-card-title{margin-bottom:5px}.plan-card-title h3{font-size:12px}.plan-compact-form{grid-template-columns:1fr 1fr!important;gap:5px!important}.plan-compact-form .field.full,.plan-compact-form .full{grid-column:1/-1}.plan-compact-form input,.plan-compact-form select{height:30px!important;min-height:30px!important;font-size:10px!important}
-  .plan-recurring-panel .plan-expense-form{grid-template-columns:1fr 1fr!important}.plan-recurring-panel .plan-scroll-list{max-height:none}
+
+  /* On phones the recurring-expense editor is a single full-width column. */
+  .plan-recurring-panel .plan-editor-card{width:100%!important;max-width:none!important}
+  .plan-recurring-panel .plan-expense-form{display:grid!important;grid-template-columns:minmax(0,1fr)!important;width:100%!important;max-width:none!important;gap:6px!important}
+  .plan-recurring-panel .plan-expense-form>.field,
+  .plan-recurring-panel .plan-expense-form>.field.full,
+  .plan-recurring-panel .plan-expense-form>.full{grid-column:1/-1!important;width:100%!important;max-width:none!important;min-width:0!important}
+  .plan-recurring-panel .plan-expense-form input,
+  .plan-recurring-panel .plan-expense-form select,
+  .plan-recurring-panel .plan-expense-form button{width:100%!important;max-width:none!important}
+  .plan-recurring-panel .plan-scroll-list{max-height:none}
+
   .plan-scroll-list{max-height:none;overflow:visible}.plan-list-head{margin-top:2px}.recurring-row-v3{display:grid;grid-template-columns:1fr auto}.recurring-row-v3 .tx-actions{grid-column:1/-1;justify-content:flex-start;flex-wrap:wrap}.plan-panel .recurring-row{padding:7px!important}.plan-row-meta{font-size:8px!important}
   .plan-goal-contribution{grid-template-columns:1fr 1fr!important}.plan-goal-contribution .goal-contribute-btn{grid-column:1/-1}.plan-goal-stats{gap:4px}.reminder-summary{width:100%;margin-top:6px}
 }
+
+/* Same full-width form for Android WebViews that expose a desktop-like CSS viewport. */
+@media (max-device-width:760px) and (min-width:761px), (pointer:coarse) and (min-width:761px) and (max-width:1400px){
+  .plan-recurring-panel .plan-workspace{display:block!important;width:100%!important}
+  .plan-recurring-panel .plan-editor-card{position:static!important;width:100%!important;max-width:none!important}
+  .plan-recurring-panel .plan-expense-form{display:grid!important;grid-template-columns:minmax(0,1fr)!important;width:100%!important;max-width:none!important;gap:6px!important}
+  .plan-recurring-panel .plan-expense-form>.field,
+  .plan-recurring-panel .plan-expense-form>.field.full,
+  .plan-recurring-panel .plan-expense-form>.full{grid-column:1/-1!important;width:100%!important;max-width:none!important;min-width:0!important}
+  .plan-recurring-panel .plan-expense-form input,
+  .plan-recurring-panel .plan-expense-form select,
+  .plan-recurring-panel .plan-expense-form button{width:100%!important;max-width:none!important}
+}
+
 @media(max-width:420px){.plan-tabs{gap:4px;padding:3px}.plan-tab{font-size:9px}.plan-tab b{min-width:18px;height:18px;font-size:8px}.plan-compact-form label{font-size:7px!important}.plan-goal-head h3{font-size:11px}.plan-goal-head>b{font-size:10px}.plan-goal-stats span{font-size:8px}.plan-goal-stats span b,.plan-goal-stats strong{font-size:9px}.plan-panel .recurring-row{grid-template-columns:1fr auto}.plan-panel .recurring-title b{font-size:10px}}
