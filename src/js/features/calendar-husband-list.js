@@ -133,6 +133,21 @@
     baseOpenHusbandDayWithFields(dateKey,editId);
     const form=document.getElementById('husbandCalendarForm');
     if(!form)return;
+
+    // The base editor refreshes only its modal after deleting a husband's event.
+    // Re-render the page as well so the monthly register, day counter and status
+    // marker are recalculated immediately from the updated calendarEntries state.
+    document.querySelectorAll('[data-delete-calendar]').forEach(button=>{
+      button.onclick=async()=>{
+        if(!confirm('Удалить эту запись календаря?'))return;
+        button.disabled=true;
+        if(await deleteCalendarRow(button.dataset.deleteCalendar)){
+          renderApp();
+          openHusbandDay(dateKey);
+        }else button.disabled=false;
+      };
+    });
+
     const person=calendarCurrentPerson();
     const edit=editId&&person?calendarEntriesOn(person.id,dateKey,'event').find(row=>row.id===editId):null;
     const comment=document.getElementById('calendarComment')?.closest('.field');
