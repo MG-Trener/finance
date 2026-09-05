@@ -1,0 +1,74 @@
+/* Current KZT equivalents for the multi-currency Piggy Bank. */
+.piggy-balance{
+  display:grid;
+  grid-template-columns:auto auto;
+  justify-content:end;
+  align-items:baseline;
+  column-gap:5px;
+  row-gap:2px
+}
+.piggy-kzt-equivalent{
+  grid-column:1/-1;
+  display:block;
+  color:#8f9b9f;
+  font-size:9px;
+  font-weight:700;
+  text-align:right;
+  white-space:nowrap
+}
+.piggy-rate-summary{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:18px;
+  padding:10px 13px!important;
+  border-color:rgba(196,151,78,.34);
+  background:linear-gradient(180deg,rgba(20,31,37,.94),rgba(9,16,22,.94))
+}
+.piggy-rate-total span,
+.piggy-rate-meta span,
+.piggy-rate-meta small{display:block}
+.piggy-rate-total span{
+  color:#8f999f;
+  font-size:9px;
+  text-transform:uppercase;
+  letter-spacing:.045em
+}
+.piggy-rate-total strong{
+  display:block;
+  margin-top:2px;
+  color:#f0d69f;
+  font:700 19px Cinzel,serif;
+  font-variant-numeric:tabular-nums
+}
+.piggy-rate-meta{
+  min-width:0;
+  text-align:right
+}
+.piggy-rate-meta span{
+  color:#9c907b;
+  font-size:9px
+}
+.piggy-rate-meta small{
+  margin-top:3px;
+  color:#7f8d92;
+  font-size:8px;
+  line-height:1.35
+}
+
+@media(max-width:760px){
+  .piggy-kzt-equivalent{font-size:8px}
+  .piggy-rate-summary{gap:10px;padding:9px 10px!important}
+  .piggy-rate-total strong{font-size:16px}
+  .piggy-rate-total span,.piggy-rate-meta span{font-size:8px}
+  .piggy-rate-meta small{font-size:7px}
+}
+
+@media(max-width:430px){
+  .piggy-rate-summary{
+    align-items:flex-start;
+    flex-direction:column;
+    gap:5px
+  }
+  .piggy-rate-meta{text-align:left}
+}
