@@ -1,7 +1,12 @@
-/* Calendar status accents: paid events and a calm, visible highlight for today. */
+/* Calendar status accents: paid events, overdue unpaid events and today. */
 .calendar-day.is-paid-day .calendar-entry-dot{
   background:#49bd78;
   box-shadow:0 0 9px rgba(73,189,120,.46)
+}
+
+.calendar-day.is-overdue-unpaid-day .calendar-entry-dot{
+  background:#df4e4e;
+  box-shadow:0 0 10px rgba(223,78,78,.52)
 }
 
 /* Animate a dedicated inner frame instead of the whole cell shadow. This is
