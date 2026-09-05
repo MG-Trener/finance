@@ -9,6 +9,20 @@
   box-shadow:0 0 10px rgba(223,78,78,.52)
 }
 
+.calendar-legend .legend-paid,
+.calendar-legend .legend-overdue{
+  border-radius:50%;
+  border:0!important
+}
+.calendar-legend .legend-paid{
+  background:#49bd78;
+  box-shadow:0 0 8px rgba(73,189,120,.38)
+}
+.calendar-legend .legend-overdue{
+  background:#df4e4e;
+  box-shadow:0 0 8px rgba(223,78,78,.42)
+}
+
 /* Animate a dedicated inner frame instead of the whole cell shadow. This is
    much more reliable in Android WebView and stays intentionally subtle. */
 .calendar-day.is-today::after{
