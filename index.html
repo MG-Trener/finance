@@ -14,13 +14,19 @@
   <link rel="icon" href="assets/icon-192.png" type="image/png" sizes="192x192" />
   <link rel="icon" href="assets/app-icon.svg" type="image/svg+xml" />
   <link rel="apple-touch-icon" href="assets/icon-192.png" />
+  <link rel="preload" href="assets/startup-family-treasury.mp4" as="video" type="video/mp4" />
   <link rel="preload" href="assets/splash-family-treasury.webp" as="image" type="image/webp" />
   <link rel="preload" href="assets/gerb-runtime.webp" as="image" type="image/webp" />
-  <style>#app>.boot:empty{position:fixed;inset:0;z-index:20000;width:100vw;height:100vh;height:100dvh;margin:0;padding:0;background:#050b12 url('assets/splash-family-treasury.webp') center/cover no-repeat}</style>
+  <style>
+    #app>.boot:empty{position:fixed;inset:0;z-index:20000;width:100vw;height:100vh;height:100dvh;margin:0;padding:0;background:#050b12 url('assets/splash-family-treasury.webp') center/cover no-repeat}
+    #startupVideoSplash{position:fixed;inset:0;z-index:30000;width:100vw;height:100vh;height:100dvh;overflow:hidden;background:#050b12 url('assets/splash-family-treasury.webp') center/cover no-repeat;opacity:1;transition:opacity .42s ease;pointer-events:none}
+    #startupVideoSplash.is-hiding{opacity:0}
+    #startupVideoSplash video{display:block;width:100%;height:100%;object-fit:cover;object-position:center center;background:#050b12}
+  </style>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="src/css/app.css?v=startup-crest1" />
+  <link rel="stylesheet" href="src/css/app.css?v=startup-video1" />
   <link rel="stylesheet" href="src/css/pages/calendar.css?v=calendar1" />
   <link rel="stylesheet" href="src/css/pages/calendar-duration.css?v=calendar-duration1" />
   <link rel="stylesheet" href="src/css/pages/calendar-person-switcher.css?v=calendar2" />
@@ -31,7 +37,31 @@
   <link rel="stylesheet" href="src/css/components/period-calendar-polish.css?v=period4" />
 </head>
 <body>
+  <div id="startupVideoSplash" aria-hidden="true">
+    <video id="startupVideo" autoplay muted playsinline preload="auto" poster="assets/splash-family-treasury.webp">
+      <source src="assets/startup-family-treasury.mp4" type="video/mp4" />
+    </video>
+  </div>
   <div id="app"><div class="boot"></div></div>
+  <script>
+    (()=>{
+      const splash=document.getElementById('startupVideoSplash');
+      const video=document.getElementById('startupVideo');
+      if(!splash||!video)return;
+      let done=false;
+      const finish=()=>{
+        if(done)return;
+        done=true;
+        splash.classList.add('is-hiding');
+        setTimeout(()=>splash.remove(),460);
+      };
+      video.addEventListener('ended',finish,{once:true});
+      video.addEventListener('error',finish,{once:true});
+      const playPromise=video.play();
+      if(playPromise&&typeof playPromise.catch==='function')playPromise.catch(()=>setTimeout(finish,250));
+      setTimeout(finish,7000);
+    })();
+  </script>
   <script src="vendor/supabase.js?v=refactor80"></script>
 
   <script src="src/js/core/runtime.js?v=refactor80"></script>
