@@ -39,4 +39,5 @@ try{
   throw new Error(`Не удалось настроить системные панели Android: ${error.message}`);
 }
 
+await import('./disable-android-splash.mjs');
 console.log('Android system bars configured for the dark application theme.');
