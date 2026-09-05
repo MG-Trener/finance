@@ -16,7 +16,9 @@
 .husband-event-date{color:#cbb076;font-size:12px;font-weight:800;text-transform:capitalize}
 .husband-event-title{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .husband-event-amount{display:inline-flex;align-items:center;gap:7px;color:#e5c88e;font-size:13px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}
-.husband-event-paid{display:inline-grid;place-items:center;width:18px;height:18px;flex:0 0 18px;border-radius:50%;background:#2f9e61;color:#f2fff7;font-size:12px;font-weight:900;line-height:1;box-shadow:0 0 0 1px rgba(92,207,139,.22),0 0 12px rgba(47,158,97,.22)}
+.husband-event-paid,.husband-event-overdue{display:inline-grid;place-items:center;width:18px;height:18px;flex:0 0 18px;border-radius:50%;color:#f2fff7;font-size:12px;font-weight:900;line-height:1}
+.husband-event-paid{background:#2f9e61;box-shadow:0 0 0 1px rgba(92,207,139,.22),0 0 12px rgba(47,158,97,.22)}
+.husband-event-overdue{background:#c74343;color:#fff4f4;box-shadow:0 0 0 1px rgba(235,92,92,.28),0 0 12px rgba(199,67,67,.26)}
 .husband-event-comment{color:#9ba4a9;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .husband-event-call{justify-self:end;width:88px;box-sizing:border-box}
 .husband-event-no-phone{display:block;text-align:center;color:#69757c;font-size:12px}
@@ -47,7 +49,7 @@
   .husband-event-date{grid-column:1;font-size:11px}
   .husband-event-title{grid-column:1;grid-row:2;font-size:13px;white-space:normal}
   .husband-event-amount{grid-column:2;grid-row:1 / span 2;align-self:center;justify-self:end;justify-content:flex-end;text-align:right;font-size:12px}
-  .husband-event-paid{width:17px;height:17px;flex-basis:17px;font-size:11px}
+  .husband-event-paid,.husband-event-overdue{width:17px;height:17px;flex-basis:17px;font-size:11px}
   .husband-event-comment{grid-column:1 / -1;grid-row:3;white-space:normal;line-height:1.35;padding-top:2px}
   .husband-event-comment::before{content:'Комментарий: ';color:#727f86}
   .husband-event-call{width:36px;min-height:34px;padding:0;border-radius:9px}
