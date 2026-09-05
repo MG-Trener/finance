@@ -132,6 +132,9 @@
     const panel=document.querySelector('[data-plan-panel="piggy"]');
     if(!panel)return;
 
+    const description=panel.querySelector('.piggy-toolbar-copy p');
+    if(description)description.textContent='Накопления остаются в исходной валюте, а эквивалент в тенге рассчитывается автоматически.';
+
     panel.querySelector('.piggy-rate-summary')?.remove();
     panel.querySelectorAll('.piggy-kzt-equivalent').forEach(node=>node.remove());
 
@@ -157,7 +160,7 @@
   }
   async function ensureDailyRates(){
     const today=dayKey(),cached=readCache();
-    if(cached?.cacheDate===today||cached?.attemptDate===today){decorate();return cached}
+    if(cached?.cacheDate===today){decorate();return cached}
     if(!navigator.onLine){decorate();return cached}
     if(inflight)return inflight;
 
@@ -169,14 +172,12 @@
           console.warn('Не удалось получить курс НБК, используем резервный источник',primaryError);
           fresh=await fetchFallbackRates();
         }
-        const snapshot={...fresh,cacheDate:today,attemptDate:today,fetchedAt:new Date().toISOString()};
+        const snapshot={...fresh,cacheDate:today,fetchedAt:new Date().toISOString()};
         writeCache(snapshot);
         decorate();
         return snapshot;
       }catch(error){
         console.error('Не удалось обновить курсы валют для Копилки',error);
-        const failed={...(cached||{}),attemptDate:today};
-        try{localStorage.setItem(CACHE_KEY,JSON.stringify(failed))}catch(_){ }
         if(cached)state.piggyRates=cached;
         decorate();
         return cached;
