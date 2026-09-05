@@ -17,6 +17,16 @@
     return `${day}, ${weekday}`;
   }
 
+  function husbandEventIsOverdue(row){
+    if(row?.is_paid===true)return false;
+    const eventDate=calendarDateFromKey(row?.entry_date);
+    if(Number.isNaN(eventDate.getTime()))return false;
+    const now=new Date();
+    const today=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+    const eventDay=new Date(eventDate.getFullYear(),eventDate.getMonth(),eventDate.getDate());
+    return eventDay<today;
+  }
+
   function husbandEventPhone(row){return String(row?.client_phone||'').trim()}
   function normalizeHusbandPhone(phone){
     const raw=String(phone||'').trim();
@@ -44,11 +54,15 @@
             const phone=husbandEventPhone(row);
             const callHref=husbandPhoneHref(phone);
             const amount=row.amount!=null&&row.amount!==''?money(row.amount):'—';
+            const overdue=husbandEventIsOverdue(row);
+            const paymentStatus=row.is_paid
+              ?'<span class="husband-event-paid" title="Оплачено" aria-label="Оплачено">✓</span>'
+              :overdue?'<span class="husband-event-overdue" title="Просрочено: не оплачено" aria-label="Просрочено: не оплачено">!</span>':'';
             return `<div class="husband-month-event-row">
               <button type="button" class="husband-month-event-main" data-husband-month-event="${row.id}" data-husband-month-date="${row.entry_date}" aria-label="Открыть ${esc(row.title||'мероприятие')} за ${esc(husbandEventDateLabel(row.entry_date))}">
                 <span class="husband-event-date">${esc(husbandEventDateLabel(row.entry_date))}</span>
                 <span class="husband-event-title">${esc(row.title||'Мероприятие')}</span>
-                <span class="husband-event-amount"><span>${amount}</span>${row.is_paid?'<span class="husband-event-paid" title="Оплачено" aria-label="Оплачено">✓</span>':''}</span>
+                <span class="husband-event-amount"><span>${amount}</span>${paymentStatus}</span>
                 <span class="husband-event-comment">${row.comment?esc(row.comment):'—'}</span>
               </button>
               ${callHref?`<a class="salon-call-button husband-event-call" href="${callHref}" aria-label="Позвонить по номеру ${esc(phone)}" title="${esc(phone)}"><span aria-hidden="true">☎</span><span>Позвонить</span></a>`:'<span class="husband-event-no-phone">—</span>'}
