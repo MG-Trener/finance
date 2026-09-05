@@ -19,6 +19,21 @@ await cp(assetsRoot,path.join(out,'assets'),{
 });
 await access(path.join(out,'assets','gerb-runtime.webp'));
 
+// GitHub text tools cannot safely persist the uploaded MP4 as a binary file.
+// Keep a compact, Android-compatible H.264 copy as three Base64 text chunks and
+// reconstruct the exact bytes during the mobile build. The strict size check
+// prevents publishing another truncated/black startup video.
+const startupVideoParts=['part-01.b64','part-02.b64','part-03.b64'];
+const startupVideoBase64=(await Promise.all(startupVideoParts.map(name=>
+  readFile(path.join(root,'mobile-assets','startup-video',name),'utf8')
+))).join('').replace(/\s+/g,'');
+const startupVideoBytes=Buffer.from(startupVideoBase64,'base64');
+if(startupVideoBytes.length!==26499){
+  throw new Error(`Startup video bundle is invalid: ${startupVideoBytes.length} bytes; expected 26499`);
+}
+await writeFile(path.join(out,'assets','startup-family-treasury.mp4'),startupVideoBytes);
+console.log(`Bundled validated startup video: ${startupVideoBytes.length} bytes.`);
+
 for(const file of ['styles.css','hotfix.css','manifest.webmanifest','sw.js','privacy.html','delete-account.html']){
   try{await copyFile(path.join(root,file),path.join(out,file))}catch(error){if(error?.code!=='ENOENT')throw error}
 }
