@@ -41,12 +41,20 @@
     return html.replace(pattern,`$1 ${className}$2`);
   }
 
+  function addStatusLegend(html){
+    if(html.includes('legend-paid')||html.includes('legend-overdue'))return html;
+    return html.replace(
+      /(<div class="calendar-legend">[\s\S]*?)(<\/div>)/,
+      '$1<span><i class="legend-paid"></i>Оплачено</span><span><i class="legend-overdue"></i>Просрочено / не оплачено</span>$2'
+    );
+  }
+
   const baseHusbandCalendarPageWithPaidStatus=husbandCalendarPage;
   husbandCalendarPage=function(person){
     let html=baseHusbandCalendarPageWithPaidStatus(person);
     const {paidDates,overdueUnpaidDates}=husbandDateStatuses(person);
     paidDates.forEach(dateKey=>{html=addHusbandDayClass(html,dateKey,'is-paid-day')});
     overdueUnpaidDates.forEach(dateKey=>{html=addHusbandDayClass(html,dateKey,'is-overdue-unpaid-day')});
-    return html;
+    return addStatusLegend(html);
   };
 })();
