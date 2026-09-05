@@ -1,6 +1,6 @@
 /* Single stylesheet entrypoint for the current application. */
 @import url('../../styles.css');
-@import url('../../hotfix.css?v=startup-nosplash1');
+@import url('../../hotfix.css?v=startup-crest1');
 
 /* Pages */
 @import url('./pages/overview.css?v=overview30');
