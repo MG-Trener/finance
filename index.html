@@ -14,20 +14,20 @@
   <link rel="icon" href="assets/icon-192.png" type="image/png" sizes="192x192" />
   <link rel="icon" href="assets/app-icon.svg" type="image/svg+xml" />
   <link rel="apple-touch-icon" href="assets/icon-192.png" />
-  <link rel="preload" href="assets/startup-family-treasury.mp4" as="video" type="video/mp4" />
-  <link rel="preload" href="assets/splash-family-treasury.webp" as="image" type="image/webp" />
   <link rel="preload" href="assets/gerb-runtime.webp" as="image" type="image/webp" />
   <style>
-    #app>.boot:empty{position:fixed;inset:0;z-index:20000;width:100vw;height:100vh;height:100dvh;margin:0;padding:0;background:#050b12 url('assets/splash-family-treasury.webp') center/cover no-repeat}
-    #startupVideoSplash{position:fixed;inset:0;z-index:30000;width:100vw;height:100vh;height:100dvh;overflow:hidden;background:#050b12 url('assets/splash-family-treasury.webp') center/cover no-repeat;opacity:1;transition:opacity .42s ease;pointer-events:none}
-    #startupVideoSplash.is-hiding{opacity:0}
-    #startupVideoSplash video{display:block;width:100%;height:100%;object-fit:cover;object-position:center center;opacity:0;transition:opacity .12s linear;background:transparent}
-    #startupVideoSplash video.is-ready{opacity:1}
+    body.native-app #app>.boot:empty{position:fixed;inset:0;z-index:20000;width:100vw;height:100vh;height:100dvh;margin:0;padding:0;background:#050b12}
+    #startupCrestSplash{display:none}
+    body.native-app #startupCrestSplash{position:fixed;inset:0;z-index:30000;width:100vw;height:100vh;height:100dvh;overflow:hidden;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 48%,#101c2a 0,#08111b 46%,#03070c 100%);opacity:1;transition:opacity .42s ease;pointer-events:none}
+    body.native-app #startupCrestSplash.is-hiding{opacity:0}
+    body.native-app #startupCrestSplash .startup-crest{display:block;width:min(72vw,380px);max-height:66vh;object-fit:contain;filter:drop-shadow(0 0 16px rgba(255,211,111,.44)) drop-shadow(0 0 42px rgba(255,173,51,.28));animation:startupCrestGlow 2.15s ease-in-out infinite alternate;transform:translateZ(0)}
+    @keyframes startupCrestGlow{from{filter:drop-shadow(0 0 14px rgba(255,211,111,.38)) drop-shadow(0 0 34px rgba(255,173,51,.22))}to{filter:drop-shadow(0 0 22px rgba(255,224,145,.62)) drop-shadow(0 0 58px rgba(255,173,51,.36))}}
+    @media (prefers-reduced-motion:reduce){body.native-app #startupCrestSplash .startup-crest{animation:none;filter:drop-shadow(0 0 20px rgba(255,211,111,.5)) drop-shadow(0 0 48px rgba(255,173,51,.3))}}
   </style>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="src/css/app.css?v=startup-video2" />
+  <link rel="stylesheet" href="src/css/app.css?v=startup-crest1" />
   <link rel="stylesheet" href="src/css/pages/calendar.css?v=calendar1" />
   <link rel="stylesheet" href="src/css/pages/calendar-duration.css?v=calendar-duration1" />
   <link rel="stylesheet" href="src/css/pages/calendar-person-switcher.css?v=calendar2" />
@@ -38,48 +38,26 @@
   <link rel="stylesheet" href="src/css/components/period-calendar-polish.css?v=period4" />
 </head>
 <body>
-  <div id="startupVideoSplash" aria-hidden="true">
-    <video id="startupVideo" autoplay muted playsinline preload="auto" poster="assets/splash-family-treasury.webp">
-      <source src="assets/startup-family-treasury.mp4" type="video/mp4" />
-    </video>
+  <div id="startupCrestSplash" aria-hidden="true">
+    <img class="startup-crest" src="assets/gerb-runtime.webp" alt="" />
   </div>
   <div id="app"><div class="boot"></div></div>
   <script>
     (()=>{
-      const splash=document.getElementById('startupVideoSplash');
-      const video=document.getElementById('startupVideo');
-      if(!splash||!video)return;
+      const splash=document.getElementById('startupCrestSplash');
+      if(!splash)return;
+      if(!document.body.classList.contains('native-app')){
+        splash.remove();
+        return;
+      }
       let done=false;
-      let revealed=false;
-      const reveal=()=>{
-        if(revealed||done)return;
-        revealed=true;
-        video.classList.add('is-ready');
-      };
       const finish=()=>{
         if(done)return;
         done=true;
         splash.classList.add('is-hiding');
         setTimeout(()=>splash.remove(),460);
       };
-      const tryPlay=()=>{
-        if(done)return;
-        video.muted=true;
-        video.defaultMuted=true;
-        video.setAttribute('muted','');
-        video.setAttribute('playsinline','');
-        const promise=video.play();
-        if(promise&&typeof promise.catch==='function')promise.catch(()=>{});
-      };
-      video.addEventListener('loadeddata',reveal,{once:true});
-      video.addEventListener('playing',reveal,{once:true});
-      video.addEventListener('canplay',tryPlay,{once:true});
-      video.addEventListener('ended',finish,{once:true});
-      video.addEventListener('error',finish,{once:true});
-      tryPlay();
-      setTimeout(tryPlay,250);
-      setTimeout(tryPlay,750);
-      setTimeout(finish,7000);
+      setTimeout(finish,5500);
     })();
   </script>
   <script src="vendor/supabase.js?v=refactor80"></script>
