@@ -44,7 +44,7 @@ function openWifeDictionary(){
       wifeDictionaryRows=[data,...wifeDictionaryRows.filter(x=>x.id!==data.id)];saveWifeDictionaryCache();input.value='';renderWifeDictionaryList();if(typeof uiSound==='function')uiSound('success');input.focus();
     }finally{if(document.body.contains(button)){button.disabled=false;button.textContent='Добавить'}}
   };
-  loadWifeDictionary();setTimeout(()=>document.getElementById('wifeDictionaryInput')?.focus(),0);
+  loadWifeDictionary();
 }
 
 function settingsPage(){
