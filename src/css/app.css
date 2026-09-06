@@ -9,7 +9,7 @@
 @import url('./pages/journal-enhancements.css?v=journal33');
 @import url('./pages/analytics.css?v=analytics59');
 @import url('./pages/goals.css?v=goals57');
-@import url('./pages/settings.css?v=settings1');
+@import url('./pages/settings.css?v=settings2');
 
 /* Components */
 @import url('./components/transaction-entry.css?v=entry72');
@@ -48,7 +48,7 @@
 /* Operations density must win over Android desktop-viewport fallback sizing. */
 @import url('./pages/journal-mobile-density.css?v=journal-mobile1');
 /* Must be last among application UI rules: spouse messaging and action-icon alignment. */
-@import url('./components/family-messages.css?v=familymsg2');
+@import url('./components/family-messages.css?v=familymsg3');
 /* Piggy Bank intentionally loads after generic mobile rules so its compact layout wins. */
 @import url('./pages/piggy-bank.css?v=piggy2');
 
