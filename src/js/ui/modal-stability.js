@@ -15,6 +15,8 @@
     }else if(modal.querySelector('#editNotice')){
       modal.classList.add('transaction-edit-modal');
       backdrop.classList.add('modal-layout-top');
+    }else if(modal.classList.contains('wife-dictionary-modal')||modal.querySelector('#wifeDictionaryForm')){
+      backdrop.classList.add('modal-layout-top');
     }else if(modal.classList.contains('transfer-modal')||modal.querySelector('#transferForm')){
       modal.classList.add('transfer-modal');
       backdrop.classList.add('modal-layout-center');
