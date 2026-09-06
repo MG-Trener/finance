@@ -13,12 +13,18 @@ function wifeDictionarySortedRows(){
 }
 function wifeDictionaryListMarkup(){
   if(!wifeDictionaryRows.length)return '<div class="wife-dictionary-empty">Пока нет записей. Добавьте первый псевдоним.</div>';
-  return wifeDictionarySortedRows().map(row=>`<div class="wife-dictionary-alias">${esc(row.alias)}</div>`).join('');
+  return wifeDictionarySortedRows().map(row=>`<button type="button" class="wife-dictionary-alias" data-id="${row.id}" title="Редактировать">${esc(row.alias)}</button>`).join('');
+}
+function bindWifeDictionaryRows(){
+  document.querySelectorAll('#wifeDictionaryList .wife-dictionary-alias[data-id]').forEach(button=>{
+    button.onclick=()=>openWifeDictionaryEdit(button.dataset.id);
+  });
 }
 function renderWifeDictionaryList(){
   const list=document.getElementById('wifeDictionaryList');if(!list)return;
   list.innerHTML=wifeDictionaryListMarkup();
   const count=document.getElementById('wifeDictionaryCount');if(count)count.textContent=String(wifeDictionaryRows.length);
+  bindWifeDictionaryRows();
 }
 async function loadWifeDictionary(){
   wifeDictionaryRows=readWifeDictionaryCache();renderWifeDictionaryList();
@@ -27,9 +33,32 @@ async function loadWifeDictionary(){
   if(error)return notice('wifeDictionaryNotice',`Не удалось загрузить словарь: ${error.message||error}`);
   wifeDictionaryRows=data||[];saveWifeDictionaryCache();renderWifeDictionaryList();
 }
+function openWifeDictionaryEdit(id){
+  const row=wifeDictionaryRows.find(item=>item.id===id);if(!row)return;
+  closeModal();
+  const returnToDictionary=()=>{closeModal();openWifeDictionary()};
+  document.body.insertAdjacentHTML('beforeend',`<div class="modal-backdrop modal-layout-top" id="modal"><div class="modal wife-dictionary-modal wife-dictionary-edit-modal" role="dialog" aria-modal="true" aria-labelledby="wifeDictionaryEditTitle"><div class="modal-head wife-dictionary-head"><div><h2 id="wifeDictionaryEditTitle">Редактировать запись</h2><p>Измените псевдоним и сохраните новое значение.</p></div><button type="button" class="icon-btn" id="closeWifeDictionaryEdit" aria-label="Закрыть">×</button></div><div id="wifeDictionaryEditNotice"></div><form id="wifeDictionaryEditForm" class="wife-dictionary-form"><label for="wifeDictionaryEditInput">Псевдоним</label><input id="wifeDictionaryEditInput" maxlength="120" autocomplete="off" value="${esc(row.alias)}" required><div class="wife-dictionary-edit-actions"><button type="button" class="btn btn-soft btn-small" id="wifeDictionaryEditCancel">Отмена</button><button type="submit" class="btn btn-primary btn-small" id="wifeDictionaryEditSave">Сохранить</button></div></form></div></div>`);
+  const modal=document.getElementById('modal');
+  document.getElementById('closeWifeDictionaryEdit').onclick=returnToDictionary;
+  document.getElementById('wifeDictionaryEditCancel').onclick=returnToDictionary;
+  modal.onclick=e=>{if(e.target===modal)returnToDictionary()};
+  document.getElementById('wifeDictionaryEditForm').onsubmit=async e=>{
+    e.preventDefault();notice('wifeDictionaryEditNotice','');
+    const input=document.getElementById('wifeDictionaryEditInput'),button=document.getElementById('wifeDictionaryEditSave'),alias=input.value.trim();
+    if(!alias)return notice('wifeDictionaryEditNotice','Введите текст записи.');
+    if(alias===row.alias)return returnToDictionary();
+    if(!navigator.onLine)return notice('wifeDictionaryEditNotice','Для сохранения изменений нужен интернет.');
+    button.disabled=true;button.textContent='Сохраняю…';
+    try{
+      const {data,error}=await sb.from('wife_dictionary').update({alias}).eq('id',row.id).eq('family_id',state.family.id).select('id,alias,created_by,created_at').single();
+      if(error){if(error.code==='23505')return notice('wifeDictionaryEditNotice','Такой псевдоним уже есть в словаре.');return notice('wifeDictionaryEditNotice',`Не удалось сохранить: ${error.message||error}`)}
+      wifeDictionaryRows=wifeDictionaryRows.map(item=>item.id===data.id?data:item);saveWifeDictionaryCache();if(typeof uiSound==='function')uiSound('success');returnToDictionary();
+    }finally{if(document.body.contains(button)){button.disabled=false;button.textContent='Сохранить'}}
+  };
+}
 function openWifeDictionary(){
   closeModal();wifeDictionaryRows=readWifeDictionaryCache();
-  document.body.insertAdjacentHTML('beforeend',`<div class="modal-backdrop" id="modal"><div class="modal wife-dictionary-modal" role="dialog" aria-modal="true" aria-labelledby="wifeDictionaryTitle"><div class="modal-head wife-dictionary-head"><div><h2 id="wifeDictionaryTitle">Словарь жены</h2><p>Псевдонимы и ласковые имена, которыми её называет муж.</p></div><button type="button" class="icon-btn" id="closeWifeDictionary" aria-label="Закрыть">×</button></div><div id="wifeDictionaryNotice"></div><form id="wifeDictionaryForm" class="wife-dictionary-form"><label for="wifeDictionaryInput">Новая запись</label><div class="wife-dictionary-entry"><input id="wifeDictionaryInput" maxlength="120" autocomplete="off" placeholder="Например: Золотко" required><button type="submit" class="btn btn-primary btn-small" id="wifeDictionaryAdd">Добавить</button></div></form><div class="wife-dictionary-summary">Записей: <b id="wifeDictionaryCount">${wifeDictionaryRows.length}</b></div><div class="wife-dictionary-list" id="wifeDictionaryList">${wifeDictionaryListMarkup()}</div></div></div>`);
+  document.body.insertAdjacentHTML('beforeend',`<div class="modal-backdrop modal-layout-top" id="modal"><div class="modal wife-dictionary-modal" role="dialog" aria-modal="true" aria-labelledby="wifeDictionaryTitle"><div class="modal-head wife-dictionary-head"><div><h2 id="wifeDictionaryTitle">Словарь жены</h2><p>Псевдонимы и ласковые имена, которыми её называет муж.</p></div><button type="button" class="icon-btn" id="closeWifeDictionary" aria-label="Закрыть">×</button></div><div id="wifeDictionaryNotice"></div><form id="wifeDictionaryForm" class="wife-dictionary-form"><label for="wifeDictionaryInput">Новая запись</label><div class="wife-dictionary-entry"><input id="wifeDictionaryInput" maxlength="120" autocomplete="off" placeholder="Например: Золотко" required><button type="submit" class="btn btn-primary btn-small" id="wifeDictionaryAdd">Добавить</button></div></form><div class="wife-dictionary-summary">Записей: <b id="wifeDictionaryCount">${wifeDictionaryRows.length}</b></div><div class="wife-dictionary-list" id="wifeDictionaryList">${wifeDictionaryListMarkup()}</div></div></div>`);
   const modal=document.getElementById('modal');document.getElementById('closeWifeDictionary').onclick=closeModal;modal.onclick=e=>{if(e.target===modal)closeModal()};
   const form=document.getElementById('wifeDictionaryForm');
   form.onsubmit=async e=>{
@@ -44,7 +73,7 @@ function openWifeDictionary(){
       wifeDictionaryRows=[data,...wifeDictionaryRows.filter(x=>x.id!==data.id)];saveWifeDictionaryCache();input.value='';renderWifeDictionaryList();if(typeof uiSound==='function')uiSound('success');input.focus();
     }finally{if(document.body.contains(button)){button.disabled=false;button.textContent='Добавить'}}
   };
-  loadWifeDictionary();
+  bindWifeDictionaryRows();loadWifeDictionary();
 }
 
 function settingsPage(){
