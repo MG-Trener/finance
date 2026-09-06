@@ -8,27 +8,17 @@ function readWifeDictionaryCache(){
 function saveWifeDictionaryCache(){
   try{localStorage.setItem(wifeDictionaryCacheKey(),JSON.stringify(wifeDictionaryRows))}catch(_){}
 }
+function wifeDictionarySortedRows(){
+  return [...wifeDictionaryRows].sort((a,b)=>String(a.alias||'').localeCompare(String(b.alias||''),'ru',{sensitivity:'base'}));
+}
 function wifeDictionaryListMarkup(){
   if(!wifeDictionaryRows.length)return '<div class="wife-dictionary-empty">Пока нет записей. Добавьте первый псевдоним.</div>';
-  const deleteIcon=typeof trashIcon==='function'?trashIcon():'×';
-  return wifeDictionaryRows.map(row=>`<div class="wife-dictionary-row" data-id="${row.id}"><span class="wife-dictionary-alias">${esc(row.alias)}</span><button type="button" class="icon-btn wife-dictionary-delete" data-id="${row.id}" aria-label="Удалить ${esc(row.alias)}" title="Удалить">${deleteIcon}</button></div>`).join('');
-}
-function bindWifeDictionaryDeleteButtons(){
-  document.querySelectorAll('.wife-dictionary-delete').forEach(button=>button.onclick=async()=>{
-    const row=wifeDictionaryRows.find(x=>x.id===button.dataset.id);if(!row)return;
-    if(!confirm(`Удалить «${row.alias}» из словаря?`))return;
-    if(!navigator.onLine)return notice('wifeDictionaryNotice','Для удаления записи нужен интернет.');
-    button.disabled=true;
-    const {error}=await sb.from('wife_dictionary').delete().eq('id',row.id).eq('family_id',state.family.id);
-    if(error){button.disabled=false;return notice('wifeDictionaryNotice',error.message||String(error))}
-    wifeDictionaryRows=wifeDictionaryRows.filter(x=>x.id!==row.id);saveWifeDictionaryCache();renderWifeDictionaryList();if(typeof uiSound==='function')uiSound('delete');
-  });
+  return wifeDictionarySortedRows().map(row=>`<div class="wife-dictionary-alias">${esc(row.alias)}</div>`).join('');
 }
 function renderWifeDictionaryList(){
   const list=document.getElementById('wifeDictionaryList');if(!list)return;
   list.innerHTML=wifeDictionaryListMarkup();
   const count=document.getElementById('wifeDictionaryCount');if(count)count.textContent=String(wifeDictionaryRows.length);
-  bindWifeDictionaryDeleteButtons();
 }
 async function loadWifeDictionary(){
   wifeDictionaryRows=readWifeDictionaryCache();renderWifeDictionaryList();
@@ -54,7 +44,7 @@ function openWifeDictionary(){
       wifeDictionaryRows=[data,...wifeDictionaryRows.filter(x=>x.id!==data.id)];saveWifeDictionaryCache();input.value='';renderWifeDictionaryList();if(typeof uiSound==='function')uiSound('success');input.focus();
     }finally{if(document.body.contains(button)){button.disabled=false;button.textContent='Добавить'}}
   };
-  bindWifeDictionaryDeleteButtons();loadWifeDictionary();setTimeout(()=>document.getElementById('wifeDictionaryInput')?.focus(),0);
+  loadWifeDictionary();setTimeout(()=>document.getElementById('wifeDictionaryInput')?.focus(),0);
 }
 
 function settingsPage(){
