@@ -1,21 +1,21 @@
 /* Late UI fixes: spouse push composer and deterministic destructive-action icon alignment. */
-.settings-message-card{grid-column:1/-1;padding:18px}
-.family-message-composer{display:grid;gap:13px;width:100%}
-.family-message-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}
-.family-message-heading h3{margin:0 0 5px;font-size:18px}
-.family-message-heading p{margin:0;color:#9e927f;font-size:12px;line-height:1.45}
-.family-message-recipient{flex:0 0 auto;max-width:45%;padding:6px 10px;border:1px solid rgba(199,151,78,.44);border-radius:999px;background:rgba(25,35,42,.72);color:#e7c98f;font-size:11px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.family-message-emojis{display:flex;flex-wrap:wrap;gap:7px}
-.family-message-emoji{display:inline-grid;place-items:center;width:39px;height:39px;padding:0;border:1px solid rgba(135,99,52,.55);border-radius:10px;background:linear-gradient(180deg,#1e2b34,#0d161c);font-size:20px;line-height:1;cursor:pointer;box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 3px 9px rgba(0,0,0,.25)}
+.settings-message-card{grid-column:1/-1;padding:10px}
+.family-message-composer{display:grid;gap:8px;width:100%}
+.family-message-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:9px}
+.family-message-heading h3{margin:0 0 2px;font-size:14px}
+.family-message-heading p{margin:0;color:#9e927f;font-size:9.5px;line-height:1.35}
+.family-message-recipient{flex:0 0 auto;max-width:45%;padding:4px 7px;border:1px solid rgba(199,151,78,.44);border-radius:999px;background:rgba(25,35,42,.72);color:#e7c98f;font-size:9px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.family-message-emojis{display:flex;flex-wrap:wrap;gap:5px}
+.family-message-emoji{display:inline-grid;place-items:center;width:31px;height:31px;padding:0;border:1px solid rgba(135,99,52,.55);border-radius:8px;background:linear-gradient(180deg,#1e2b34,#0d161c);font-size:16px;line-height:1;cursor:pointer;box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 2px 7px rgba(0,0,0,.24)}
 .family-message-emoji:hover,.family-message-emoji:focus-visible{border-color:#c59650;filter:brightness(1.08);outline:none}
-.family-message-field{display:grid;gap:6px;color:#c4ad84;font-size:11px;font-weight:700}
-.family-message-field textarea{width:100%;min-height:92px;resize:vertical;padding:12px 13px;border:1px solid #76552e;border-radius:11px;background:rgba(8,17,23,.96);color:#f6e7c9;font:500 15px/1.45 Inter,sans-serif;box-sizing:border-box;outline:none}
-.family-message-field textarea:focus{border-color:#d6a85b;box-shadow:0 0 0 3px rgba(214,168,91,.14),inset 0 1px 8px #0004}
+.family-message-field{display:grid;gap:4px;color:#c4ad84;font-size:9px;font-weight:700}
+.family-message-field textarea{width:100%;min-height:64px;resize:vertical;padding:8px 9px;border:1px solid #76552e;border-radius:9px;background:rgba(8,17,23,.96);color:#f6e7c9;font:500 13px/1.35 Inter,sans-serif;box-sizing:border-box;outline:none}
+.family-message-field textarea:focus{border-color:#d6a85b;box-shadow:0 0 0 2px rgba(214,168,91,.14),inset 0 1px 8px #0004}
 .family-message-field textarea:disabled{opacity:.55}
-.family-message-footer{display:flex;align-items:center;justify-content:space-between;gap:12px}
-#familyPushCounter{color:#9f927a;font-size:11px;font-variant-numeric:tabular-nums}
+.family-message-footer{display:flex;align-items:center;justify-content:space-between;gap:8px}
+#familyPushCounter{color:#9f927a;font-size:9px;font-variant-numeric:tabular-nums}
 #familyPushCounter.limit{color:#e6b66b;font-weight:800}
-.family-message-footer .btn{min-width:150px}
+.family-message-footer .btn{min-width:112px;min-height:30px!important;padding:5px 9px!important;font-size:9px!important}
 
 /* The button already contains one SVG. Disable the legacy generated pseudo-icon,
    then center the real SVG inside a fixed square action button. */
@@ -24,22 +24,22 @@
 .tx-actions .deleteTx svg{display:block!important;width:21px!important;height:21px!important;min-width:21px!important;max-width:21px!important;flex:0 0 21px!important;margin:0!important;transform:none!important}
 
 @media(max-width:760px){
-  .settings-message-card{padding:14px!important}
-  .family-message-heading{display:grid;gap:8px}
-  .family-message-heading h3{font-size:16px}
-  .family-message-heading p{font-size:10.5px}
-  .family-message-recipient{max-width:100%;width:max-content;padding:5px 8px;font-size:10px}
-  .family-message-emojis{gap:6px}
-  .family-message-emoji{width:36px;height:36px;border-radius:9px;font-size:19px}
-  .family-message-field textarea{min-height:88px;font-size:16px}
+  .settings-message-card{padding:9px!important}
+  .family-message-heading{display:grid;gap:5px}
+  .family-message-heading h3{font-size:13px}
+  .family-message-heading p{font-size:9px}
+  .family-message-recipient{max-width:100%;width:max-content;padding:3px 6px;font-size:8.5px}
+  .family-message-emojis{gap:4px}
+  .family-message-emoji{width:30px;height:30px;border-radius:8px;font-size:16px}
+  .family-message-field textarea{min-height:62px;font-size:16px;padding:7px 8px}
   .family-message-footer{align-items:center}
-  .family-message-footer .btn{min-width:145px}
+  .family-message-footer .btn{min-width:108px}
   .overview-last .tx-actions .deleteTx{flex-basis:46px!important;width:46px!important;min-width:46px!important;height:44px!important;min-height:44px!important;padding:0!important}
   .overview-last .tx-actions .deleteTx svg{width:20px!important;height:20px!important;min-width:20px!important;max-width:20px!important;flex-basis:20px!important}
 }
 
 @media(max-width:380px){
   .family-message-footer{display:grid;grid-template-columns:1fr auto}
-  .family-message-footer .btn{min-width:132px;padding-left:10px!important;padding-right:10px!important}
-  .family-message-emoji{width:34px;height:34px;font-size:18px}
+  .family-message-footer .btn{min-width:104px;padding-left:8px!important;padding-right:8px!important}
+  .family-message-emoji{width:29px;height:29px;font-size:15px}
 }
