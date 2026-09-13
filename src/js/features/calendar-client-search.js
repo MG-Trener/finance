@@ -1,4 +1,4 @@
-// Wife calendar client lookup: search by name or phone and show appointment history.
+// Wife calendar client lookup: search by name, phone or keywords in appointment comments.
 (function(){
   if(typeof wifeCalendarPage!=='function'||typeof bindWifeCalendar!=='function')return;
 
@@ -6,8 +6,12 @@
   const baseBindWifeCalendar=bindWifeCalendar;
   let lastQuery='';
   let lastCandidates=[];
+  let lastCommentMatches=[];
 
   function normalizeName(value){
+    return String(value||'').trim().toLocaleLowerCase('ru-RU').replace(/ё/g,'е').replace(/\s+/g,' ');
+  }
+  function normalizeComment(value){
     return String(value||'').trim().toLocaleLowerCase('ru-RU').replace(/ё/g,'е').replace(/\s+/g,' ');
   }
   function phoneDigits(value){return String(value||'').replace(/\D/g,'')}
@@ -65,15 +69,30 @@
       };
     }).sort((a,b)=>rowStamp(b.latest||{}).localeCompare(rowStamp(a.latest||{}))||a.name.localeCompare(b.name,'ru'));
   }
+  function buildCommentMatches(person,query){
+    const keyword=normalizeComment(query);
+    const hasText=/[a-zа-яё]/i.test(String(query||''));
+    if(keyword.length<2||!hasText)return [];
+    return wifeAppointments(person)
+      .filter(row=>normalizeComment(row.comment).includes(keyword))
+      .sort(historySort);
+  }
+  function rowPhoneForDisplay(person,row){
+    const direct=String(row.client_phone||'').trim();
+    if(direct)return direct;
+    const nameKey=normalizeName(clientName(row));
+    if(!nameKey)return '';
+    return latestPhone(candidateHistory(person,{nameKey,phoneDigits:''}));
+  }
 
   function clientSearchMarkup(){
-    return `<section class="card salon-client-search-card" aria-label="Поиск клиента">
+    return `<section class="card salon-client-search-card" aria-label="Поиск клиента и записей">
       <div class="salon-client-search-copy">
-        <strong>Найти клиента</strong>
-        <span>По имени или телефону. Покажем всю историю записей.</span>
+        <strong>Поиск по записям</strong>
+        <span>По имени, телефону или ключевому слову из комментария.</span>
       </div>
       <form class="salon-client-search-form" id="salonClientSearchForm">
-        <input id="salonClientSearchInput" type="search" maxlength="120" autocomplete="off" placeholder="Имя или телефон" aria-label="Имя или телефон клиента">
+        <input id="salonClientSearchInput" type="search" maxlength="120" autocomplete="off" placeholder="Имя, телефон или ключевое слово" aria-label="Имя, телефон или ключевое слово">
         <button type="submit" class="btn btn-soft btn-small">Найти</button>
       </form>
       <div class="salon-client-search-hint" id="salonClientSearchHint" aria-live="polite"></div>
@@ -101,31 +120,6 @@
     </button>`;
   }
 
-  function openSearchResults(person,query,{forceList=false}={}){
-    lastQuery=String(query||'').trim();
-    lastCandidates=buildCandidates(person,lastQuery);
-    if(lastCandidates.length===1&&!forceList){
-      openClientHistory(person,lastCandidates[0]);
-      return;
-    }
-    if(!lastCandidates.length){
-      calendarModal(`${calendarModalHead('Клиент не найден',`Поиск: ${lastQuery}`)}
-        <div class="salon-client-empty">По этому имени или телефону записей не найдено.</div>`);
-      prepareClientModal();
-      return;
-    }
-    calendarModal(`${calendarModalHead('Найденные клиенты',`Поиск: ${lastQuery}`)}
-      <div class="salon-client-results-summary">Найдено: <strong>${lastCandidates.length}</strong></div>
-      <div class="salon-client-results">${lastCandidates.map(resultCardMarkup).join('')}</div>`);
-    prepareClientModal();
-    document.querySelectorAll('[data-client-result]').forEach(button=>{
-      button.onclick=()=>{
-        const candidate=lastCandidates[Number(button.dataset.clientResult)];
-        if(candidate)openClientHistory(person,candidate);
-      };
-    });
-  }
-
   function historyTime(row){
     const start=calendarTimeText(row.start_time);
     if(!start)return 'Время не указано';
@@ -134,6 +128,65 @@
     const endMinutes=calendarMinutes(start)+duration;
     return `${start}–${calendarTimeFromMinutes(endMinutes)}`;
   }
+  function commentResultMarkup(person,row,index){
+    const name=clientName(row)||'Клиент';
+    const phone=rowPhoneForDisplay(person,row);
+    const date=calendarDateLabel(row.entry_date,{weekday:false});
+    const service=String(row.service_name||'').trim();
+    const comment=String(row.comment||'').trim();
+    return `<article class="salon-comment-result">
+      <div class="salon-comment-result-head">
+        <div><strong>${esc(name)}</strong>${phone?`<small>${esc(phone)}</small>`:''}</div>
+        <button type="button" class="btn btn-soft btn-small" data-comment-result="${index}">Открыть запись</button>
+      </div>
+      <div class="salon-comment-result-meta">${esc(date)} · ${esc(historyTime(row))}${service?` · ${esc(service)}`:''}</div>
+      <div class="salon-comment-result-text"><span>Комментарий</span><p>${esc(comment)}</p></div>
+    </article>`;
+  }
+
+  function openSearchResults(person,query,{forceList=false}={}){
+    lastQuery=String(query||'').trim();
+    lastCandidates=buildCandidates(person,lastQuery);
+    lastCommentMatches=buildCommentMatches(person,lastQuery);
+
+    if(lastCandidates.length===1&&!lastCommentMatches.length&&!forceList){
+      openClientHistory(person,lastCandidates[0]);
+      return;
+    }
+    if(!lastCandidates.length&&!lastCommentMatches.length){
+      calendarModal(`${calendarModalHead('Ничего не найдено',`Поиск: ${lastQuery}`)}
+        <div class="salon-client-empty">Совпадений по имени, телефону или комментариям не найдено.</div>`);
+      prepareClientModal();
+      return;
+    }
+
+    const clientSection=lastCandidates.length?`<section class="salon-search-section">
+      <div class="salon-search-section-title"><strong>Совпадения по клиентам</strong><span>${lastCandidates.length}</span></div>
+      <div class="salon-client-results">${lastCandidates.map(resultCardMarkup).join('')}</div>
+    </section>`:'';
+    const commentSection=lastCommentMatches.length?`<section class="salon-search-section">
+      <div class="salon-search-section-title"><strong>Совпадения в комментариях</strong><span>${lastCommentMatches.length}</span></div>
+      <div class="salon-comment-results">${lastCommentMatches.map((row,index)=>commentResultMarkup(person,row,index)).join('')}</div>
+    </section>`:'';
+
+    calendarModal(`${calendarModalHead('Результаты поиска',`Поиск: ${lastQuery}`)}
+      <div class="salon-client-results-summary">Клиентов: <strong>${lastCandidates.length}</strong> · записей по комментарию: <strong>${lastCommentMatches.length}</strong></div>
+      ${clientSection}${commentSection}`);
+    prepareClientModal();
+    document.querySelectorAll('[data-client-result]').forEach(button=>{
+      button.onclick=()=>{
+        const candidate=lastCandidates[Number(button.dataset.clientResult)];
+        if(candidate)openClientHistory(person,candidate);
+      };
+    });
+    document.querySelectorAll('[data-comment-result]').forEach(button=>{
+      button.onclick=()=>{
+        const row=lastCommentMatches[Number(button.dataset.commentResult)];
+        if(row)openSalonAppointment(row.entry_date,calendarTimeText(row.start_time),row.id);
+      };
+    });
+  }
+
   function historyItemMarkup(row){
     const date=calendarDateLabel(row.entry_date,{weekday:false});
     const amount=row.amount!=null&&row.amount!==''?money(row.amount):'Без суммы';
@@ -152,7 +205,7 @@
     const history=candidateHistory(person,candidate);
     const phone=latestPhone(history)||candidate.phone||'';
     const total=history.reduce((sum,row)=>sum+Number(row.amount||0),0);
-    const backMarkup=lastCandidates.length>1?'<button type="button" class="salon-back-button" id="salonClientHistoryBack" aria-label="Вернуться к найденным клиентам">‹</button>':'';
+    const backMarkup=(lastCandidates.length>1||lastCommentMatches.length)?'<button type="button" class="salon-back-button" id="salonClientHistoryBack" aria-label="Вернуться к результатам поиска">‹</button>':'';
     calendarModal(`<div class="modal-head salon-client-history-head">
       <div class="salon-editor-heading">${backMarkup}<div><h2>${esc(candidate.name)}</h2><p class="quick-amount-context">История записей клиента</p></div></div>
       <button type="button" class="icon-btn" id="closeModal" aria-label="Закрыть">×</button>
@@ -177,9 +230,10 @@
       event.preventDefault();
       const query=input.value.trim();
       const digits=phoneDigits(query);
+      const normalized=normalizeName(query);
       const hint=document.getElementById('salonClientSearchHint');
-      if(normalizeName(query).length<2&&digits.length<3){
-        if(hint)hint.textContent='Введите минимум 2 буквы имени или 3 цифры телефона.';
+      if(normalized.length<2&&digits.length<3){
+        if(hint)hint.textContent='Введите минимум 2 символа или 3 цифры телефона.';
         return;
       }
       if(hint)hint.textContent='';
