@@ -53,8 +53,10 @@
 @import url('./pages/piggy-bank.css?v=piggy2');
 /* Treasurer mobile polish must win over the generic full-height modal treatment. */
 @import url('./pages/treasurer-mobile-fix.css?v=treasurer-mobile1');
-/* Treasurer voice selector is loaded last so its compact settings layout wins. */
+/* Treasurer voice selector is loaded late so its compact settings layout wins. */
 @import url('./pages/treasurer-voices.css?v=treasurer-voices1');
+/* Unified Treasurer settings and API spend card must be last among Treasurer settings rules. */
+@import url('./pages/treasurer-settings-hub.css?v=treasurer-hub1');
 
 /* Analytics month tiles should hug their content instead of reserving empty space below savings. */
 .analytics-month-card{min-height:auto}
