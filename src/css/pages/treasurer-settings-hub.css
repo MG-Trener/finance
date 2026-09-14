@@ -1,0 +1,70 @@
+/* Unified Treasurer settings area. */
+.treasurer-settings-hub{
+  grid-column:1/-1;
+  display:grid;
+  gap:14px;
+  padding:16px;
+  border:1px solid rgba(219,177,93,.24);
+  border-radius:18px;
+  background:linear-gradient(145deg,rgba(17,26,37,.96),rgba(8,14,22,.96));
+  box-shadow:0 14px 36px rgba(0,0,0,.18)
+}
+.treasurer-settings-hub-head{display:flex;align-items:center;gap:12px}
+.treasurer-settings-hub-icon{
+  width:42px;height:42px;display:grid;place-items:center;flex:0 0 42px;
+  border-radius:13px;border:1px solid rgba(224,185,104,.34);
+  background:rgba(202,157,73,.11);color:#e7be70;font-size:22px
+}
+.treasurer-settings-hub-head h2{margin:0;font:700 19px/1.15 Cinzel,serif;color:#f2d394}
+.treasurer-settings-hub-head p{margin:4px 0 0;color:var(--muted,#9ca9b7);font-size:12px}
+.treasurer-settings-hub-controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.treasurer-settings-hub-controls>.settings-card{
+  margin:0!important;min-width:0;height:auto;border-color:rgba(255,255,255,.08);background:rgba(255,255,255,.025)
+}
+.treasurer-settings-hub-controls>.treasurer-voice-settings{grid-column:1/-1}
+
+.treasurer-api-card{
+  display:grid;gap:12px;padding:14px;border-radius:15px;
+  border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.025)
+}
+.treasurer-api-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.treasurer-api-head h3{margin:0;color:#f0d59b;font-size:14px}
+.treasurer-api-head p{margin:4px 0 0;color:var(--muted,#9ca9b7);font-size:11px}
+.treasurer-api-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.treasurer-api-metric{
+  min-width:0;padding:10px 11px;border:1px solid rgba(255,255,255,.07);border-radius:12px;background:rgba(4,9,15,.42)
+}
+.treasurer-api-metric span,.treasurer-api-metric small{display:block;color:var(--muted,#9ca9b7);font-size:10px}
+.treasurer-api-metric strong{display:block;margin:4px 0 2px;color:#eef5f8;font-size:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.treasurer-api-metric.is-balance strong{color:#efca75}
+.treasurer-api-status{min-height:18px;color:#b9c6cf;font-size:11px}
+.treasurer-api-card.is-unconfigured .treasurer-api-status{color:#e1b76a}
+.treasurer-api-funding{border-top:1px solid rgba(255,255,255,.07);padding-top:10px}
+.treasurer-api-funding summary{cursor:pointer;color:#c8d1d8;font-size:11px;font-weight:700;user-select:none}
+.treasurer-api-funding-row{display:grid;grid-template-columns:minmax(120px,.7fr) minmax(150px,1fr) auto;align-items:end;gap:9px;margin-top:10px}
+.treasurer-api-funding label{display:grid;gap:5px}
+.treasurer-api-funding label span{color:var(--muted,#9ca9b7);font-size:10px}
+.treasurer-api-funding input{
+  width:100%;min-height:34px;padding:7px 9px;border:1px solid rgba(255,255,255,.1);border-radius:9px;
+  background:#0b141e;color:#eef4f7;font:600 12px Inter,sans-serif
+}
+.treasurer-api-funding p,.treasurer-api-note{margin:8px 0 0;color:#7f8d99;font-size:9.5px;line-height:1.45}
+.treasurer-api-note{margin:0;padding-top:2px}
+
+@media (max-width:760px), (max-device-width:760px), (pointer:coarse) and (max-width:1400px){
+  .treasurer-settings-hub{gap:11px;padding:12px;border-radius:15px}
+  .treasurer-settings-hub-head{gap:9px}
+  .treasurer-settings-hub-icon{width:36px;height:36px;flex-basis:36px;font-size:19px}
+  .treasurer-settings-hub-head h2{font-size:16px}
+  .treasurer-settings-hub-head p{font-size:10px}
+  .treasurer-settings-hub-controls{grid-template-columns:1fr;gap:9px}
+  .treasurer-settings-hub-controls>.treasurer-voice-settings{grid-column:auto}
+  .treasurer-api-card{padding:11px;gap:10px}
+  .treasurer-api-head{align-items:center}
+  .treasurer-api-head p{font-size:9.5px}
+  .treasurer-api-metrics{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+  .treasurer-api-metric{padding:8px 9px}
+  .treasurer-api-metric strong{font-size:15px}
+  .treasurer-api-funding-row{grid-template-columns:1fr 1fr}
+  .treasurer-api-funding-row .btn{grid-column:1/-1;justify-self:start}
+}
