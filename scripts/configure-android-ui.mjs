@@ -31,12 +31,19 @@ for(const file of stylePaths)await patchStyles(file);
 
 try{
   let manifest=await readFile(manifestPath,'utf8');
-  const microphonePermission='<uses-permission android:name="android.permission.RECORD_AUDIO" />';
-  if(!manifest.includes('android.permission.RECORD_AUDIO')){
-    manifest=manifest.replace(/\s*<application\b/,`\n    ${microphonePermission}\n\n    <application`);
+  const microphonePermissions=[
+    ['android.permission.RECORD_AUDIO','<uses-permission android:name="android.permission.RECORD_AUDIO" />'],
+    ['android.permission.MODIFY_AUDIO_SETTINGS','<uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />']
+  ];
+  const missing=microphonePermissions.filter(([name])=>!manifest.includes(name)).map(([,tag])=>tag);
+  if(missing.length){
+    manifest=manifest.replace(/\s*<application\b/,`\n    ${missing.join('\n    ')}\n\n    <application`);
     await writeFile(manifestPath,manifest,'utf8');
   }
-  if(!((await readFile(manifestPath,'utf8')).includes('android.permission.RECORD_AUDIO')))throw new Error('RECORD_AUDIO permission was not applied');
+  const finalManifest=await readFile(manifestPath,'utf8');
+  for(const [name] of microphonePermissions){
+    if(!finalManifest.includes(name))throw new Error(`${name} permission was not applied`);
+  }
 }catch(error){
   throw new Error(`Не удалось добавить доступ к микрофону Android: ${error.message}`);
 }
@@ -53,4 +60,4 @@ try{
 }
 
 await import('./disable-android-splash.mjs');
-console.log('Android system bars and microphone permission configured.');
+console.log('Android system bars and WebView microphone permissions configured.');
