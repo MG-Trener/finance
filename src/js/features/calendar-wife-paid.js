@@ -1,4 +1,4 @@
-// Paid status for wife's salon appointments: same interaction as husband's events.
+// Paid status for wife's salon appointments: full-chain highlighting and monthly paid state.
 (function(){
   if(typeof openSalonAppointment!=='function'||typeof saveCalendarRow!=='function'||typeof calendarModal!=='function')return;
 
@@ -6,6 +6,13 @@
     const person=calendarCurrentPerson();
     if(!person||!editId)return null;
     return calendarEntriesOn(person.id,dateKey,'appointment').find(row=>String(row.id)===String(editId))||null;
+  }
+
+  function wifeMonthAppointments(person){
+    if(!person)return [];
+    const prefix=`${state.year}-${calendarPad(state.month)}-`;
+    return calendarPersonEntries(person.id)
+      .filter(row=>row.kind==='appointment'&&String(row.entry_date||'').startsWith(prefix));
   }
 
   // Persist the checkbox through the existing shared calendar save pipeline.
@@ -41,53 +48,84 @@
     anchor.before(paidField);
   };
 
+  // Month view: a day's dot is green only when every appointment on that day is paid.
+  if(typeof wifeCalendarPage==='function'){
+    const baseWifeCalendarPageWithPaid=wifeCalendarPage;
+    wifeCalendarPage=function(person){
+      let html=baseWifeCalendarPageWithPaid(person);
+      const appointments=wifeMonthAppointments(person);
+      const byDate=new Map();
+      appointments.forEach(row=>{
+        const rows=byDate.get(row.entry_date)||[];
+        rows.push(row);
+        byDate.set(row.entry_date,rows);
+      });
+
+      byDate.forEach((rows,dateKey)=>{
+        if(!rows.length||!rows.every(row=>row.is_paid===true))return;
+        const pattern=new RegExp(`(<button[^>]*class="calendar-day)([^\"]*\"[^>]*data-wife-calendar-date="${dateKey}")`);
+        html=html.replace(pattern,'$1 is-paid-day$2');
+      });
+
+      const paidCount=appointments.filter(row=>row.is_paid===true).length;
+      html=html.replace(
+        /(<div class="wife-month-summary-item"><span>Записей за месяц<\/span><strong>[^<]*<\/strong>)(<\/div>)/,
+        `$1<small class="wife-month-paid-count">из них оплачено <b>${paidCount}</b></small>$2`
+      );
+      return html;
+    };
+  }
+
   function decoratePaidSalonDay(){
     const schedule=document.querySelector('.salon-day-schedule');
     if(!schedule)return;
     const person=calendarCurrentPerson();
     const dateKey=calendarUi?.selectedDate;
     if(!person||!dateKey)return;
-    const appointments=calendarEntriesOn(person.id,dateKey,'appointment');
+
+    const paidAppointments=calendarEntriesOn(person.id,dateKey,'appointment')
+      .filter(row=>row.is_paid===true)
+      .map(row=>({
+        row,
+        start:calendarMinutes(row.start_time),
+        end:calendarMinutes(row.start_time)+Number(row.duration_minutes||30)
+      }));
 
     schedule.querySelectorAll('.salon-day-slot').forEach(slot=>{
       slot.classList.remove('is-paid');
       slot.querySelector('.salon-paid-badge')?.remove();
+      slot.querySelector('.salon-paid-checkmark')?.remove();
 
-      const appointmentButton=slot.querySelector('[data-appointment-id]');
-      let appointment=appointmentButton
-        ?appointments.find(row=>String(row.id)===String(appointmentButton.dataset.appointmentId))
-        :null;
+      const timeNode=slot.querySelector('.salon-time');
+      const time=String(timeNode?.childNodes?.[0]?.textContent||timeNode?.textContent||'').trim();
+      if(!time)return;
+      const minute=calendarMinutes(time);
+      const match=paidAppointments.find(item=>minute>=item.start&&minute<item.end);
+      if(!match)return;
 
-      if(!appointment&&slot.classList.contains('is-covered')){
-        const time=String(slot.querySelector('.salon-time')?.textContent||'').trim();
-        if(time){
-          const minute=calendarMinutes(time);
-          appointment=appointments.find(row=>{
-            const start=calendarMinutes(row.start_time);
-            const end=start+Number(row.duration_minutes||30);
-            return minute>start&&minute<end;
-          })||null;
-        }
-      }
-
-      if(appointment?.is_paid!==true)return;
       slot.classList.add('is-paid');
 
-      if(appointmentButton){
-        const badge=document.createElement('span');
-        badge.className='salon-paid-badge';
-        badge.textContent='✓ Оплачено';
-        appointmentButton.appendChild(badge);
+      // Show the payment status once, beside the start time. Continuation rows
+      // inherit the green block but do not repeat the icon.
+      if(minute===match.start&&slot.querySelector('[data-appointment-id]')&&timeNode){
+        const check=document.createElement('span');
+        check.className='salon-paid-checkmark';
+        check.textContent='✓';
+        check.title='Оплачено';
+        check.setAttribute('aria-label','Оплачено');
+        timeNode.appendChild(check);
       }
     });
   }
 
-  // Every day schedule is built through calendarModal, so decorate it immediately
-  // after rendering. Unpaid appointments receive no extra class and stay unchanged.
+  // Every day schedule is built through calendarModal. Decorate immediately and
+  // once more after layout settles so long appointment chains are always updated.
   const baseCalendarModalWithWifePaid=calendarModal;
   calendarModal=function(markup){
     baseCalendarModalWithWifePaid(markup);
     decoratePaidSalonDay();
+    if(typeof requestAnimationFrame==='function')requestAnimationFrame(decoratePaidSalonDay);
+    setTimeout(decoratePaidSalonDay,0);
   };
 
   window.FinanceSalonPaid={decorate:decoratePaidSalonDay};
