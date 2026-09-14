@@ -51,6 +51,8 @@
 @import url('./components/family-messages.css?v=familymsg3');
 /* Piggy Bank intentionally loads after generic mobile rules so its compact layout wins. */
 @import url('./pages/piggy-bank.css?v=piggy2');
+/* Treasurer mobile polish must win over the generic full-height modal treatment. */
+@import url('./pages/treasurer-mobile-fix.css?v=treasurer-mobile1');
 
 /* Analytics month tiles should hug their content instead of reserving empty space below savings. */
 .analytics-month-card{min-height:auto}
