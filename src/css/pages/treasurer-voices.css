@@ -1,0 +1,92 @@
+/* Optional Treasurer voice selection in Settings. */
+.treasurer-voice-settings{
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr) auto;
+  gap:10px 12px;
+  align-items:start;
+  border-color:rgba(213,162,76,.28)
+}
+.treasurer-voice-settings[hidden]{display:none!important}
+.treasurer-voice-settings>.settings-card-icon{grid-row:1/3}
+.treasurer-voice-grid{
+  grid-column:2/-1;
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px
+}
+.treasurer-voice-grid section{
+  min-width:0;
+  padding:10px;
+  border:1px solid rgba(202,160,88,.2);
+  border-radius:10px;
+  background:rgba(3,10,17,.35)
+}
+.treasurer-voice-grid h4{
+  margin:0 0 8px;
+  color:#d7b36c;
+  font:700 10px/1.2 Inter,sans-serif;
+  letter-spacing:.08em;
+  text-transform:uppercase
+}
+.treasurer-voice-option{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 34px;
+  gap:6px;
+  align-items:stretch;
+  margin-top:6px
+}
+.treasurer-voice-choice,
+.treasurer-voice-preview{
+  border:1px solid rgba(192,150,78,.28);
+  border-radius:8px;
+  background:linear-gradient(180deg,#18232d,#101820);
+  color:#e7d4ad;
+  cursor:pointer
+}
+.treasurer-voice-choice{
+  display:grid;
+  gap:2px;
+  min-width:0;
+  padding:7px 9px;
+  text-align:left
+}
+.treasurer-voice-choice span{font:700 12px/1.2 Inter,sans-serif}
+.treasurer-voice-choice small{color:#938670;font:500 9.5px/1.25 Inter,sans-serif}
+.treasurer-voice-choice.active{
+  border-color:rgba(235,187,91,.72);
+  background:linear-gradient(180deg,#76501f,#4d351a);
+  color:#fff1ce;
+  box-shadow:inset 0 1px rgba(255,255,255,.12),0 4px 12px rgba(0,0,0,.2)
+}
+.treasurer-voice-choice.active small{color:#e2c996}
+.treasurer-voice-preview{
+  display:grid;
+  place-items:center;
+  width:34px;
+  min-width:34px;
+  padding:0;
+  font-size:12px
+}
+.treasurer-voice-preview:disabled{opacity:.65;cursor:default}
+.treasurer-voice-disclosure{
+  grid-column:2/-1;
+  color:#786f61;
+  font:500 9.5px/1.4 Inter,sans-serif
+}
+.treasurer-voice-preview-status{
+  grid-column:2/-1;
+  min-height:14px;
+  color:#cba45c;
+  font:600 10px/1.4 Inter,sans-serif
+}
+
+@media(max-width:720px){
+  .treasurer-voice-settings{grid-template-columns:auto minmax(0,1fr)}
+  .treasurer-voice-grid,.treasurer-voice-disclosure,.treasurer-voice-preview-status{grid-column:1/-1}
+}
+
+@media(max-width:430px){
+  .treasurer-voice-grid{grid-template-columns:1fr}
+  .treasurer-voice-option{grid-template-columns:minmax(0,1fr) 38px}
+  .treasurer-voice-preview{width:38px;min-width:38px}
+}
