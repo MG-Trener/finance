@@ -3,6 +3,7 @@ import path from 'node:path';
 
 const root=process.cwd();
 const activityPath=path.join(root,'android','app','src','main','java','kz','mgtrener','familyfinance','MainActivity.java');
+const manifestPath=path.join(root,'android','app','src','main','AndroidManifest.xml');
 const stylePaths=[
   path.join(root,'android','app','src','main','res','values','styles.xml'),
   path.join(root,'android','app','src','main','res','values-night','styles.xml')
@@ -29,6 +30,18 @@ async function patchStyles(file){
 for(const file of stylePaths)await patchStyles(file);
 
 try{
+  let manifest=await readFile(manifestPath,'utf8');
+  const microphonePermission='<uses-permission android:name="android.permission.RECORD_AUDIO" />';
+  if(!manifest.includes('android.permission.RECORD_AUDIO')){
+    manifest=manifest.replace(/\s*<application\b/,`\n    ${microphonePermission}\n\n    <application`);
+    await writeFile(manifestPath,manifest,'utf8');
+  }
+  if(!((await readFile(manifestPath,'utf8')).includes('android.permission.RECORD_AUDIO')))throw new Error('RECORD_AUDIO permission was not applied');
+}catch(error){
+  throw new Error(`Не удалось добавить доступ к микрофону Android: ${error.message}`);
+}
+
+try{
   let java=await readFile(activityPath,'utf8');
   if(!java.includes('android.graphics.Color'))java=java.replace('package kz.mgtrener.familyfinance;','package kz.mgtrener.familyfinance;\n\nimport android.graphics.Color;\nimport android.os.Build;\nimport android.os.Bundle;');
   if(!java.includes('protected void onCreate(Bundle savedInstanceState)')){
@@ -40,4 +53,4 @@ try{
 }
 
 await import('./disable-android-splash.mjs');
-console.log('Android system bars configured for the dark application theme.');
+console.log('Android system bars and microphone permission configured.');
