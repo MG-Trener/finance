@@ -1,0 +1,12 @@
+/* Wife salon appointment paid status. Unpaid rows keep the existing appearance. */
+.salon-day-slot.has-appointment.is-paid{border-color:rgba(69,170,108,.5);background:linear-gradient(90deg,rgba(34,91,57,.5),rgba(24,65,44,.28));box-shadow:inset 3px 0 0 rgba(76,190,119,.72),0 0 0 1px rgba(66,158,102,.08)}
+.salon-day-slot.is-covered.is-paid{border-color:rgba(69,170,108,.28);background:rgba(29,79,50,.24);box-shadow:inset 3px 0 0 rgba(76,190,119,.42)}
+.salon-day-slot.is-paid .salon-time{color:#79d89d}
+.salon-day-slot.is-paid .salon-day-appointment strong{color:#e2f8ea}
+.salon-day-slot.is-paid .salon-day-appointment small,.salon-day-slot.is-paid .salon-day-continuation{color:#98bda7}
+.salon-paid-badge{display:inline-flex;align-items:center;justify-content:center;width:max-content;margin-top:5px;padding:3px 7px;border:1px solid rgba(91,199,133,.34);border-radius:999px;background:rgba(44,143,84,.22);color:#77dda0;font-size:9px;font-weight:800;line-height:1.1;letter-spacing:.03em;text-transform:uppercase}
+.salon-paid-field{margin-top:2px}
+
+@media(max-width:760px){
+  .salon-paid-badge{margin-top:4px;padding:3px 6px;font-size:8px}
+}
