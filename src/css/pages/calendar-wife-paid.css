@@ -44,14 +44,42 @@
 }
 .salon-paid-field{margin-top:2px}
 
-/* Month view: default appointment dot stays gold; fully paid days turn green. */
+/* Month view: future/pending appointments stay gold; fully paid days turn green. */
 .wife-month-calendar-page .calendar-day.is-paid-day .calendar-entry-dot{
   background:#43b875!important;
   border-color:#70d398!important;
   box-shadow:0 0 0 2px rgba(67,184,117,.13),0 0 10px rgba(67,184,117,.34)!important
 }
+
+/* A past/today day with at least one appointment without an amount alternates
+   between the normal gold marker and the paid green marker. */
+.wife-month-calendar-page .calendar-day.is-missing-amount-day .calendar-entry-dot{
+  animation:wifeMissingAmountIndicator 1.15s steps(1,end) infinite!important
+}
+@keyframes wifeMissingAmountIndicator{
+  0%,49%{
+    background:#e0aa38;
+    border-color:#f1c760;
+    box-shadow:0 0 0 2px rgba(224,170,56,.13),0 0 10px rgba(224,170,56,.28)
+  }
+  50%,100%{
+    background:#43b875;
+    border-color:#70d398;
+    box-shadow:0 0 0 2px rgba(67,184,117,.13),0 0 10px rgba(67,184,117,.34)
+  }
+}
+
 .wife-month-paid-count{display:block;margin-top:4px;color:#77bf91;font-size:11px;font-weight:600}
 .wife-month-paid-count b{color:#7edca2;font-size:12px}
+
+@media(prefers-reduced-motion:reduce){
+  .wife-month-calendar-page .calendar-day.is-missing-amount-day .calendar-entry-dot{
+    animation:none!important;
+    background:linear-gradient(90deg,#e0aa38 0 50%,#43b875 50% 100%)!important;
+    border-color:#a9c47d!important;
+    box-shadow:0 0 0 2px rgba(126,196,130,.12)!important
+  }
+}
 
 @media(max-width:760px){
   .salon-paid-checkmark{width:15px;height:15px;flex-basis:15px;font-size:9px}

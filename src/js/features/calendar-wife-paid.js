@@ -1,6 +1,32 @@
-// Paid status for wife's salon appointments: full-chain highlighting and monthly paid state.
+// Paid status for wife's salon appointments: automatic completion highlighting and monthly paid state.
 (function(){
   if(typeof openSalonAppointment!=='function'||typeof saveCalendarRow!=='function'||typeof calendarModal!=='function')return;
+
+  function appointmentHasAmount(row){
+    if(!row||row.amount==null||row.amount==='')return false;
+    const amount=Number(row.amount);
+    return Number.isFinite(amount)&&amount>0;
+  }
+
+  function appointmentEndAt(row){
+    if(!row?.entry_date||!row?.start_time)return null;
+    const date=calendarDateFromKey(row.entry_date);
+    if(Number.isNaN(date.getTime()))return null;
+    const start=calendarMinutes(row.start_time);
+    if(!Number.isFinite(start))return null;
+    date.setHours(0,0,0,0);
+    return new Date(date.getTime()+(start+Number(row.duration_minutes||30))*60000);
+  }
+
+  function isAutoPaid(row,now=new Date()){
+    if(!appointmentHasAmount(row))return false;
+    const endAt=appointmentEndAt(row);
+    return !!endAt&&endAt.getTime()<=now.getTime();
+  }
+
+  function isAppointmentPaid(row,now=new Date()){
+    return row?.is_paid===true||isAutoPaid(row,now);
+  }
 
   function currentAppointment(dateKey,editId){
     const person=calendarCurrentPerson();
@@ -13,6 +39,15 @@
     const prefix=`${state.year}-${calendarPad(state.month)}-`;
     return calendarPersonEntries(person.id)
       .filter(row=>row.kind==='appointment'&&String(row.entry_date||'').startsWith(prefix));
+  }
+
+  function wifeDayState(rows,dateKey,now=new Date()){
+    if(!rows.length)return 'empty';
+    const todayKey=calendarDateKey(now);
+    if(String(dateKey)>todayKey)return 'future';
+    if(rows.some(row=>!appointmentHasAmount(row)))return 'missing-amount';
+    if(rows.every(row=>isAppointmentPaid(row,now)))return 'paid';
+    return 'pending';
   }
 
   // Persist the checkbox through the existing shared calendar save pipeline.
@@ -39,22 +74,28 @@
     if(!form||document.getElementById('salonAppointmentPaid'))return;
 
     const edit=currentAppointment(dateKey,editId);
+    const checked=edit&&isAppointmentPaid(edit);
+    const autoPaid=edit&&edit?.is_paid!==true&&isAutoPaid(edit);
     const anchor=document.getElementById('salonComment')?.closest('.field')||form.querySelector('.calendar-form-actions');
     if(!anchor)return;
 
     const paidField=document.createElement('div');
     paidField.className='field husband-paid-field salon-paid-field';
-    paidField.innerHTML=`<label class="husband-paid-toggle salon-paid-toggle"><input id="salonAppointmentPaid" type="checkbox" ${edit?.is_paid===true?'checked':''}><span class="husband-paid-check" aria-hidden="true">✓</span><span class="husband-paid-copy"><strong>ОПЛАЧЕНО</strong><small>Отметьте, если клиент уже оплатил эту запись</small></span></label>`;
+    paidField.innerHTML=`<label class="husband-paid-toggle salon-paid-toggle"><input id="salonAppointmentPaid" type="checkbox" ${checked?'checked':''}><span class="husband-paid-check" aria-hidden="true">✓</span><span class="husband-paid-copy"><strong>ОПЛАЧЕНО</strong><small>${autoPaid?'Отмечено автоматически: время записи прошло и сумма указана':'Отметьте, если клиент уже оплатил эту запись'}</small></span></label>`;
     anchor.before(paidField);
   };
 
-  // Month view: a day's dot is green only when every appointment on that day is paid.
+  // Month view status:
+  // - future days stay yellow;
+  // - a non-future day with any appointment without amount blinks yellow/green;
+  // - otherwise a day turns green when every appointment is paid (manual or automatic).
   if(typeof wifeCalendarPage==='function'){
     const baseWifeCalendarPageWithPaid=wifeCalendarPage;
     wifeCalendarPage=function(person){
       let html=baseWifeCalendarPageWithPaid(person);
       const appointments=wifeMonthAppointments(person);
       const byDate=new Map();
+      const now=new Date();
       appointments.forEach(row=>{
         const rows=byDate.get(row.entry_date)||[];
         rows.push(row);
@@ -62,15 +103,17 @@
       });
 
       byDate.forEach((rows,dateKey)=>{
-        if(!rows.length||!rows.every(row=>row.is_paid===true))return;
+        const status=wifeDayState(rows,dateKey,now);
+        const statusClass=status==='paid'?'is-paid-day':status==='missing-amount'?'is-missing-amount-day':'';
+        if(!statusClass)return;
         const pattern=new RegExp(`(<button[^>]*class="calendar-day)([^\"]*\"[^>]*data-wife-calendar-date="${dateKey}")`);
-        html=html.replace(pattern,'$1 is-paid-day$2');
+        html=html.replace(pattern,`$1 ${statusClass}$2`);
       });
 
-      const paidCount=appointments.filter(row=>row.is_paid===true).length;
+      const paidCount=appointments.filter(row=>isAppointmentPaid(row,now)).length;
       html=html.replace(
         /(<div class="wife-month-summary-item"><span>Записей за месяц<\/span><strong>[^<]*<\/strong>)(<\/div>)/,
-        `$1<small class="wife-month-paid-count">из них оплачено <b>${paidCount}</b></small>$2`
+        `$1<small class="wife-month-paid-count">Оплачено <b>${paidCount}</b> из <b>${appointments.length}</b></small>$2`
       );
       return html;
     };
@@ -83,8 +126,9 @@
     const dateKey=calendarUi?.selectedDate;
     if(!person||!dateKey)return;
 
+    const now=new Date();
     const paidAppointments=calendarEntriesOn(person.id,dateKey,'appointment')
-      .filter(row=>row.is_paid===true)
+      .filter(row=>isAppointmentPaid(row,now))
       .map(row=>({
         row,
         start:calendarMinutes(row.start_time),
@@ -111,8 +155,8 @@
         const check=document.createElement('span');
         check.className='salon-paid-checkmark';
         check.textContent='✓';
-        check.title='Оплачено';
-        check.setAttribute('aria-label','Оплачено');
+        check.title=match.row.is_paid===true?'Оплачено':'Оплачено автоматически';
+        check.setAttribute('aria-label',check.title);
         timeNode.appendChild(check);
       }
     });
@@ -128,5 +172,11 @@
     setTimeout(decoratePaidSalonDay,0);
   };
 
-  window.FinanceSalonPaid={decorate:decoratePaidSalonDay};
+  window.FinanceSalonPaid={
+    decorate:decoratePaidSalonDay,
+    hasAmount:appointmentHasAmount,
+    isAutoPaid,
+    isPaid:isAppointmentPaid,
+    dayState:wifeDayState
+  };
 })();
