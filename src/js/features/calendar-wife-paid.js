@@ -2,6 +2,9 @@
 (function(){
   if(typeof openSalonAppointment!=='function'||typeof saveCalendarRow!=='function'||typeof calendarModal!=='function')return;
 
+  let autoPaidSyncInFlight=false;
+  let lastAutoPaidSyncAt=0;
+
   function appointmentHasAmount(row){
     if(!row||row.amount==null||row.amount==='')return false;
     const amount=Number(row.amount);
@@ -26,6 +29,47 @@
 
   function isAppointmentPaid(row,now=new Date()){
     return row?.is_paid===true||isAutoPaid(row,now);
+  }
+
+  async function persistAutoPaidAppointments({force=false}={}){
+    if(autoPaidSyncInFlight||!navigator.onLine||!state?.family?.id||!state?.user)return 0;
+    if(window.FinanceOfflineSession?.isLocalSession?.())return 0;
+    const now=new Date();
+    if(!force&&now.getTime()-lastAutoPaidSyncAt<45000)return 0;
+    lastAutoPaidSyncAt=now.getTime();
+
+    const wifeIds=new Set((state.people||[]).filter(person=>person.label==='wife').map(person=>person.id));
+    if(!wifeIds.size)return 0;
+    const pending=(state.calendarEntries||[]).filter(row=>
+      row?.id&&wifeIds.has(row.person_id)&&row.kind==='appointment'&&row.is_paid!==true&&isAutoPaid(row,now)
+    );
+    if(!pending.length)return 0;
+
+    autoPaidSyncInFlight=true;
+    try{
+      const ids=pending.map(row=>row.id);
+      const updatedAt=new Date().toISOString();
+      const {data,error}=await sb.from('calendar_entries')
+        .update({is_paid:true,updated_at:updatedAt})
+        .in('id',ids)
+        .select('id,is_paid,updated_at');
+      if(error)throw error;
+
+      const synced=new Map((data||[]).map(row=>[String(row.id),row]));
+      if(synced.size){
+        state.calendarEntries=(state.calendarEntries||[]).map(row=>{
+          const saved=synced.get(String(row.id));
+          return saved?{...row,is_paid:true,updated_at:saved.updated_at||updatedAt}:row;
+        });
+        window.FinanceOffline?.persistSnapshotSoon?.();
+      }
+      return synced.size;
+    }catch(error){
+      console.error('Не удалось синхронизировать автооплату записей жены',error);
+      return 0;
+    }finally{
+      autoPaidSyncInFlight=false;
+    }
   }
 
   function currentAppointment(dateKey,editId){
@@ -162,6 +206,23 @@
     });
   }
 
+  // Keep the persisted status aligned with the same automatic rule that the UI uses.
+  // This makes server-side consumers such as the Treasurer see the same paid state.
+  if(typeof loadData==='function'){
+    const baseLoadDataWithAutoPaidSync=loadData;
+    loadData=async function(){
+      const result=await baseLoadDataWithAutoPaidSync();
+      await persistAutoPaidAppointments({force:true});
+      return result;
+    };
+  }
+
+  if(typeof window!=='undefined'){
+    window.addEventListener('focus',()=>persistAutoPaidAppointments());
+    document.addEventListener('visibilitychange',()=>{if(!document.hidden)persistAutoPaidAppointments()});
+    setInterval(()=>{if(!document.hidden)persistAutoPaidAppointments()},60000);
+  }
+
   // Every day schedule is built through calendarModal. Decorate immediately and
   // once more after layout settles so long appointment chains are always updated.
   const baseCalendarModalWithWifePaid=calendarModal;
@@ -177,6 +238,7 @@
     hasAmount:appointmentHasAmount,
     isAutoPaid,
     isPaid:isAppointmentPaid,
-    dayState:wifeDayState
+    dayState:wifeDayState,
+    sync:persistAutoPaidAppointments
   };
 })();
