@@ -1,4 +1,4 @@
-const CACHE='family-finance-shell-v27';
+const CACHE='family-finance-shell-v28';
 const PRECACHE=[
   './',
   './index.html',
