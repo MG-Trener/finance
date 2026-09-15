@@ -1,0 +1,411 @@
+/* Final composition pass for Plan. Loaded after raster artwork.
+   Goal: proportions and hierarchy closer to the supplied portrait reference. */
+
+.plan-baroque-page.is-baroque-calendar{
+  width:min(100%,620px)!important;
+  max-width:620px!important;
+  margin:0 auto 24px!important;
+  padding:48px 18px 26px!important;
+  overflow:visible!important;
+  box-sizing:border-box;
+}
+.plan-baroque-page.is-baroque-calendar .plan-vintage-heading{
+  display:none!important;
+}
+.plan-baroque-top-ornament{
+  position:absolute;
+  z-index:4;
+  left:50%;
+  top:-4px;
+  width:72%;
+  height:58px;
+  transform:translateX(-50%);
+  background:var(--plan-art-divider-ornate) top center/contain no-repeat;
+  opacity:.96;
+  pointer-events:none;
+  filter:drop-shadow(0 3px 8px rgba(0,0,0,.58));
+}
+
+/* Use the two actual generated corner artworks instead of rotating one generic corner. */
+.plan-baroque-corner.is-tr{
+  background:var(--plan-art-corner-tr) center/contain no-repeat!important;
+  transform:none!important;
+}
+.plan-baroque-corner.is-tl{
+  background:var(--plan-art-corner-tr) center/contain no-repeat!important;
+  transform:scaleX(-1)!important;
+}
+.plan-baroque-corner.is-bl{
+  background:var(--plan-art-corner-bl) center/contain no-repeat!important;
+  transform:none!important;
+  width:146px!important;
+  height:146px!important;
+}
+.plan-baroque-corner.is-br{
+  background:var(--plan-art-corner-bl) center/contain no-repeat!important;
+  transform:scaleX(-1)!important;
+  width:146px!important;
+  height:146px!important;
+}
+
+/* Top plaques sit where they do in the reference: left and right, with open space between. */
+.plan-baroque-actions{
+  position:relative!important;
+  z-index:6!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  width:100%!important;
+  margin:3px 0 2px!important;
+  padding:0 8px!important;
+  gap:38px!important;
+  box-sizing:border-box!important;
+}
+.plan-baroque-action{
+  flex:0 1 174px!important;
+  width:min(38%,174px)!important;
+  max-width:174px!important;
+  aspect-ratio:3/1!important;
+  transform:translateZ(0);
+}
+.plan-baroque-action:active{
+  transform:translateY(1px) scale(.985)!important;
+}
+
+/* Calendar card becomes the inner antique panel, not a modern card. */
+.plan-baroque-calendar-shell{
+  position:relative!important;
+  margin:0!important;
+  padding:0 13px 14px!important;
+  border:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  overflow:visible!important;
+}
+.plan-baroque-inner-frame{
+  inset:2px 1px 1px!important;
+  border-color:rgba(175,112,32,.34)!important;
+  border-radius:3px!important;
+}
+.plan-baroque-inner-frame::before,
+.plan-baroque-inner-frame::after{display:none!important}
+.plan-baroque-calendar-shell .plan-vintage-crown{
+  top:-23px!important;
+  width:60px!important;
+  height:60px!important;
+  opacity:.96!important;
+}
+
+/* Month title: compact central cartouche, arrows outside its shoulders. */
+.plan-baroque-month-stage{
+  display:grid!important;
+  grid-template-columns:62px minmax(0,1fr) 62px!important;
+  align-items:center!important;
+  gap:8px!important;
+  min-height:132px!important;
+  margin:0 4px 1px!important;
+  padding:10px 0 5px!important;
+  border:0!important;
+  overflow:visible!important;
+}
+.plan-baroque-month-title{
+  width:100%!important;
+  max-width:360px!important;
+  min-height:118px!important;
+  justify-self:center!important;
+  padding:24px 64px 13px!important;
+  background-size:100% 100%!important;
+}
+.plan-baroque-month-title strong{
+  font-size:39px!important;
+  line-height:.96!important;
+  letter-spacing:.015em!important;
+}
+.plan-baroque-month-title .plan-vintage-year{
+  margin-top:7px!important;
+  font-size:14px!important;
+  line-height:1!important;
+  letter-spacing:.42em!important;
+  text-indent:.42em;
+}
+.plan-baroque-month-title small{
+  display:none!important;
+}
+.plan-baroque-arrow{
+  position:relative!important;
+  z-index:5!important;
+  width:56px!important;
+  height:56px!important;
+  justify-self:center!important;
+  font-family:Georgia,serif!important;
+  font-size:31px!important;
+  line-height:1!important;
+  padding:0 0 4px!important;
+  color:#e5bb6d!important;
+}
+.plan-baroque-arrow.is-prev{grid-column:1}
+.plan-baroque-month-title{grid-column:2}
+.plan-baroque-arrow.is-next{grid-column:3}
+
+/* Tight gold calendar lattice. */
+.plan-baroque-grid-frame{
+  margin:0!important;
+  padding:0!important;
+  border:1px solid rgba(154,96,29,.92)!important;
+  border-radius:4px!important;
+  background:rgba(7,4,2,.46)!important;
+  box-shadow:inset 0 0 0 1px #050302,inset 0 0 0 2px rgba(218,148,47,.11),0 7px 18px rgba(0,0,0,.24)!important;
+  overflow:visible!important;
+}
+.plan-baroque-grid-frame::before,
+.plan-baroque-grid-frame::after{
+  width:42px!important;
+  height:42px!important;
+  opacity:.74!important;
+}
+.plan-baroque-grid-frame::before{left:-10px!important;top:-10px!important}
+.plan-baroque-grid-frame::after{right:-10px!important;bottom:-10px!important}
+.plan-baroque-calendar-shell .calendar-weekdays,
+.plan-baroque-calendar-shell .plan-calendar-grid{
+  gap:0!important;
+}
+.plan-baroque-calendar-shell .calendar-weekdays{
+  margin:0!important;
+  border-bottom:1px solid rgba(146,91,28,.78)!important;
+}
+.plan-baroque-calendar-shell .calendar-weekdays>div{
+  min-height:38px!important;
+  padding:9px 0 7px!important;
+  border-right:1px solid rgba(122,75,24,.62)!important;
+  background:linear-gradient(180deg,rgba(35,22,10,.78),rgba(15,9,5,.9))!important;
+  font-size:14px!important;
+  text-transform:none!important;
+  letter-spacing:.015em!important;
+}
+.plan-baroque-calendar-shell .calendar-weekdays>div:last-child{border-right:0!important}
+.plan-baroque-calendar-shell .plan-calendar-day{
+  min-height:61px!important;
+  padding:7px 5px 5px!important;
+  border:0!important;
+  border-right:1px solid rgba(132,81,26,.54)!important;
+  border-bottom:1px solid rgba(132,81,26,.54)!important;
+  border-radius:0!important;
+  display:flex!important;
+  align-items:flex-start!important;
+  justify-content:center!important;
+  text-align:center!important;
+  overflow:visible!important;
+}
+.plan-baroque-calendar-shell .plan-calendar-day:nth-child(7n){border-right:0!important}
+.plan-baroque-calendar-shell .calendar-day-number{
+  position:relative!important;
+  z-index:5!important;
+  width:100%!important;
+  margin:0!important;
+  font-size:21px!important;
+  line-height:29px!important;
+  font-weight:600!important;
+  text-align:center!important;
+}
+.plan-baroque-calendar-shell .plan-calendar-day.is-today{
+  box-shadow:inset 0 0 0 1px rgba(202,143,53,.24)!important;
+}
+
+/* Selected day: simple double gold ring like the reference, not a full ornate medallion. */
+.plan-baroque-calendar-shell .plan-calendar-day.is-selected::before{
+  content:""!important;
+  position:absolute!important;
+  z-index:3!important;
+  left:50%!important;
+  top:3px!important;
+  width:39px!important;
+  height:39px!important;
+  transform:translateX(-50%)!important;
+  border-radius:50%!important;
+  border:1px solid #dca951!important;
+  background:radial-gradient(circle at 40% 30%,rgba(255,220,146,.12),transparent 30%),radial-gradient(circle,#1a1008 0 59%,#080503 60% 100%)!important;
+  box-shadow:inset 0 0 0 2px #090502,inset 0 0 0 3px rgba(235,185,86,.48),0 0 0 1px rgba(103,61,17,.8),0 0 11px rgba(218,151,52,.34)!important;
+  filter:none!important;
+  pointer-events:none!important;
+}
+.plan-baroque-calendar-shell .plan-calendar-day.is-selected .calendar-day-number{
+  color:#ffe4a3!important;
+  text-shadow:0 1px 0 #1b0e04,0 0 7px rgba(238,178,74,.25)!important;
+}
+
+/* Generated event medallions now appear inside the calendar, legend and daily list. */
+.plan-vintage-event-svg svg,
+.plan-vintage-legend-svg svg{display:none!important}
+.plan-day-type-icon.plan-vintage-event-svg{
+  display:inline-block!important;
+  width:22px!important;
+  height:22px!important;
+  flex:0 0 22px!important;
+  background-position:center!important;
+  background-size:contain!important;
+  background-repeat:no-repeat!important;
+  filter:drop-shadow(0 2px 3px rgba(0,0,0,.45))!important;
+}
+.plan-day-type-icon.is-birthday{background-image:var(--plan-art-event-birthday)!important}
+.plan-day-type-icon.is-meeting{background-image:var(--plan-art-event-meeting)!important}
+.plan-day-type-icon.is-generic-event{background-image:var(--plan-art-event-generic)!important}
+.plan-day-icons{
+  left:4px!important;
+  right:4px!important;
+  bottom:3px!important;
+  justify-content:center!important;
+  gap:0!important;
+  max-width:none!important;
+  overflow:visible!important;
+}
+.plan-baroque-calendar-shell .calendar-entry-count{display:none!important}
+
+.plan-vintage-legend-svg{
+  display:inline-block!important;
+  width:25px!important;
+  height:25px!important;
+  background-position:center!important;
+  background-size:contain!important;
+  background-repeat:no-repeat!important;
+}
+.plan-baroque-legend span:nth-child(2) .plan-vintage-legend-svg{background-image:var(--plan-art-event-birthday)!important}
+.plan-baroque-legend span:nth-child(3) .plan-vintage-legend-svg{background-image:var(--plan-art-event-meeting)!important}
+.plan-baroque-legend{
+  display:flex!important;
+  justify-content:center!important;
+  align-items:center!important;
+  gap:20px!important;
+  margin:11px 3px 0!important;
+  padding:18px 5px 6px!important;
+  background-size:78% auto!important;
+}
+.plan-baroque-legend>span:first-child{display:none!important}
+.plan-baroque-legend span{
+  gap:6px!important;
+  font-size:12px!important;
+}
+
+/* Daily events are flatter and more ceremonial. */
+.plan-baroque-events{
+  margin:3px 13px 0!important;
+  padding:35px 14px 14px!important;
+  border:1px solid rgba(138,84,26,.74)!important;
+  background:linear-gradient(180deg,rgba(18,11,6,.94),rgba(7,4,2,.97))!important;
+}
+.plan-baroque-event-crown{
+  top:-17px!important;
+  width:78%!important;
+  height:58px!important;
+}
+.plan-baroque-events .plan-day-list-head{
+  margin:0 0 10px!important;
+  padding:0 4px 7px!important;
+  text-align:center!important;
+  justify-content:center!important;
+}
+.plan-baroque-events .plan-day-list-head>div{width:100%!important}
+.plan-baroque-events .plan-day-list-head span{display:none!important}
+.plan-baroque-events .plan-day-list-head strong{
+  font-size:24px!important;
+  line-height:1.05!important;
+}
+.plan-baroque-events .plan-day-list-head>b{display:none!important}
+.plan-baroque-events .plan-day-events{gap:6px!important}
+.plan-baroque-events .plan-day-event{
+  grid-template-columns:46px minmax(0,1fr) auto!important;
+  gap:9px!important;
+  padding:8px 10px!important;
+  border-radius:3px!important;
+  background:linear-gradient(90deg,rgba(34,20,8,.72),rgba(10,6,3,.82))!important;
+}
+.plan-baroque-events .plan-event-icon.plan-vintage-event-svg{
+  display:block!important;
+  width:42px!important;
+  height:42px!important;
+  min-width:42px!important;
+  background-position:center!important;
+  background-size:contain!important;
+  background-repeat:no-repeat!important;
+  filter:drop-shadow(0 3px 5px rgba(0,0,0,.45));
+}
+.plan-baroque-events .plan-event-icon.is-birthday{background-image:var(--plan-art-event-birthday)!important}
+.plan-baroque-events .plan-event-icon.is-meeting{background-image:var(--plan-art-event-meeting)!important}
+.plan-baroque-events .plan-event-icon.is-generic-event{background-image:var(--plan-art-event-generic)!important}
+.plan-baroque-events .plan-event-copy strong{font-size:18px!important;line-height:1.05!important}
+.plan-baroque-events .plan-event-copy small{font-size:10px!important;color:#a88a5b!important}
+.plan-baroque-events .plan-event-copy p{font-size:11px!important;margin-top:2px!important}
+
+.plan-baroque-motto{
+  margin:2px 14px 0!important;
+  padding-top:16px!important;
+  background-size:72% auto!important;
+}
+.plan-baroque-motto p{
+  font-size:9px!important;
+  line-height:1.4!important;
+  letter-spacing:.22em!important;
+  text-transform:uppercase!important;
+}
+
+@media(max-width:760px){
+  .plan-baroque-page.is-baroque-calendar{
+    width:100%!important;
+    max-width:520px!important;
+    padding:34px 6px 18px!important;
+  }
+  .plan-baroque-top-ornament{top:-1px;width:82%;height:42px}
+  .plan-baroque-corner{width:66px!important;height:66px!important}
+  .plan-baroque-corner.is-bl,.plan-baroque-corner.is-br{width:82px!important;height:82px!important}
+  .plan-baroque-actions{padding:0 4px!important;gap:14px!important;margin:1px 0 0!important}
+  .plan-baroque-action{flex-basis:145px!important;width:42%!important;max-width:145px!important}
+  .plan-baroque-calendar-shell{padding:0 4px 9px!important}
+  .plan-baroque-calendar-shell .plan-vintage-crown{top:-16px!important;width:43px!important;height:43px!important}
+  .plan-baroque-month-stage{
+    grid-template-columns:42px minmax(0,1fr) 42px!important;
+    gap:3px!important;
+    min-height:103px!important;
+    margin:0!important;
+    padding:4px 0 3px!important;
+  }
+  .plan-baroque-month-title{
+    max-width:290px!important;
+    min-height:92px!important;
+    padding:16px 37px 9px!important;
+  }
+  .plan-baroque-month-title strong{font-size:29px!important}
+  .plan-baroque-month-title .plan-vintage-year{margin-top:4px!important;font-size:10px!important;letter-spacing:.36em!important;text-indent:.36em}
+  .plan-baroque-arrow{width:39px!important;height:39px!important;font-size:25px!important}
+  .plan-baroque-grid-frame::before,.plan-baroque-grid-frame::after{width:31px!important;height:31px!important}
+  .plan-baroque-grid-frame::before{left:-6px!important;top:-6px!important}.plan-baroque-grid-frame::after{right:-6px!important;bottom:-6px!important}
+  .plan-baroque-calendar-shell .calendar-weekdays>div{min-height:29px!important;padding:6px 0 5px!important;font-size:10px!important}
+  .plan-baroque-calendar-shell .plan-calendar-day{min-height:48px!important;padding:4px 2px 2px!important}
+  .plan-baroque-calendar-shell .calendar-day-number{font-size:16px!important;line-height:22px!important}
+  .plan-baroque-calendar-shell .plan-calendar-day.is-selected::before{top:1px!important;width:31px!important;height:31px!important;box-shadow:inset 0 0 0 1px #090502,inset 0 0 0 2px rgba(235,185,86,.5),0 0 0 1px rgba(103,61,17,.8),0 0 8px rgba(218,151,52,.31)!important}
+  .plan-day-type-icon.plan-vintage-event-svg{width:17px!important;height:17px!important;flex-basis:17px!important}
+  .plan-day-icons{bottom:1px!important}
+  .plan-baroque-legend{gap:12px!important;margin-top:8px!important;padding-top:13px!important;background-size:92% auto!important}
+  .plan-vintage-legend-svg{width:21px!important;height:21px!important}
+  .plan-baroque-legend span{font-size:9px!important}
+  .plan-baroque-events{margin:2px 3px 0!important;padding:28px 7px 9px!important}
+  .plan-baroque-event-crown{top:-11px!important;width:91%!important;height:44px!important}
+  .plan-baroque-events .plan-day-list-head strong{font-size:18px!important}
+  .plan-baroque-events .plan-day-event{grid-template-columns:38px minmax(0,1fr)!important;padding:7px 7px!important}
+  .plan-baroque-events .plan-day-event .plan-edit-event{grid-column:2!important;justify-self:start!important}
+  .plan-baroque-events .plan-event-icon.plan-vintage-event-svg{width:35px!important;height:35px!important;min-width:35px!important}
+  .plan-baroque-events .plan-event-copy strong{font-size:15px!important}
+  .plan-baroque-motto{margin:1px 4px 0!important;background-size:90% auto!important}
+}
+
+@media(max-width:390px){
+  .plan-baroque-page.is-baroque-calendar{padding-left:3px!important;padding-right:3px!important}
+  .plan-baroque-actions{gap:6px!important;padding:0 1px!important}
+  .plan-baroque-action{width:46%!important;max-width:136px!important}
+  .plan-baroque-month-stage{grid-template-columns:37px minmax(0,1fr) 37px!important}
+  .plan-baroque-month-title{min-height:86px!important;padding:15px 27px 8px!important}
+  .plan-baroque-month-title strong{font-size:26px!important}
+  .plan-baroque-arrow{width:35px!important;height:35px!important}
+  .plan-baroque-calendar-shell .plan-calendar-day{min-height:44px!important}
+  .plan-baroque-calendar-shell .calendar-day-number{font-size:15px!important;line-height:20px!important}
+  .plan-baroque-calendar-shell .plan-calendar-day.is-selected::before{width:29px!important;height:29px!important}
+  .plan-day-type-icon.plan-vintage-event-svg{width:15px!important;height:15px!important;flex-basis:15px!important}
+}
