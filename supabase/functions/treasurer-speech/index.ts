@@ -13,13 +13,16 @@ const CORS={
   'Access-Control-Allow-Methods':'POST, OPTIONS'
 };
 
-const VOICES:Record<string,{label:string,group:'male'|'female',style:string}>={
-  cedar:{label:'Кедр',group:'male',style:'спокойным взрослым мужским голосом, уверенно и доброжелательно'},
+const VOICES:Record<string,{label:string,group:'male',style:string}>={
+  cedar:{label:'Кедр',group:'male',style:'спокойным зрелым мужским голосом, уверенно и доброжелательно'},
   onyx:{label:'Оникс',group:'male',style:'глубоким взрослым мужским голосом, сдержанно и уверенно'},
   echo:{label:'Эхо',group:'male',style:'ровным взрослым мужским голосом, нейтрально и спокойно'},
-  marin:{label:'Марин',group:'female',style:'естественным взрослым женским голосом, мягко и уверенно'},
-  nova:{label:'Нова',group:'female',style:'светлым взрослым женским голосом, живо, но без спешки'},
-  shimmer:{label:'Шиммер',group:'female',style:'мягким взрослым женским голосом, спокойно и доброжелательно'}
+  ash:{label:'Эш',group:'male',style:'низким взрослым мужским голосом, энергично, но без спешки'},
+  ballad:{label:'Баллад',group:'male',style:'мягким выразительным мужским голосом, тепло и размеренно'},
+  fable:{label:'Фэйбл',group:'male',style:'тёплым мужским голосом рассказчика, естественно и спокойно'},
+  sage:{label:'Сейдж',group:'male',style:'сдержанным интеллектуальным мужским голосом, чётко и спокойно'},
+  verse:{label:'Верс',group:'male',style:'уверенным живым мужским голосом, естественно и выразительно'},
+  alloy:{label:'Аллой',group:'male',style:'чётким деловым мужским голосом, собранно и уверенно'}
 };
 
 const PREVIEW_TEXT='Здравствуйте. Я Казначей вашей семьи. Готов помочь разобраться в доходах, расходах и накоплениях.';
