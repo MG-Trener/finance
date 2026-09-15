@@ -2,7 +2,6 @@
 (function(){
   if(typeof planPage!=='function')return;
   const basePlanPageBaroque=planPage;
-  const baseBindPlanBaroque=typeof bindPlan==='function'?bindPlan:null;
 
   const PLAN_ART_COMMON=[
     'assets/plan-runtime/corner-tr.webp',
@@ -18,15 +17,28 @@
     'assets/plan-runtime/side-ornament.webp',
     'assets/plan-runtime/plaque-thin.webp'
   ];
-  const PLAN_ART_EXPENSES=['assets/plan-runtime/expenses-plaque.webp','assets/plan-runtime/expenses-medallion.webp','assets/plan-runtime/plaque-small.webp'];
-  const PLAN_ART_PIGGY=['assets/plan-runtime/piggy-plaque.webp','assets/plan-runtime/piggy-medallion.webp','assets/plan-runtime/plaque-small.webp'];
+  const PLAN_ART_EXPENSES=[
+    'assets/plan-runtime/expenses-plaque.webp',
+    'assets/plan-runtime/expenses-medallion.webp',
+    'assets/plan-runtime/plaque-small.webp'
+  ];
+  const PLAN_ART_PIGGY=[
+    'assets/plan-runtime/piggy-plaque.webp',
+    'assets/plan-runtime/piggy-medallion.webp',
+    'assets/plan-runtime/plaque-small.webp'
+  ];
   const planArtPromises=new Map();
 
   function preloadPlanArt(src){
     if(planArtPromises.has(src))return planArtPromises.get(src);
     const promise=new Promise(resolve=>{
       const image=new Image();
-      const done=()=>resolve(src);
+      let settled=false;
+      const done=()=>{
+        if(settled)return;
+        settled=true;
+        resolve(src);
+      };
       image.onload=done;
       image.onerror=done;
       image.decoding='async';
@@ -37,29 +49,10 @@
     return promise;
   }
 
-  function criticalPlanArt(){
-    const extra=planSection==='calendar'?PLAN_ART_CALENDAR:planSection==='piggy'?PLAN_ART_PIGGY:PLAN_ART_EXPENSES;
-    return [...new Set([...PLAN_ART_COMMON,...extra])];
-  }
-
-  function revealPlanArtwork(){
-    const root=document.querySelector('.plan-baroque-page.plan-artwork-loading');
-    if(!root)return;
-    let finished=false;
-    const reveal=()=>{
-      if(finished||!root.isConnected)return;
-      finished=true;
-      root.classList.remove('plan-artwork-loading');
-      root.classList.add('plan-artwork-ready');
-    };
-    Promise.allSettled(criticalPlanArt().map(preloadPlanArt)).then(()=>requestAnimationFrame(reveal));
-    setTimeout(reveal,650);
-  }
-
-  // Warm the calendar artwork as soon as this module loads. This makes the first
-  // transition into Plan paint directly in the final raster-led style instead of
-  // briefly showing the older CSS/SVG treatment while WebP files decode.
-  [...PLAN_ART_COMMON,...PLAN_ART_CALENDAR].forEach(preloadPlanArt);
+  // Warm every runtime ornament once when the application boots. Rendering never
+  // waits for these promises and never toggles visibility, so Plan cannot flash
+  // between a hidden/base treatment and the final raster-led treatment.
+  [...new Set([...PLAN_ART_COMMON,...PLAN_ART_CALENDAR,...PLAN_ART_EXPENSES,...PLAN_ART_PIGGY])].forEach(preloadPlanArt);
 
   function addOuterFrame(root){
     if(root.querySelector('.plan-baroque-corner'))return;
@@ -74,7 +67,7 @@
   }
 
   function addCalendarDecor(root){
-    root.classList.add('plan-baroque-page','is-baroque-calendar','plan-raster-artwork','plan-artwork-loading');
+    root.classList.add('plan-baroque-page','is-baroque-calendar','plan-raster-artwork','plan-artwork-ready');
     addOuterFrame(root);
     if(!root.querySelector('.plan-baroque-side')){
       root.insertAdjacentHTML('afterbegin','<span class="plan-baroque-side is-left" aria-hidden="true"></span><span class="plan-baroque-side is-right" aria-hidden="true"></span>');
@@ -109,12 +102,15 @@
       events.classList.add('plan-baroque-events');
       if(!events.querySelector('.plan-baroque-event-crown'))events.insertAdjacentHTML('afterbegin','<span class="plan-baroque-event-crown" aria-hidden="true"></span>');
     }
-    root.querySelector('.plan-vintage-motto')?.classList.add('plan-baroque-motto');
+
+    // The lower slogan was decorative only and competed with the frame artwork.
+    // Remove it from the DOM instead of hiding it so the bottom frame can sit higher.
+    root.querySelector('.plan-vintage-motto')?.remove();
   }
 
   function addSubsectionDecor(root){
     const isExpenses=planSection==='recurring';
-    root.classList.add('plan-baroque-page','is-baroque-subsection','plan-raster-artwork','plan-artwork-loading',isExpenses?'is-expenses-section':'is-piggy-section');
+    root.classList.add('plan-baroque-page','is-baroque-subsection','plan-raster-artwork','plan-artwork-ready',isExpenses?'is-expenses-section':'is-piggy-section');
     addOuterFrame(root);
     root.querySelector('.plan-vintage-actions')?.classList.add('plan-baroque-actions');
     root.querySelectorAll('.plan-vintage-action').forEach(button=>button.classList.add('plan-baroque-action'));
@@ -132,13 +128,6 @@
     if(planSection==='calendar')addCalendarDecor(root);else addSubsectionDecor(root);
     return template.innerHTML;
   };
-
-  if(baseBindPlanBaroque){
-    bindPlan=function(){
-      baseBindPlanBaroque();
-      revealPlanArtwork();
-    };
-  }
 
   if(typeof recurringPage==='function')recurringPage=function(){return planPage()};
 })();
