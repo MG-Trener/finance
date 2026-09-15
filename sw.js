@@ -1,4 +1,4 @@
-const CACHE='family-finance-shell-v20';
+const CACHE='family-finance-shell-v21';
 const PRECACHE=[
   './',
   './index.html',
@@ -70,6 +70,7 @@ self.addEventListener('fetch',event=>{
     return;
   }
 
+  // Large Plan artwork is intentionally lazy-cached on first use instead of precached.
   event.respondWith(
     caches.match(req).then(cached=>{
       const network=fetch(req).then(res=>{
