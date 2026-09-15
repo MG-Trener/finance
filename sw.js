@@ -1,4 +1,4 @@
-const CACHE='family-finance-shell-v17';
+const CACHE='family-finance-shell-v18';
 const PRECACHE=[
   './',
   './index.html',
@@ -19,7 +19,8 @@ const PRECACHE=[
   './assets/plan-baroque-side.svg',
   './assets/plan-baroque-button-frame.svg',
   './assets/plan-baroque-event-plaque.svg',
-  './assets/plan-baroque-medallion.svg'
+  './assets/plan-baroque-medallion.svg',
+  './assets/plan-baroque-texture.svg'
 ];
 
 self.addEventListener('install',event=>{
