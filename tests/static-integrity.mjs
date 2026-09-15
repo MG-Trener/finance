@@ -54,7 +54,7 @@ assert(exists('assets/piggy-chest.svg'),'piggy bank treasure chest artwork is mi
 assert(html.includes('src/js/features/piggy-bank.js'),'piggy bank UI module is not loaded');
 const piggyJs=fs.readFileSync(path.join(root,'src/js/features/piggy-bank.js'),'utf8');
 for(const code of ['KZT','RUB','USD','CNY'])assert(piggyJs.includes(code),`piggy bank currency is missing: ${code}`);
-assert(piggyJs.includes('Копилка'),'Plan section must be labelled Копилка');
+assert(piggyJs.includes('Семейная копилка'),'Piggy Bank heading must remain Семейная копилка');
 assert(piggyJs.includes("uiSound(edit?'success':'income')"),'piggy bank add action must use the coin sound');
 if(exists(piggyMigration)){
   const sql=fs.readFileSync(path.join(root,piggyMigration),'utf8');
