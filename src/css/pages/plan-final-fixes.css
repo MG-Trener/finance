@@ -1,0 +1,161 @@
+/* Final Plan corrections based on desktop/mobile screenshots.
+   Loaded last among Plan styles so these rules are authoritative. */
+
+/* ---------- Outer top corners ----------
+   The source top-corner artwork has its vertical leg on the left side.
+   Therefore the left corner must use it as-is, and the right corner must be mirrored. */
+.plan-baroque-page .plan-baroque-corner.is-tl{
+  background:var(--plan-art-corner-tr) center/contain no-repeat!important;
+  transform:none!important;
+  left:-4px!important;
+  top:-4px!important;
+}
+.plan-baroque-page .plan-baroque-corner.is-tr{
+  background:var(--plan-art-corner-tr) center/contain no-repeat!important;
+  transform:scaleX(-1)!important;
+  right:-4px!important;
+  top:-4px!important;
+}
+.plan-baroque-page .plan-baroque-corner.is-tl,
+.plan-baroque-page .plan-baroque-corner.is-tr{
+  width:102px!important;
+  height:102px!important;
+  opacity:.94!important;
+  pointer-events:none!important;
+}
+
+/* ---------- Calendar date state ----------
+   Selected day is now the whole cell, not a circular medallion. */
+.plan-baroque-calendar-shell .plan-calendar-day{
+  -webkit-tap-highlight-color:transparent!important;
+  outline:0!important;
+}
+.plan-baroque-calendar-shell .plan-calendar-day:focus,
+.plan-baroque-calendar-shell .plan-calendar-day:focus-visible,
+.plan-baroque-calendar-shell .plan-calendar-day:active{
+  outline:0!important;
+}
+
+/* Remove all legacy ring/medallion pseudo-elements from selected/today cells. */
+.plan-baroque-calendar-shell .plan-calendar-day.is-selected::before,
+.plan-baroque-calendar-shell .plan-calendar-day.is-selected::after,
+.plan-baroque-calendar-shell .plan-calendar-day.is-today::before,
+.plan-baroque-calendar-shell .plan-calendar-day.is-today::after{
+  content:none!important;
+  display:none!important;
+  background:none!important;
+  border:0!important;
+  box-shadow:none!important;
+  filter:none!important;
+}
+
+/* Today is deliberately neutral; selection is the only strong date state. */
+.plan-baroque-calendar-shell .plan-calendar-day.is-today{
+  outline:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+}
+.plan-baroque-calendar-shell .plan-calendar-day.is-today:not(.is-selected) .calendar-day-number{
+  color:#e7cf9b!important;
+  text-shadow:none!important;
+}
+
+/* Highlight the entire selected date cell. */
+.plan-baroque-calendar-shell .plan-calendar-day.is-selected,
+.plan-baroque-calendar-shell .plan-calendar-day.is-selected.is-today,
+.plan-baroque-calendar-shell .plan-calendar-day.is-selected:focus,
+.plan-baroque-calendar-shell .plan-calendar-day.is-selected:focus-visible{
+  background:
+    radial-gradient(circle at 50% 35%,rgba(246,197,105,.17),transparent 52%),
+    linear-gradient(180deg,rgba(74,43,15,.62),rgba(24,13,6,.82))!important;
+  outline:0!important;
+  box-shadow:
+    inset 0 0 0 1px rgba(224,164,65,.92),
+    inset 0 0 0 2px rgba(77,43,13,.72),
+    inset 0 0 18px rgba(221,154,53,.17),
+    0 0 10px rgba(199,128,33,.12)!important;
+}
+.plan-baroque-calendar-shell .plan-calendar-day.is-selected .calendar-day-number{
+  color:#ffe0a0!important;
+  text-shadow:0 1px 0 #160b03,0 0 7px rgba(231,169,67,.23)!important;
+}
+
+/* Keep the lattice borders visible around the selected cell. */
+.plan-baroque-calendar-shell .plan-calendar-day.is-selected{
+  border-right:1px solid rgba(163,103,35,.76)!important;
+  border-bottom:1px solid rgba(163,103,35,.76)!important;
+}
+.plan-baroque-calendar-shell .plan-calendar-day.is-selected:nth-child(7n){
+  border-right:0!important;
+}
+
+/* ---------- Lower section ----------
+   Reserve real space between the selected-day text and the decorative bottom frame. */
+.plan-baroque-page.is-baroque-calendar{
+  padding-bottom:72px!important;
+}
+.plan-baroque-events{
+  margin-bottom:12px!important;
+}
+.plan-baroque-motto{
+  position:relative!important;
+  z-index:3!important;
+  margin:12px 24px 38px!important;
+  padding:12px 18px 8px!important;
+  min-height:46px!important;
+  background:var(--plan-art-divider-thin) top center/72% auto no-repeat!important;
+}
+.plan-baroque-motto p{
+  position:relative!important;
+  z-index:2!important;
+  margin:12px 0 0!important;
+  padding:0 18px!important;
+  line-height:1.55!important;
+}
+.plan-baroque-bottom-fleur{
+  bottom:-13px!important;
+  z-index:6!important;
+}
+.plan-baroque-corner.is-bl,
+.plan-baroque-corner.is-br{
+  bottom:-4px!important;
+}
+
+@media(max-width:760px){
+  .plan-baroque-page .plan-baroque-corner.is-tl,
+  .plan-baroque-page .plan-baroque-corner.is-tr{
+    width:64px!important;
+    height:64px!important;
+    top:-1px!important;
+  }
+  .plan-baroque-page .plan-baroque-corner.is-tl{left:-1px!important}
+  .plan-baroque-page .plan-baroque-corner.is-tr{right:-1px!important}
+
+  .plan-baroque-page.is-baroque-calendar{
+    padding-bottom:62px!important;
+  }
+  .plan-baroque-calendar-shell .plan-calendar-day.is-selected{
+    background:
+      radial-gradient(circle at 50% 34%,rgba(246,197,105,.15),transparent 54%),
+      linear-gradient(180deg,rgba(70,40,14,.58),rgba(22,12,6,.84))!important;
+    box-shadow:
+      inset 0 0 0 1px rgba(224,164,65,.88),
+      inset 0 0 0 2px rgba(77,43,13,.68),
+      inset 0 0 14px rgba(221,154,53,.14)!important;
+  }
+  .plan-baroque-events{margin-bottom:9px!important}
+  .plan-baroque-motto{
+    margin:9px 16px 34px!important;
+    padding:10px 12px 8px!important;
+    min-height:42px!important;
+    background-size:84% auto!important;
+  }
+  .plan-baroque-motto p{
+    margin-top:10px!important;
+    padding:0 16px!important;
+    line-height:1.5!important;
+  }
+  .plan-baroque-bottom-fleur{bottom:-11px!important}
+  .plan-baroque-corner.is-bl,
+  .plan-baroque-corner.is-br{bottom:-2px!important}
+}
