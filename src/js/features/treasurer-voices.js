@@ -3,12 +3,15 @@
   const MODE_KEY='finance.treasurerResponseMode';
   const VOICE_KEY='finance.treasurerVoice';
   const VOICES=[
-    {id:'cedar',name:'Кедр',group:'male',note:'спокойный и уверенный'},
+    {id:'cedar',name:'Кедр',group:'male',note:'спокойный зрелый голос'},
     {id:'onyx',name:'Оникс',group:'male',note:'глубокий и серьёзный'},
     {id:'echo',name:'Эхо',group:'male',note:'ровный и нейтральный'},
-    {id:'marin',name:'Марин',group:'female',note:'естественный и мягкий'},
-    {id:'nova',name:'Нова',group:'female',note:'светлый и живой'},
-    {id:'shimmer',name:'Шиммер',group:'female',note:'мягкий и спокойный'}
+    {id:'ash',name:'Эш',group:'male',note:'низкий и энергичный'},
+    {id:'ballad',name:'Баллад',group:'male',note:'мягкий и выразительный'},
+    {id:'fable',name:'Фэйбл',group:'male',note:'тёплый голос рассказчика'},
+    {id:'sage',name:'Сейдж',group:'male',note:'сдержанный и интеллектуальный'},
+    {id:'verse',name:'Верс',group:'male',note:'уверенный и живой'},
+    {id:'alloy',name:'Аллой',group:'male',note:'чёткий деловой голос'}
   ];
   const nativeFetch=window.fetch.bind(window);
   let previewAudio=null;
@@ -44,17 +47,15 @@
   }
 
   function cardMarkup(){
-    const male=VOICES.filter(item=>item.group==='male').map(optionMarkup).join('');
-    const female=VOICES.filter(item=>item.group==='female').map(optionMarkup).join('');
+    const male=VOICES.map(optionMarkup).join('');
     return `<div class="card settings-card treasurer-voice-settings" data-treasurer-voice-settings ${mode()==='voice'?'':'hidden'}>
       <div class="settings-card-icon">🔊</div>
       <div class="settings-card-body">
         <h3>Голос Казначея</h3>
-        <p>Выбран: <b data-treasurer-selected-voice>${meta().name}</b>. Нажмите ▶, чтобы прослушать пример.</p>
+        <p>Выбран: <b data-treasurer-selected-voice>${meta().name}</b>. Только мужские варианты. Нажмите ▶, чтобы прослушать пример.</p>
       </div>
-      <div class="treasurer-voice-grid">
+      <div class="treasurer-voice-grid treasurer-voice-grid-male-only">
         <section><h4>Мужские варианты</h4>${male}</section>
-        <section><h4>Женские варианты</h4>${female}</section>
       </div>
       <div class="treasurer-voice-disclosure">Голос синтезируется ИИ и не является записью реального человека.</div>
       <div class="treasurer-voice-preview-status" data-treasurer-preview-status></div>
