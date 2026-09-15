@@ -1,0 +1,57 @@
+/* Final Plan calendar polish loaded after all legacy Plan layers. */
+
+/* Move the legend slightly lower so captions never sit on top of the ornament. */
+.plan-baroque-legend{
+  margin-top:16px!important;
+}
+
+.plan-baroque-calendar-shell .plan-calendar-day{
+  position:relative!important;
+}
+
+/* Independent frame for today: it stays visible even when the date is selected. */
+.plan-today-frame{
+  position:absolute;
+  inset:2px;
+  z-index:7;
+  pointer-events:none;
+  border:1px solid rgba(245,194,91,.95);
+  border-radius:3px;
+  box-shadow:
+    inset 0 0 0 1px rgba(91,52,15,.7),
+    0 0 5px rgba(235,170,56,.45),
+    0 0 12px rgba(218,143,31,.18);
+  animation:planTodayGoldPulse 1.55s ease-in-out infinite;
+}
+
+@keyframes planTodayGoldPulse{
+  0%,100%{
+    opacity:.5;
+    border-color:rgba(218,156,55,.72);
+    box-shadow:inset 0 0 0 1px rgba(91,52,15,.62),0 0 4px rgba(225,154,45,.28),0 0 8px rgba(218,143,31,.1);
+  }
+  50%{
+    opacity:1;
+    border-color:rgba(255,220,139,1);
+    box-shadow:inset 0 0 0 1px rgba(120,72,20,.78),0 0 8px rgba(255,201,91,.82),0 0 18px rgba(231,158,42,.36);
+  }
+}
+
+.plan-baroque-legend .plan-legend-event-icon{
+  color:#e0b15c!important;
+  font-size:1.05em!important;
+  text-shadow:0 0 6px rgba(224,177,92,.25)!important;
+}
+
+@media(max-width:760px){
+  .plan-baroque-legend{
+    margin-top:14px!important;
+  }
+  .plan-today-frame{inset:1px}
+}
+
+@media(max-width:430px){
+  .plan-baroque-legend{
+    margin-top:13px!important;
+  }
+}
