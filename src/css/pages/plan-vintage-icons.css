@@ -1,0 +1,46 @@
+/* Monochrome antique-gold event icons for the vintage Plan calendar. */
+.plan-vintage-calendar .plan-vintage-event-svg,
+.plan-vintage-events .plan-vintage-event-svg,
+.plan-vintage-calendar .plan-vintage-legend-svg{
+  display:inline-grid!important;
+  place-items:center;
+  color:#d59a3e!important;
+  filter:drop-shadow(0 0 5px rgba(214,148,51,.20))!important;
+}
+.plan-vintage-calendar .plan-vintage-event-svg svg,
+.plan-vintage-events .plan-vintage-event-svg svg,
+.plan-vintage-calendar .plan-vintage-legend-svg svg{
+  width:100%;
+  height:100%;
+  fill:none;
+  stroke:currentColor;
+  stroke-width:1.9;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+.plan-vintage-calendar .plan-day-type-icon.plan-vintage-event-svg{
+  width:19px;
+  height:19px;
+  font-size:0!important;
+}
+.plan-vintage-calendar .plan-day-type-icon.is-generic-event.plan-vintage-event-svg{width:20px;height:20px}
+.plan-vintage-events .plan-event-icon.plan-vintage-event-svg{
+  width:34px;
+  height:34px;
+  min-width:34px;
+  font-size:0!important;
+  color:#dca449!important;
+}
+.plan-vintage-calendar .plan-legend-icon.plan-vintage-legend-svg{
+  width:22px!important;
+  height:22px!important;
+  font-size:0!important;
+}
+.plan-vintage-calendar .plan-calendar-legend>span{align-items:center}
+
+@media(max-width:760px){
+  .plan-vintage-calendar .plan-day-type-icon.plan-vintage-event-svg{width:14px;height:14px}
+  .plan-vintage-calendar .plan-day-type-icon.is-generic-event.plan-vintage-event-svg{width:15px;height:15px}
+  .plan-vintage-events .plan-event-icon.plan-vintage-event-svg{width:28px;height:28px;min-width:28px}
+  .plan-vintage-calendar .plan-legend-icon.plan-vintage-legend-svg{width:17px!important;height:17px!important}
+}
