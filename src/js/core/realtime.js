@@ -1,5 +1,5 @@
 // Live synchronization between family devices. Primary path: Supabase Realtime.
-// Transactions, goals, recurring payments and categories update across both family devices.
+// Transactions, recurring payments and categories update across both family devices.
 (function(){
   const FULL_REFRESH_INTERVAL=60000;
   let channel=null;
@@ -13,8 +13,6 @@
 
   const ENTITY_CHANNELS=[
     {table:'recurring_payments',stateKey:'recurring'},
-    {table:'financial_goals',stateKey:'goals'},
-    {table:'goal_contributions',stateKey:'goalContributions'},
     {table:'categories',stateKey:'categories'},
     {table:'subcategories',stateKey:'subcategories',noFamilyFilter:true}
   ];
@@ -73,8 +71,6 @@
 
   function sortEntityState(config){
     const list=state[config.stateKey];if(!Array.isArray(list))return;
-    if(config.table==='goal_contributions')list.sort((a,b)=>new Date(b.contributed_at)-new Date(a.contributed_at));
-    if(config.table==='financial_goals')list.sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
     if(config.table==='categories'||config.table==='subcategories')list.sort((a,b)=>Number(a.sort_order||0)-Number(b.sort_order||0));
     if(config.table==='recurring_payments')list.sort((a,b)=>Number(a.day_of_month||0)-Number(b.day_of_month||0));
   }
