@@ -1,0 +1,223 @@
+/* Screenshot-led tuning for Plan. Loaded last.
+   Fixes focus/today marker conflicts and proportions observed on desktop + Android. */
+
+/* Keep the portrait Plan panel truly centered on wide desktop layouts. */
+@media(min-width:761px){
+  .main>.plan-baroque-page{
+    position:relative!important;
+    left:50%!important;
+    transform:translateX(-50%)!important;
+    margin-left:0!important;
+    margin-right:0!important;
+  }
+}
+
+.plan-baroque-page.is-baroque-calendar{
+  margin-bottom:0!important;
+}
+
+/* The generated cartouche should be visible as artwork, not stretched into the dark panel. */
+.plan-baroque-month-title{
+  position:relative!important;
+  isolation:isolate;
+  background:none!important;
+}
+.plan-baroque-month-title::before{
+  content:""!important;
+  display:block!important;
+  position:absolute!important;
+  z-index:0!important;
+  inset:-7px -19px -6px!important;
+  background:var(--plan-art-plaque-wide) center/contain no-repeat!important;
+  filter:drop-shadow(0 7px 10px rgba(0,0,0,.48));
+  pointer-events:none!important;
+}
+.plan-baroque-month-title::after{display:none!important}
+.plan-baroque-month-title>*{position:relative;z-index:1}
+
+/* Reduce the empty vertical gap between the top plaques and month title. */
+.plan-baroque-calendar-shell{margin-top:-9px!important}
+.plan-baroque-calendar-shell .plan-vintage-crown{
+  top:-7px!important;
+  width:38px!important;
+  height:38px!important;
+}
+.plan-baroque-month-stage{
+  min-height:108px!important;
+  padding-top:0!important;
+  padding-bottom:2px!important;
+}
+.plan-baroque-month-title{
+  min-height:96px!important;
+  padding-top:18px!important;
+  padding-bottom:10px!important;
+}
+
+/* The screenshot showed inner corner artwork covering Пн and sticking out in the last cell. */
+.plan-baroque-grid-frame::before,
+.plan-baroque-grid-frame::after{display:none!important}
+
+/* Never show the browser/Android blue focus rectangle in the Plan calendar. */
+.plan-baroque-calendar-shell .plan-calendar-day:focus,
+.plan-baroque-calendar-shell .plan-calendar-day:focus-visible{
+  outline:none!important;
+}
+.plan-baroque-calendar-shell .plan-calendar-day.is-today{
+  outline:0!important;
+  box-shadow:inset 0 0 0 1px rgba(205,146,53,.20)!important;
+}
+.plan-baroque-calendar-shell .plan-calendar-day.is-selected,
+.plan-baroque-calendar-shell .plan-calendar-day.is-selected.is-today,
+.plan-baroque-calendar-shell .plan-calendar-day.is-selected:focus,
+.plan-baroque-calendar-shell .plan-calendar-day.is-selected:focus-visible{
+  outline:0!important;
+  box-shadow:none!important;
+}
+
+/* Slightly larger event seals: generated art has transparent padding around the emblem. */
+.plan-day-type-icon.plan-vintage-event-svg{
+  width:27px!important;
+  height:27px!important;
+  flex-basis:27px!important;
+}
+.plan-day-icons{bottom:1px!important}
+
+/* Legend becomes a framed strip like the reference instead of a large floral ornament. */
+.plan-baroque-legend{
+  min-height:54px!important;
+  margin:8px 5px 2px!important;
+  padding:8px 26px!important;
+  gap:24px!important;
+  border:0!important;
+  background:var(--plan-art-plaque-thin) center/100% 100% no-repeat!important;
+  filter:drop-shadow(0 4px 7px rgba(0,0,0,.40));
+}
+.plan-baroque-legend span{
+  position:relative;
+  z-index:1;
+  font-size:11px!important;
+  color:#c7ad7b!important;
+}
+.plan-vintage-legend-svg{
+  width:27px!important;
+  height:27px!important;
+}
+
+/* The empty-day screenshot had the decorative plaque painted over the date title. */
+.plan-baroque-events{
+  padding-top:34px!important;
+}
+.plan-baroque-event-crown{
+  top:6px!important;
+  left:50%!important;
+  width:66%!important;
+  height:18px!important;
+  transform:translateX(-50%)!important;
+  background:var(--plan-art-divider-thin) center/contain no-repeat!important;
+  filter:none!important;
+  opacity:.78!important;
+}
+.plan-baroque-events.plan-day-empty{
+  display:grid!important;
+  gap:5px!important;
+  padding:35px 18px 18px!important;
+  text-align:center!important;
+}
+.plan-baroque-events.plan-day-empty>strong{
+  display:block;
+  margin:1px 0 4px!important;
+  color:#e5c78f!important;
+  font-family:Cormorant Garamond,Georgia,serif!important;
+  font-size:19px!important;
+  line-height:1.05!important;
+  text-transform:none!important;
+  letter-spacing:.01em!important;
+}
+.plan-baroque-events.plan-day-empty>span{
+  color:#b39a70!important;
+  font-size:12px!important;
+  line-height:1.35!important;
+}
+.plan-baroque-events.plan-day-empty>small{
+  color:#8f7958!important;
+  font-size:10px!important;
+  line-height:1.35!important;
+}
+
+/* Live event list gets the same quiet divider with title clearly below it. */
+.plan-baroque-events .plan-day-list-head{
+  margin-top:1px!important;
+  padding-top:0!important;
+}
+
+@media(max-width:760px){
+  .main>.plan-baroque-page{
+    left:auto!important;
+    transform:none!important;
+  }
+  .plan-baroque-page.is-baroque-calendar{
+    margin-bottom:0!important;
+    padding-top:29px!important;
+    padding-bottom:10px!important;
+  }
+  .plan-baroque-calendar-shell{
+    margin-top:-8px!important;
+  }
+  .plan-baroque-calendar-shell .plan-vintage-crown{
+    top:-2px!important;
+    width:30px!important;
+    height:30px!important;
+  }
+  .plan-baroque-month-stage{
+    min-height:83px!important;
+    padding:0!important;
+  }
+  .plan-baroque-month-title{
+    min-height:75px!important;
+    padding:12px 29px 7px!important;
+  }
+  .plan-baroque-month-title::before{
+    inset:-5px -10px -4px!important;
+  }
+  .plan-baroque-month-title strong{
+    font-size:27px!important;
+  }
+  .plan-baroque-month-title .plan-vintage-year{
+    margin-top:3px!important;
+    font-size:9px!important;
+  }
+  .plan-baroque-calendar-shell .plan-calendar-day.is-selected::before{
+    top:2px!important;
+    width:36px!important;
+    height:36px!important;
+  }
+  .plan-day-type-icon.plan-vintage-event-svg{
+    width:25px!important;
+    height:25px!important;
+    flex-basis:25px!important;
+  }
+  .plan-baroque-legend{
+    min-height:48px!important;
+    margin:7px 3px 1px!important;
+    padding:6px 19px!important;
+    gap:14px!important;
+  }
+  .plan-baroque-legend span{font-size:9px!important;gap:4px!important}
+  .plan-vintage-legend-svg{width:23px!important;height:23px!important}
+  .plan-baroque-events{
+    margin-top:3px!important;
+    padding-top:31px!important;
+  }
+  .plan-baroque-event-crown{
+    top:6px!important;
+    width:64%!important;
+    height:15px!important;
+  }
+  .plan-baroque-events.plan-day-empty{
+    padding:32px 13px 15px!important;
+  }
+  .plan-baroque-events.plan-day-empty>strong{font-size:17px!important}
+  .plan-baroque-events.plan-day-empty>span{font-size:11px!important}
+  .plan-baroque-events.plan-day-empty>small{font-size:9px!important}
+  .plan-baroque-motto{margin-bottom:0!important}
+}
