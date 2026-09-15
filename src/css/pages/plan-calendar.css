@@ -1,0 +1,45 @@
+/* Plan v2: family month calendar and personal/work statistics refinements. */
+.plan-tabs-v2{margin-bottom:14px}
+.plan-calendar-workspace{display:grid;gap:14px}
+.plan-calendar-card{overflow:hidden}
+.plan-calendar-day{position:relative;touch-action:manipulation}
+.plan-calendar-day.is-selected{outline:2px solid rgba(221,177,92,.72);outline-offset:-2px;background:rgba(221,177,92,.10)}
+.plan-day-icons{position:absolute;left:7px;bottom:6px;display:flex;gap:2px;align-items:center;max-width:calc(100% - 28px);overflow:hidden}
+.plan-day-type-icon{font-size:13px;line-height:1;filter:saturate(.95)}
+.plan-day-type-icon.is-generic{font-size:17px;color:#d7c6a5}
+.plan-calendar-day .calendar-entry-count{right:6px;bottom:5px}
+.plan-calendar-legend{flex-wrap:wrap}
+.plan-legend-icon{display:inline-grid;place-items:center;width:18px;height:18px;font-size:14px}
+.plan-day-list-card{padding:16px}
+.plan-day-list-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:12px}
+.plan-day-list-head>div{display:grid;gap:3px}
+.plan-day-list-head span{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted,#9b8f7e)}
+.plan-day-list-head strong{font-size:17px}
+.plan-day-list-head>b{min-width:28px;height:28px;border-radius:999px;display:grid;place-items:center;background:rgba(221,177,92,.12);border:1px solid rgba(221,177,92,.28);color:#e8c982}
+.plan-day-events{display:grid;gap:8px}
+.plan-day-event{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding:11px 12px;border-radius:12px;border:1px solid rgba(221,177,92,.16);background:rgba(255,255,255,.025)}
+.plan-day-event.type-birthday{border-color:rgba(232,190,108,.34);background:linear-gradient(90deg,rgba(232,190,108,.09),rgba(255,255,255,.018))}
+.plan-day-event.type-meeting{border-color:rgba(157,183,196,.28);background:linear-gradient(90deg,rgba(157,183,196,.07),rgba(255,255,255,.018))}
+.plan-event-icon{font-size:22px;min-width:28px;text-align:center}
+.plan-event-copy{min-width:0;display:grid;gap:3px}
+.plan-event-copy strong{font-size:15px;overflow-wrap:anywhere}
+.plan-event-copy small{color:var(--muted,#9b8f7e)}
+.plan-event-copy p{margin:3px 0 0;color:#cfc6b6;font-size:13px;line-height:1.35}
+.plan-day-empty{display:grid;gap:5px;padding:16px;text-align:left}
+.plan-day-empty span,.plan-day-empty small{color:var(--muted,#9b8f7e)}
+.plan-subsection-back{margin:0 0 12px}
+.plan-event-owner{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 12px;border-radius:12px;background:rgba(221,177,92,.08);border:1px solid rgba(221,177,92,.20)}
+.plan-event-owner span{color:var(--muted,#9b8f7e);font-size:12px}
+.plan-event-owner strong{color:#e8c982}
+.plan-conflict-warning{display:grid;gap:10px;padding:14px;border:1px solid rgba(229,177,79,.34);background:rgba(229,177,79,.08);border-radius:14px}
+.plan-conflict-warning ul{margin:0;padding-left:20px;display:grid;gap:6px}
+.plan-conflict-warning p{margin:0;color:#cfc6b6;line-height:1.4}
+.plan-conflict-actions{margin-top:14px}
+.wife-average-work-item strong{white-space:nowrap}
+@media(max-width:700px){
+  .plan-day-event{grid-template-columns:auto minmax(0,1fr)}
+  .plan-day-event .plan-edit-event{grid-column:2;justify-self:start}
+  .plan-day-icons{left:5px;bottom:5px;gap:1px}
+  .plan-day-type-icon{font-size:11px}
+  .plan-calendar-card .calendar-month-toolbar small{font-size:10px}
+}
