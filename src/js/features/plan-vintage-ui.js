@@ -84,6 +84,49 @@
     }
   }
 
+  function decorateSubsection(root){
+    const isExpenses=planSection==='recurring';
+    const panel=root.querySelector(isExpenses?'.plan-recurring-panel':'.piggy-bank-panel');
+    if(!panel)return;
+    panel.classList.add('plan-vintage-subsection-panel',isExpenses?'is-expenses':'is-piggy');
+
+    const heading=root.querySelector('.plan-vintage-heading');
+    if(heading){
+      heading.classList.add('plan-vintage-subsection-heading');
+      const title=heading.querySelector('.page-title');
+      const subtitle=heading.querySelector('.page-subtitle');
+      if(title)title.textContent=isExpenses?'Ежемесячные затраты':'Семейная копилка';
+      if(subtitle)subtitle.textContent=isExpenses
+        ?'Регулярные обязательства и запланированные платежи'
+        :'Накопления семьи в разных валютах';
+      heading.insertAdjacentHTML('afterbegin',`<div class="plan-subsection-emblem" aria-hidden="true">${isExpenses?'◆':'♜'}</div>`);
+    }
+
+    const back=root.querySelector('.plan-subsection-back');
+    if(back){
+      back.classList.add('plan-vintage-back');
+      const button=back.querySelector('#planBackToCalendar');
+      if(button)button.innerHTML='<span aria-hidden="true">‹</span> Вернуться к календарю';
+    }
+
+    if(isExpenses){
+      root.querySelector('.plan-summary-strip')?.classList.add('plan-vintage-summary');
+      root.querySelector('.plan-editor-card')?.classList.add('plan-vintage-editor');
+      root.querySelector('.plan-list-column')?.classList.add('plan-vintage-list');
+      root.querySelectorAll('.recurring-row-v3').forEach(row=>row.classList.add('plan-vintage-recurring-row'));
+      root.querySelectorAll('.reminder-card').forEach(row=>row.classList.add('plan-vintage-reminder'));
+    }else{
+      root.querySelector('.piggy-toolbar')?.classList.add('plan-vintage-piggy-toolbar');
+      root.querySelector('.piggy-meta')?.classList.add('plan-vintage-piggy-meta');
+      root.querySelectorAll('.piggy-currency-card').forEach(card=>card.classList.add('plan-vintage-currency-card'));
+      root.querySelector('.piggy-chest-wrap')?.classList.add('plan-vintage-chest');
+    }
+
+    if(!panel.querySelector('.plan-vintage-subsection-footer')){
+      panel.insertAdjacentHTML('beforeend',`<div class="plan-vintage-subsection-footer" aria-hidden="true"><span></span><b>⚜</b><span></span></div>`);
+    }
+  }
+
   planPage=function(){
     const html=basePlanPageVintage();
     const template=document.createElement('template');
@@ -96,7 +139,7 @@
     if(heading)heading.classList.add('plan-vintage-heading');
     decorateActionTabs(root);
     if(planSection==='calendar')decorateCalendar(root);
-    else root.querySelector('.plan-subsection-back')?.classList.add('plan-vintage-back');
+    else decorateSubsection(root);
 
     return root.outerHTML;
   };
