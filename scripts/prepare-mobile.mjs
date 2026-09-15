@@ -17,13 +17,26 @@ const excludedMobileAssets=new Set([
   'splash-family-treasury.webp',
   'startup-family-treasury.mp4'
 ]);
+function includeMobileAsset(source){
+  const relative=path.relative(assetsRoot,source).replaceAll('\\','/');
+  if(!relative)return true;
+  if(excludedMobileAssets.has(relative))return false;
+  const base=path.posix.basename(relative);
+  // These 1–2 MiB PNG files are design masters only. Android uses the already
+  // optimized assets/plan-runtime/*.webp copies, so bundling the masters would
+  // add roughly 30 MiB to every APK without changing what the user sees.
+  if(/^plan-bar(?:o)?que(?:\s*\(\d+\))?\.png$/i.test(base))return false;
+  return true;
+}
 await cp(assetsRoot,path.join(out,'assets'),{
   recursive:true,
-  // Keep only runtime-ready artwork in the APK. The large crest master and the
-  // retired video splash assets are intentionally excluded from mobile builds.
-  filter:source=>!excludedMobileAssets.has(path.relative(assetsRoot,source).replaceAll('\\','/'))
+  // Keep only runtime-ready artwork in the APK. Heavy design masters and retired
+  // splash media remain in the repository but never enter www/ or the Android APK.
+  filter:includeMobileAsset
 });
 await access(path.join(out,'assets','gerb-runtime.webp'));
+await access(path.join(out,'assets','plan-runtime','expenses-plaque.webp'));
+await access(path.join(out,'assets','plan-runtime','piggy-plaque.webp'));
 
 for(const file of ['styles.css','hotfix.css','manifest.webmanifest','sw.js','privacy.html','delete-account.html']){
   try{await copyFile(path.join(root,file),path.join(out,file))}catch(error){if(error?.code!=='ENOENT')throw error}
@@ -52,7 +65,7 @@ await copyFirst([
 ],'xlsx.full.min.js','XLSX');
 
 async function bundleMobileFonts(){
-  const cssUrl='https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Inter:wght@400;500;600;700;800&display=swap';
+  const cssUrl='https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Cormorant+Garamond:wght@600;700&family=Inter:wght@400;500;600;700;800&display=swap';
   const fontDir=path.join(out,'assets','fonts');
   await mkdir(fontDir,{recursive:true});
   try{
@@ -100,4 +113,4 @@ let exporter=await readFile(exportPath,'utf8');
 exporter=exporter.replace('https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js','vendor/xlsx.full.min.js');
 await writeFile(exportPath,exporter,'utf8');
 
-console.log(`Android web assets prepared in www/; embedded build ${buildNumber}; push ${pushConfigured?'configured':'not configured'}; crest splash only`);
+console.log(`Android web assets prepared in www/; embedded build ${buildNumber}; push ${pushConfigured?'configured':'not configured'}; heavy Plan PNG masters excluded`);
