@@ -25,7 +25,7 @@ function headerDateText(){
 }
 
 function header(){
-  const overview=state.view==='overview',annualAnalytics=state.view==='analytics',noPeriodControls=state.view==='settings'||state.view==='categories'||state.view==='recurring'||state.view==='goals',connection=window.FinanceOffline?.statusMarkup?.()||'',authState=window.FinanceOfflineSession?.statusMarkup?.()||'';
+  const overview=state.view==='overview',annualAnalytics=state.view==='analytics',noPeriodControls=state.view==='settings'||state.view==='categories'||state.view==='recurring',connection=window.FinanceOffline?.statusMarkup?.()||'',authState=window.FinanceOfflineSession?.statusMarkup?.()||'';
   const periodLabel=overview||noPeriodControls?'':annualAnalytics?`${state.year} год`:`${MONTHS[state.month-1]} ${state.year}`;
   const periodControls=overview||noPeriodControls
     ?''
@@ -58,7 +58,6 @@ const ROUTES={
   operations:{page:()=>operationsPage(),bind:()=>bindOperations?.()},
   categories:{page:()=>categoriesPage(),bind:()=>bindCategories?.()},
   analytics:{page:()=>analyticsPage(),bind:()=>{bindAnalyticsRoute()}},
-  goals:{page:()=>planPage(),bind:()=>bindPlan?.()},
   recurring:{page:()=>planPage(),bind:()=>bindPlan?.()},
   settings:{page:()=>settingsPage(),bind:()=>bindSettings?.()}
 };
@@ -90,10 +89,6 @@ function scrollOverviewTop(){
 function renderApp(){
   releaseMobileScrollLock();
   destroyCharts?.();
-  if(state.view==='goals'){
-    if(typeof planSection!=='undefined')planSection='goals';
-    state.view='recurring';
-  }
   const route=ROUTES[state.view]||ROUTES.overview;
   app.innerHTML=shell(route.page());
   bindCommon();
@@ -121,8 +116,6 @@ function bindCommon(){
       const now=new Date();state.year=now.getFullYear();state.month=now.getMonth()+1;
     }
     state.view=next;state.journalLimit=50;renderApp();
-    // A newly opened section must start at its beginning, especially on mobile where
-    // the previous section can leave the document scrolled far down.
     scrollOverviewTop();
   });
   const logout=document.getElementById('logout')||document.getElementById('settingsLogout');if(logout)logout.onclick=performLogout;
