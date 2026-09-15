@@ -4,12 +4,9 @@
   const VOICE_KEY='finance.treasurerVoice';
   const VOICES=[
     {id:'cedar',name:'Кедр',group:'male',note:'спокойный зрелый голос'},
-    {id:'onyx',name:'Оникс',group:'male',note:'глубокий и серьёзный'},
     {id:'echo',name:'Эхо',group:'male',note:'ровный и нейтральный'},
     {id:'ash',name:'Эш',group:'male',note:'низкий и энергичный'},
-    {id:'ballad',name:'Баллад',group:'male',note:'мягкий и выразительный'},
     {id:'fable',name:'Фэйбл',group:'male',note:'тёплый голос рассказчика'},
-    {id:'sage',name:'Сейдж',group:'male',note:'сдержанный и интеллектуальный'},
     {id:'verse',name:'Верс',group:'male',note:'уверенный и живой'},
     {id:'alloy',name:'Аллой',group:'male',note:'чёткий деловой голос'}
   ];
