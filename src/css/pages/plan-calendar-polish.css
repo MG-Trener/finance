@@ -37,10 +37,39 @@
   }
 }
 
+/* Generic Plan event uses the dedicated baroque medallion artwork instead of a plain text glyph. */
+.plan-baroque-page .plan-day-type-icon.is-generic{
+  display:inline-block!important;
+  width:18px!important;
+  height:18px!important;
+  flex:0 0 18px!important;
+  font-size:0!important;
+  color:transparent!important;
+  background:var(--plan-art-event-generic) center/contain no-repeat!important;
+  filter:drop-shadow(0 1px 2px rgba(0,0,0,.5)) drop-shadow(0 0 3px rgba(224,177,92,.18))!important;
+}
+
+.plan-baroque-page .plan-day-event.type-other .plan-event-icon{
+  display:block!important;
+  width:34px!important;
+  height:34px!important;
+  min-width:34px!important;
+  font-size:0!important;
+  color:transparent!important;
+  background:var(--plan-art-event-generic) center/contain no-repeat!important;
+  filter:drop-shadow(0 3px 5px rgba(0,0,0,.48))!important;
+}
+
 .plan-baroque-legend .plan-legend-event-icon{
-  color:#e0b15c!important;
-  font-size:1.05em!important;
-  text-shadow:0 0 6px rgba(224,177,92,.25)!important;
+  display:inline-block!important;
+  width:20px!important;
+  height:20px!important;
+  flex:0 0 20px!important;
+  font-size:0!important;
+  color:transparent!important;
+  background:var(--plan-art-event-generic) center/contain no-repeat!important;
+  filter:drop-shadow(0 2px 3px rgba(0,0,0,.46))!important;
+  vertical-align:middle!important;
 }
 
 @media(max-width:760px){
@@ -48,6 +77,21 @@
     margin-top:14px!important;
   }
   .plan-today-frame{inset:1px}
+  .plan-baroque-page .plan-day-type-icon.is-generic{
+    width:16px!important;
+    height:16px!important;
+    flex-basis:16px!important;
+  }
+  .plan-baroque-page .plan-day-event.type-other .plan-event-icon{
+    width:30px!important;
+    height:30px!important;
+    min-width:30px!important;
+  }
+  .plan-baroque-legend .plan-legend-event-icon{
+    width:18px!important;
+    height:18px!important;
+    flex-basis:18px!important;
+  }
 }
 
 @media(max-width:430px){
