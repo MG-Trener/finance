@@ -1,4 +1,4 @@
-const CACHE='family-finance-shell-v15';
+const CACHE='family-finance-shell-v16';
 const PRECACHE=[
   './',
   './index.html',
@@ -10,7 +10,12 @@ const PRECACHE=[
   './assets/icon-192.png',
   './assets/icon-512.png',
   './assets/gerb-runtime.webp',
-  './assets/piggy-chest.svg'
+  './assets/piggy-chest.svg',
+  './assets/plan-vintage-corner.svg',
+  './assets/plan-vintage-laurel.svg',
+  './assets/plan-vintage-cartouche.svg',
+  './assets/plan-vintage-fleur.svg',
+  './assets/plan-vintage-divider.svg'
 ];
 
 self.addEventListener('install',event=>{
