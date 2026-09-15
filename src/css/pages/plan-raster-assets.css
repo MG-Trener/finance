@@ -1,31 +1,31 @@
 /* Generated raster artwork layer for Plan.
-   Originals stay in assets as masters; images are requested only when matching UI exists. */
+   Master PNG files stay in assets; the app uses lightweight WebP runtime copies. */
 
 .plan-baroque-page,
 .plan-vintage-modal-shell{
-  --plan-art-event-generic:url("../../../assets/plan-barque (1).png");
-  --plan-art-event-generic-plaque:url("../../../assets/plan-barque (2).png");
-  --plan-art-event-meeting:url("../../../assets/plan-barque (3).png");
-  --plan-art-event-meeting-plaque:url("../../../assets/plan-barque (4).png");
-  --plan-art-event-birthday:url("../../../assets/plan-barque (5).png");
-  --plan-art-event-birthday-plaque:url("../../../assets/plan-barque (6).png");
-  --plan-art-expenses-medallion:url("../../../assets/plan-barque (7).png");
-  --plan-art-piggy-medallion:url("../../../assets/plan-barque (8).png");
-  --plan-art-expenses-plaque:url("../../../assets/plan-barque (9).png");
-  --plan-art-piggy-plaque:url("../../../assets/plan-barque (10).png");
-  --plan-art-corner-bl:url("../../../assets/plan-barque (11).png");
-  --plan-art-divider-ornate:url("../../../assets/plan-barque (12).png");
-  --plan-art-corner-tr:url("../../../assets/plan-barque (13).png");
-  --plan-art-side:url("../../../assets/plan-barque (14).png");
-  --plan-art-plaque-wide:url("../../../assets/plan-barque (15).png");
-  --plan-art-plaque-small:url("../../../assets/plan-barque (16).png");
-  --plan-art-plaque-thin:url("../../../assets/plan-barque (17).png");
-  --plan-art-selected:url("../../../assets/plan-barque (18).png");
-  --plan-art-divider-thin:url("../../../assets/plan-barque (19).png");
-  --plan-art-fleur:url("../../../assets/plan-barque (20).png");
+  --plan-art-event-generic:url("../../../assets/plan-runtime/event-generic-medallion.webp");
+  --plan-art-event-generic-plaque:url("../../../assets/plan-runtime/event-generic-plaque.webp");
+  --plan-art-event-meeting:url("../../../assets/plan-runtime/event-meeting-medallion.webp");
+  --plan-art-event-meeting-plaque:url("../../../assets/plan-runtime/event-meeting-plaque.webp");
+  --plan-art-event-birthday:url("../../../assets/plan-runtime/event-birthday-medallion.webp");
+  --plan-art-event-birthday-plaque:url("../../../assets/plan-runtime/event-birthday-plaque.webp");
+  --plan-art-expenses-medallion:url("../../../assets/plan-runtime/expenses-medallion.webp");
+  --plan-art-piggy-medallion:url("../../../assets/plan-runtime/piggy-medallion.webp");
+  --plan-art-expenses-plaque:url("../../../assets/plan-runtime/expenses-plaque.webp");
+  --plan-art-piggy-plaque:url("../../../assets/plan-runtime/piggy-plaque.webp");
+  --plan-art-corner-bl:url("../../../assets/plan-runtime/corner-bl.webp");
+  --plan-art-divider-ornate:url("../../../assets/plan-runtime/divider-ornate.webp");
+  --plan-art-corner-tr:url("../../../assets/plan-runtime/corner-tr.webp");
+  --plan-art-side:url("../../../assets/plan-runtime/side-ornament.webp");
+  --plan-art-plaque-wide:url("../../../assets/plan-runtime/plaque-wide.webp");
+  --plan-art-plaque-small:url("../../../assets/plan-runtime/plaque-small.webp");
+  --plan-art-plaque-thin:url("../../../assets/plan-runtime/plaque-thin.webp");
+  --plan-art-selected:url("../../../assets/plan-runtime/selected-day-ring.webp");
+  --plan-art-divider-thin:url("../../../assets/plan-runtime/divider-thin.webp");
+  --plan-art-fleur:url("../../../assets/plan-runtime/fleur-crest.webp");
 }
 
-/* Main screen frame: use one high-detail corner and mirror it, so only one corner PNG is fetched. */
+/* Main screen frame: use one high-detail corner and mirror it, so only one corner file is fetched. */
 .plan-baroque-corner{
   width:128px!important;
   height:128px!important;
