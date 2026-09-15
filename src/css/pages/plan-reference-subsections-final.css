@@ -1,0 +1,148 @@
+/* Final raster-led treatment for Plan subpages. */
+.plan-baroque-page.is-baroque-subsection{
+  width:min(100%,720px)!important;
+  max-width:720px!important;
+  margin:0 auto 24px!important;
+  padding:46px 18px 24px!important;
+  border-radius:7px!important;
+  overflow:visible!important;
+}
+.plan-baroque-page.is-baroque-subsection .plan-baroque-top-ornament{
+  top:-4px;
+  width:68%;
+  height:54px;
+}
+.plan-baroque-page.is-baroque-subsection>.plan-vintage-heading{
+  margin:0 auto 8px!important;
+  min-height:100px!important;
+  width:min(92%,610px)!important;
+  padding:0!important;
+  display:block!important;
+  background-position:center!important;
+  background-size:contain!important;
+  background-repeat:no-repeat!important;
+  filter:drop-shadow(0 7px 12px rgba(0,0,0,.5));
+}
+.is-expenses-section>.plan-vintage-heading{background-image:var(--plan-art-expenses-plaque)!important}
+.is-piggy-section>.plan-vintage-heading{background-image:var(--plan-art-piggy-plaque)!important}
+.plan-baroque-page.is-baroque-subsection>.plan-vintage-heading>div:not(.plan-subsection-emblem){
+  position:absolute!important;
+  width:1px!important;
+  height:1px!important;
+  padding:0!important;
+  margin:-1px!important;
+  overflow:hidden!important;
+  clip:rect(0,0,0,0)!important;
+  white-space:nowrap!important;
+  border:0!important;
+}
+.plan-baroque-page.is-baroque-subsection>.plan-vintage-heading .plan-subsection-emblem{display:none!important}
+
+/* Keep the section switchers visually subordinate once inside a subsection. */
+.plan-baroque-page.is-baroque-subsection .plan-baroque-actions{
+  margin:0 4px 8px!important;
+  opacity:.82;
+}
+.plan-baroque-page.is-baroque-subsection .plan-baroque-action{
+  max-width:148px!important;
+  filter:brightness(.88) drop-shadow(0 4px 7px rgba(0,0,0,.4))!important;
+}
+.plan-baroque-page.is-baroque-subsection .plan-baroque-action.active{
+  filter:brightness(1.04) drop-shadow(0 5px 9px rgba(0,0,0,.48))!important;
+  opacity:1!important;
+}
+
+.plan-baroque-back{
+  display:flex!important;
+  justify-content:center!important;
+  margin:0 0 9px!important;
+}
+.plan-baroque-back .btn{
+  width:min(100%,300px)!important;
+  min-height:46px!important;
+  background:var(--plan-art-plaque-small) center/100% 100% no-repeat!important;
+  border:0!important;
+  color:#e3bd77!important;
+}
+
+.plan-baroque-subsection-panel{
+  border-radius:5px!important;
+  padding:12px!important;
+  border-color:rgba(143,87,25,.68)!important;
+  background:linear-gradient(180deg,rgba(17,10,5,.94),rgba(6,4,2,.98))!important;
+  box-shadow:inset 0 0 0 2px #050302,inset 0 0 0 3px rgba(184,120,35,.16),0 8px 22px rgba(0,0,0,.34)!important;
+}
+.plan-baroque-subsection-panel::before{
+  content:"";
+  display:block;
+  width:72%;
+  height:26px;
+  margin:-2px auto 5px;
+  background:var(--plan-art-divider-thin) center/contain no-repeat;
+  opacity:.72;
+}
+
+/* Expense form/list becomes a compact ledger. */
+.is-expenses-section .plan-vintage-summary{
+  border-radius:3px!important;
+  background:rgba(21,13,6,.76)!important;
+}
+.is-expenses-section .plan-vintage-editor,
+.is-expenses-section .plan-vintage-list{
+  border-radius:4px!important;
+}
+.is-expenses-section .plan-vintage-recurring-row{
+  border-radius:3px!important;
+  padding-top:9px!important;
+  padding-bottom:9px!important;
+}
+.is-expenses-section .plan-vintage-recurring-row::before{
+  content:"";
+  width:30px;
+  height:30px;
+  flex:0 0 30px;
+  background:var(--plan-art-expenses-medallion) center/contain no-repeat;
+  filter:drop-shadow(0 2px 4px rgba(0,0,0,.45));
+}
+
+/* Piggy cards get the generated treasury medallion without replacing live balances. */
+.is-piggy-section .plan-vintage-piggy-toolbar{
+  border-radius:4px!important;
+}
+.is-piggy-section .plan-vintage-piggy-toolbar::before{
+  content:"";
+  display:block;
+  width:76px;
+  height:76px;
+  margin:0 auto 8px;
+  background:var(--plan-art-piggy-medallion) center/contain no-repeat;
+  filter:drop-shadow(0 5px 9px rgba(0,0,0,.48));
+}
+.is-piggy-section .plan-vintage-currency-card{
+  border-radius:4px!important;
+  min-height:66px!important;
+}
+.is-piggy-section .plan-vintage-chest{
+  border-radius:5px!important;
+}
+
+@media(max-width:760px){
+  .plan-baroque-page.is-baroque-subsection{
+    width:100%!important;
+    max-width:540px!important;
+    padding:34px 5px 16px!important;
+  }
+  .plan-baroque-page.is-baroque-subsection .plan-baroque-top-ornament{top:-1px;width:82%;height:40px}
+  .plan-baroque-page.is-baroque-subsection>.plan-vintage-heading{
+    min-height:72px!important;
+    width:96%!important;
+    margin-bottom:5px!important;
+  }
+  .plan-baroque-page.is-baroque-subsection .plan-baroque-actions{gap:5px!important;margin-bottom:6px!important}
+  .plan-baroque-page.is-baroque-subsection .plan-baroque-action{width:46%!important;max-width:145px!important}
+  .plan-baroque-back .btn{min-height:40px!important;width:min(100%,260px)!important;font-size:12px!important}
+  .plan-baroque-subsection-panel{padding:7px!important}
+  .plan-baroque-subsection-panel::before{height:18px;margin-bottom:2px}
+  .is-expenses-section .plan-vintage-recurring-row::before{width:24px;height:24px;flex-basis:24px}
+  .is-piggy-section .plan-vintage-piggy-toolbar::before{width:58px;height:58px;margin-bottom:5px}
+}
