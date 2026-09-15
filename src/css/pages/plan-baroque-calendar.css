@@ -22,7 +22,7 @@
   width:62px;
   height:180px;
   transform:translateY(-50%);
-  background:url('../../assets/plan-vintage-laurel.svg') center/contain no-repeat;
+  background:url('../../../assets/plan-vintage-laurel.svg') center/contain no-repeat;
   opacity:.22;
 }
 .plan-baroque-inner-frame::before{left:-38px;transform:translateY(-50%) rotate(-90deg)}
@@ -41,7 +41,7 @@
   border-radius:0!important;
   padding:27px 70px 20px!important;
   background:
-    url('../../assets/plan-vintage-cartouche.svg') center/100% 100% no-repeat!important;
+    url('../../../assets/plan-vintage-cartouche.svg') center/100% 100% no-repeat!important;
   box-shadow:none!important;
 }
 .plan-baroque-month-title::before,.plan-baroque-month-title::after{display:none!important}
@@ -67,7 +67,7 @@
   top:34px;
   width:120px;
   height:92px;
-  background:url('../../assets/plan-vintage-laurel.svg') center/contain no-repeat;
+  background:url('../../../assets/plan-vintage-laurel.svg') center/contain no-repeat;
   opacity:.82;
   pointer-events:none;
 }
@@ -80,7 +80,7 @@
   height:58px!important;
   border:0!important;
   background:
-    url('../../assets/plan-baroque-medallion.svg') center/100% 100% no-repeat!important;
+    url('../../../assets/plan-baroque-medallion.svg') center/100% 100% no-repeat!important;
   box-shadow:none!important;
   color:#e0b667!important;
   text-shadow:0 1px 0 #2b1706;
@@ -104,7 +104,7 @@
   z-index:4;
   width:54px;
   height:54px;
-  background:url('../../assets/plan-vintage-corner.svg') center/contain no-repeat;
+  background:url('../../../assets/plan-vintage-corner.svg') center/contain no-repeat;
   opacity:.86;
   pointer-events:none;
 }
@@ -140,7 +140,7 @@
   width:56px!important;
   height:56px!important;
   border:0!important;
-  background:url('../../assets/plan-baroque-medallion.svg') center/100% 100% no-repeat;
+  background:url('../../../assets/plan-baroque-medallion.svg') center/100% 100% no-repeat;
   box-shadow:0 0 18px rgba(210,144,43,.22)!important;
 }
 .plan-baroque-calendar-shell .plan-calendar-day.is-selected .calendar-day-number{color:#ffe4aa!important;text-shadow:0 1px 0 #241305,0 0 10px rgba(232,176,78,.24)!important}
@@ -150,7 +150,7 @@
 .plan-baroque-legend{
   margin:16px 12px 1px!important;
   padding:16px 8px 3px!important;
-  background:url('../../assets/plan-vintage-divider.svg') top center/68% auto no-repeat;
+  background:url('../../../assets/plan-vintage-divider.svg') top center/68% auto no-repeat;
   border-top:0!important;
 }
 .plan-baroque-legend span{font-family:Cormorant Garamond,Georgia,serif;font-size:13px!important;color:#bda474!important}
@@ -171,7 +171,7 @@
   width:78%;
   height:56px;
   transform:translateX(-50%);
-  background:url('../../assets/plan-baroque-event-plaque.svg') center/100% 100% no-repeat;
+  background:url('../../../assets/plan-baroque-event-plaque.svg') center/100% 100% no-repeat;
   pointer-events:none;
   opacity:.96;
 }
@@ -187,7 +187,7 @@
   box-shadow:inset 0 0 0 1px rgba(8,5,3,.85),0 3px 8px rgba(0,0,0,.18)!important;
 }
 .plan-baroque-events .plan-event-copy strong{font-family:Cormorant Garamond,Georgia,serif!important;font-size:17px!important}
-.plan-baroque-motto{margin-top:3px;background:url('../../assets/plan-vintage-divider.svg') top center/72% auto no-repeat;padding-top:18px!important}
+.plan-baroque-motto{margin-top:3px;background:url('../../../assets/plan-vintage-divider.svg') top center/72% auto no-repeat;padding-top:18px!important}
 .plan-baroque-motto p{font-family:Cormorant Garamond,Georgia,serif!important;font-size:10px!important;color:#a47c3d!important}
 
 @media(max-width:760px){
