@@ -37,7 +37,9 @@
   }
 }
 
-/* Generic Plan event uses the dedicated baroque medallion artwork instead of a plain text glyph. */
+/* All Plan event types use dedicated baroque artwork — never system emoji. */
+.plan-baroque-page .plan-day-type-icon.is-birthday,
+.plan-baroque-page .plan-day-type-icon.is-meeting,
 .plan-baroque-page .plan-day-type-icon.is-generic{
   display:inline-block!important;
   width:18px!important;
@@ -45,21 +47,35 @@
   flex:0 0 18px!important;
   font-size:0!important;
   color:transparent!important;
-  background:var(--plan-art-event-generic) center/contain no-repeat!important;
+  background-position:center!important;
+  background-size:contain!important;
+  background-repeat:no-repeat!important;
   filter:drop-shadow(0 1px 2px rgba(0,0,0,.5)) drop-shadow(0 0 3px rgba(224,177,92,.18))!important;
 }
+.plan-baroque-page .plan-day-type-icon.is-birthday{background-image:var(--plan-art-event-birthday)!important}
+.plan-baroque-page .plan-day-type-icon.is-meeting{background-image:var(--plan-art-event-meeting)!important}
+.plan-baroque-page .plan-day-type-icon.is-generic{background-image:var(--plan-art-event-generic)!important}
 
-.plan-baroque-page .plan-day-event.type-other .plan-event-icon{
+.plan-baroque-page .plan-day-event .plan-event-icon.is-birthday,
+.plan-baroque-page .plan-day-event .plan-event-icon.is-meeting,
+.plan-baroque-page .plan-day-event .plan-event-icon.is-generic{
   display:block!important;
   width:34px!important;
   height:34px!important;
   min-width:34px!important;
   font-size:0!important;
   color:transparent!important;
-  background:var(--plan-art-event-generic) center/contain no-repeat!important;
+  background-position:center!important;
+  background-size:contain!important;
+  background-repeat:no-repeat!important;
   filter:drop-shadow(0 3px 5px rgba(0,0,0,.48))!important;
 }
+.plan-baroque-page .plan-day-event .plan-event-icon.is-birthday{background-image:var(--plan-art-event-birthday)!important}
+.plan-baroque-page .plan-day-event .plan-event-icon.is-meeting{background-image:var(--plan-art-event-meeting)!important}
+.plan-baroque-page .plan-day-event .plan-event-icon.is-generic{background-image:var(--plan-art-event-generic)!important}
 
+.plan-baroque-legend .plan-legend-birthday-icon,
+.plan-baroque-legend .plan-legend-meeting-icon,
 .plan-baroque-legend .plan-legend-event-icon{
   display:inline-block!important;
   width:20px!important;
@@ -67,26 +83,37 @@
   flex:0 0 20px!important;
   font-size:0!important;
   color:transparent!important;
-  background:var(--plan-art-event-generic) center/contain no-repeat!important;
+  background-position:center!important;
+  background-size:contain!important;
+  background-repeat:no-repeat!important;
   filter:drop-shadow(0 2px 3px rgba(0,0,0,.46))!important;
   vertical-align:middle!important;
 }
+.plan-baroque-legend .plan-legend-birthday-icon{background-image:var(--plan-art-event-birthday)!important}
+.plan-baroque-legend .plan-legend-meeting-icon{background-image:var(--plan-art-event-meeting)!important}
+.plan-baroque-legend .plan-legend-event-icon{background-image:var(--plan-art-event-generic)!important}
 
 @media(max-width:760px){
   .plan-baroque-legend{
     margin-top:14px!important;
   }
   .plan-today-frame{inset:1px}
+  .plan-baroque-page .plan-day-type-icon.is-birthday,
+  .plan-baroque-page .plan-day-type-icon.is-meeting,
   .plan-baroque-page .plan-day-type-icon.is-generic{
     width:16px!important;
     height:16px!important;
     flex-basis:16px!important;
   }
-  .plan-baroque-page .plan-day-event.type-other .plan-event-icon{
+  .plan-baroque-page .plan-day-event .plan-event-icon.is-birthday,
+  .plan-baroque-page .plan-day-event .plan-event-icon.is-meeting,
+  .plan-baroque-page .plan-day-event .plan-event-icon.is-generic{
     width:30px!important;
     height:30px!important;
     min-width:30px!important;
   }
+  .plan-baroque-legend .plan-legend-birthday-icon,
+  .plan-baroque-legend .plan-legend-meeting-icon,
   .plan-baroque-legend .plan-legend-event-icon{
     width:18px!important;
     height:18px!important;
