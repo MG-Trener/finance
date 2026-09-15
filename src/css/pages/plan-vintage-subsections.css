@@ -1,0 +1,288 @@
+/* Vintage continuation for Plan subsections: expenses, savings and Plan-owned dialogs. */
+.plan-vintage-page.is-subsection{
+  --sub-gold:#c79443;
+  --sub-gold-bright:#edc477;
+  --sub-border:#75501f;
+  --sub-bg:#0c0805;
+  --sub-bg-soft:#171008;
+  color:#e6d4b1;
+}
+
+.plan-vintage-subsection-heading{
+  position:relative;
+  display:flex!important;
+  justify-content:center!important;
+  text-align:center;
+  margin:8px 8px 12px!important;
+  padding:18px 54px 15px!important;
+  border:1px solid #704b1c;
+  border-radius:16px;
+  background:
+    radial-gradient(ellipse at 50% 0%,rgba(154,99,30,.18),transparent 62%),
+    linear-gradient(180deg,rgba(24,16,9,.98),rgba(10,7,4,.99));
+  box-shadow:inset 0 0 0 2px #090604,inset 0 0 0 3px rgba(184,127,44,.2),0 7px 22px rgba(0,0,0,.32);
+}
+.plan-vintage-subsection-heading::before,
+.plan-vintage-subsection-heading::after{
+  content:"❦";
+  position:absolute;
+  top:50%;
+  color:#a9742b;
+  font:22px Georgia,serif;
+  transform:translateY(-50%);
+  opacity:.88;
+}
+.plan-vintage-subsection-heading::before{left:18px}
+.plan-vintage-subsection-heading::after{right:18px;transform:translateY(-50%) scaleX(-1)}
+.plan-vintage-subsection-heading>div:not(.plan-subsection-emblem){display:grid;gap:4px}
+.plan-vintage-subsection-heading .page-title{
+  margin:0!important;
+  color:#e9cf98!important;
+  font:600 clamp(20px,3vw,29px) Cinzel,Georgia,serif!important;
+  text-shadow:0 2px 0 #241606;
+}
+.plan-vintage-subsection-heading .page-subtitle{
+  display:block!important;
+  color:#9f865e!important;
+  font-size:10px!important;
+  letter-spacing:.035em;
+}
+.plan-subsection-emblem{
+  position:absolute;
+  left:50%;top:-14px;
+  transform:translateX(-50%);
+  width:31px;height:28px;
+  display:grid;place-items:center;
+  color:#d19a42;
+  background:#100b07;
+  border:1px solid #795221;
+  border-radius:50%;
+  font:14px Georgia,serif;
+  box-shadow:0 0 13px rgba(209,154,66,.16);
+}
+
+.plan-vintage-page.is-subsection .plan-vintage-actions{margin-bottom:10px}
+.plan-vintage-back{margin:0 8px 10px!important;text-align:left}
+.plan-vintage-back .btn{
+  min-height:38px!important;
+  border:1px solid #76501f!important;
+  border-radius:10px!important;
+  color:#d6b16c!important;
+  background:linear-gradient(180deg,#21160d,#0e0906)!important;
+  box-shadow:inset 0 0 0 2px #090604,inset 0 0 0 3px rgba(180,123,42,.18),0 4px 12px rgba(0,0,0,.28)!important;
+  font:600 10px Cinzel,Georgia,serif!important;
+}
+.plan-vintage-back .btn span{font:24px Georgia,serif;line-height:0;vertical-align:-2px;margin-right:5px}
+
+.plan-vintage-subsection-panel{
+  position:relative;
+  margin:0 2px;
+  padding:18px!important;
+  border:1px solid var(--sub-border);
+  border-radius:18px;
+  background:
+    radial-gradient(ellipse at 50% -5%,rgba(137,87,27,.17),transparent 42%),
+    linear-gradient(180deg,rgba(18,12,7,.985),rgba(7,5,3,.995));
+  box-shadow:inset 0 0 0 3px #090604,inset 0 0 0 4px rgba(193,135,48,.21),0 10px 28px rgba(0,0,0,.4);
+}
+.plan-vintage-subsection-panel::before,
+.plan-vintage-subsection-panel::after{
+  content:"✦";
+  position:absolute;
+  top:8px;
+  color:#a7702a;
+  font-size:10px;
+}
+.plan-vintage-subsection-panel::before{left:11px}
+.plan-vintage-subsection-panel::after{right:11px}
+.plan-vintage-subsection-footer{
+  display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;
+  margin:16px 5px 0;color:#a16f2c;
+}
+.plan-vintage-subsection-footer span{height:1px;background:linear-gradient(90deg,transparent,#7d5420)}
+.plan-vintage-subsection-footer span:last-child{transform:scaleX(-1)}
+.plan-vintage-subsection-footer b{font:17px Georgia,serif;color:#b88032;text-shadow:0 0 9px rgba(190,129,47,.18)}
+
+/* Expenses */
+.plan-vintage-summary{
+  margin:0 0 13px!important;
+  padding:7px!important;
+  overflow:hidden;
+  border:1px solid #604018!important;
+  border-radius:11px!important;
+  background:linear-gradient(180deg,rgba(34,22,11,.72),rgba(11,7,4,.8))!important;
+  box-shadow:inset 0 0 0 2px rgba(9,6,4,.9)!important;
+}
+.plan-vintage-summary>div{padding:8px 7px!important;border-color:rgba(132,88,31,.4)!important}
+.plan-vintage-summary span{color:#9d835a!important;font-family:Cinzel,Georgia,serif!important;font-size:7px!important;letter-spacing:.07em!important}
+.plan-vintage-summary b{color:#e7c98f!important;font:600 14px Cinzel,Georgia,serif!important}
+.plan-vintage-summary b.negative{color:#d7a45b!important}
+
+.plan-vintage-editor{
+  position:relative!important;
+  padding:16px!important;
+  border:1px solid #6c491c!important;
+  border-radius:13px!important;
+  background:linear-gradient(180deg,rgba(27,18,10,.96),rgba(11,7,4,.98))!important;
+  box-shadow:inset 0 0 0 2px #090604,inset 0 0 0 3px rgba(161,108,35,.16)!important;
+}
+.plan-vintage-editor::before{content:"ЗАПЛАНИРОВАННЫЙ РАСХОД";display:block;margin:0 0 10px;color:#967b52;font:700 8px Cinzel,Georgia,serif;letter-spacing:.11em;text-align:center}
+.plan-vintage-editor .plan-card-title{justify-content:center!important;text-align:center;margin-bottom:11px!important}
+.plan-vintage-editor .plan-card-title span{display:none}
+.plan-vintage-editor .plan-card-title h3{color:#e8cf9a!important;font:600 16px Cinzel,Georgia,serif!important}
+.plan-vintage-editor .field label{color:#ad956d!important;font-family:Cinzel,Georgia,serif!important;letter-spacing:.035em}
+.plan-vintage-editor input,
+.plan-vintage-editor select{
+  border:1px solid #5e421e!important;
+  border-radius:8px!important;
+  color:#eadbbd!important;
+  background:linear-gradient(180deg,rgba(9,6,4,.95),rgba(20,13,7,.92))!important;
+  box-shadow:inset 0 1px 5px rgba(0,0,0,.45)!important;
+}
+.plan-vintage-editor input:focus,
+.plan-vintage-editor select:focus{border-color:#b47c32!important;box-shadow:0 0 0 2px rgba(188,128,48,.13)!important}
+.plan-vintage-editor .btn-primary{
+  border:1px solid #9d6c2b!important;
+  color:#f0cf8c!important;
+  background:linear-gradient(180deg,#553817,#27180b)!important;
+  box-shadow:inset 0 0 0 2px rgba(14,9,5,.75),0 5px 14px rgba(0,0,0,.28)!important;
+  font-family:Cinzel,Georgia,serif!important;
+}
+
+.plan-vintage-list{margin-top:13px}
+.plan-vintage-list .plan-list-head{padding:0 6px 7px!important;border-bottom:1px solid rgba(116,77,29,.34)}
+.plan-vintage-list .plan-list-head span{color:#9b8057!important;font-family:Cinzel,Georgia,serif!important}
+.plan-vintage-list .plan-list-head b{color:#d6a958!important}
+.plan-vintage-list .plan-list-head small{color:#b08448!important}
+.plan-vintage-recurring-row{
+  margin:0!important;
+  padding:10px 11px!important;
+  border:1px solid rgba(113,75,29,.58)!important;
+  border-radius:9px!important;
+  background:linear-gradient(90deg,rgba(41,27,13,.48),rgba(13,9,5,.7))!important;
+  box-shadow:inset 0 0 0 1px rgba(12,8,5,.82)!important;
+}
+.plan-vintage-recurring-row+.plan-vintage-recurring-row{margin-top:7px!important}
+.plan-vintage-recurring-row .recurring-title b{color:#e7d4ae!important;font-family:Cinzel,Georgia,serif!important;font-weight:600!important}
+.plan-vintage-recurring-row .plan-row-meta{color:#937e60!important}
+.plan-vintage-recurring-row>b{color:#dfb865!important}
+.plan-vintage-recurring-row .status-chip{border-color:rgba(148,100,38,.4)!important;background:rgba(51,34,16,.55)!important;color:#bd9960!important}
+.plan-vintage-recurring-row .btn-soft,
+.plan-vintage-recurring-row .icon-btn{border-color:rgba(145,97,37,.46)!important;background:rgba(40,27,14,.54)!important;color:#cda961!important}
+.plan-vintage-recurring-row .deleteRecurring{color:#b97762!important}
+.plan-vintage-reminder{
+  border-color:#8b5d25!important;
+  background:linear-gradient(90deg,rgba(57,35,13,.62),rgba(22,13,7,.7))!important;
+}
+.plan-vintage-page .due-chip{border-color:#735022!important;background:#21150b!important;color:#d6ae68!important}
+
+/* Piggy Bank */
+.plan-vintage-piggy-toolbar{
+  position:relative;
+  padding:18px!important;
+  border:1px solid #6c481a!important;
+  border-radius:13px!important;
+  background:radial-gradient(circle at 85% 20%,rgba(150,95,25,.14),transparent 31%),linear-gradient(180deg,rgba(28,18,9,.97),rgba(10,7,4,.99))!important;
+  box-shadow:inset 0 0 0 2px #080503,inset 0 0 0 3px rgba(176,117,37,.17)!important;
+}
+.plan-vintage-piggy-toolbar::before{content:"♜";position:absolute;right:18px;bottom:7px;color:rgba(176,117,39,.12);font:64px Georgia,serif;pointer-events:none}
+.plan-vintage-piggy-toolbar .piggy-toolbar-copy>span{color:#92774e!important;font-family:Cinzel,Georgia,serif!important}
+.plan-vintage-piggy-toolbar .piggy-toolbar-copy h3{color:#ebce94!important;font:600 18px Cinzel,Georgia,serif!important}
+.plan-vintage-piggy-toolbar .piggy-toolbar-copy p{color:#a38b67!important}
+.plan-vintage-piggy-toolbar .piggy-add{
+  position:relative;z-index:1;
+  border:1px solid #9b6828!important;
+  color:#f0cb83!important;
+  background:linear-gradient(180deg,#563817,#28180a)!important;
+  box-shadow:inset 0 0 0 2px #160e07,0 5px 13px rgba(0,0,0,.32)!important;
+  font-family:Cinzel,Georgia,serif!important;
+}
+.plan-vintage-piggy-meta{padding:3px 7px!important;color:#9d835b!important;font-family:Cinzel,Georgia,serif!important}
+.plan-vintage-piggy-meta b{color:#d9ae5b!important}
+
+.plan-vintage-currency-card{
+  position:relative;
+  min-height:84px!important;
+  border:1px solid rgba(112,74,27,.62)!important;
+  border-radius:11px!important;
+  background:linear-gradient(135deg,rgba(35,23,11,.72),rgba(10,7,4,.94))!important;
+  box-shadow:inset 0 0 0 2px rgba(9,6,4,.9)!important;
+  overflow:hidden;
+}
+.plan-vintage-currency-card::after{content:"❧";position:absolute;right:7px;top:4px;color:rgba(177,120,39,.2);font:20px Georgia,serif;pointer-events:none}
+.plan-vintage-currency-card.has-savings{border-color:#8e6128!important;background:radial-gradient(circle at 86% 18%,rgba(182,119,33,.16),transparent 38%),linear-gradient(135deg,rgba(42,27,12,.78),rgba(10,7,4,.96))!important}
+.plan-vintage-currency-card .piggy-flag{border-color:#72501f!important;border-radius:50%!important;background:radial-gradient(circle at 40% 32%,#2c1d0d,#0d0905 72%)!important;box-shadow:inset 0 0 0 2px #090604,inset 0 0 0 3px rgba(167,111,34,.17)!important}
+.plan-vintage-currency-card .piggy-currency-identity strong{color:#e7d2aa!important}
+.plan-vintage-currency-card .piggy-currency-identity small{color:#927b58!important}
+.plan-vintage-currency-card .piggy-symbol{color:#d2a14c!important}
+.plan-vintage-currency-card .piggy-balance strong{color:#efce8b!important;text-shadow:0 0 12px rgba(200,137,47,.11)}
+.plan-vintage-currency-card .piggy-edit{border-color:rgba(146,96,34,.52)!important;background:rgba(53,34,14,.5)!important;color:#cfa75e!important}
+.plan-vintage-currency-card .piggy-empty-label{color:#806e54!important}
+
+.plan-vintage-chest{
+  min-height:225px!important;
+  border:1px solid #684619!important;
+  border-radius:14px!important;
+  background:radial-gradient(circle at 50% 75%,rgba(188,122,31,.22),transparent 40%),linear-gradient(180deg,rgba(18,12,7,.74),rgba(6,4,3,.98))!important;
+  box-shadow:inset 0 0 0 2px #080503,inset 0 0 0 3px rgba(150,99,31,.16),0 8px 23px rgba(0,0,0,.28)!important;
+}
+.plan-vintage-chest::after{content:"СЕМЕЙНАЯ КАЗНА";position:absolute;bottom:10px;left:50%;transform:translateX(-50%);color:#80602d;font:700 8px Cinzel,Georgia,serif;letter-spacing:.28em;white-space:nowrap}
+.plan-vintage-chest img{filter:sepia(.15) saturate(.95) drop-shadow(0 14px 24px rgba(0,0,0,.55)) drop-shadow(0 0 14px rgba(181,115,28,.08))!important}
+
+/* Piggy and Plan event dialogs continue the same material language. */
+.piggy-modal,
+.calendar-modal:has(#planEventForm),
+.calendar-modal:has(.plan-conflict-warning){
+  border:1px solid #785221!important;
+  border-radius:17px!important;
+  color:#e8d5b1!important;
+  background:radial-gradient(ellipse at 50% 0%,rgba(136,87,27,.16),transparent 44%),linear-gradient(180deg,#171008,#090604)!important;
+  box-shadow:inset 0 0 0 3px #080503,inset 0 0 0 4px rgba(187,128,42,.18),0 18px 48px rgba(0,0,0,.6)!important;
+}
+.piggy-modal .modal-head,
+.calendar-modal:has(#planEventForm) .modal-head,
+.calendar-modal:has(.plan-conflict-warning) .modal-head{border-bottom:1px solid rgba(126,84,31,.36);padding-bottom:11px}
+.piggy-modal .modal-head h2,
+.calendar-modal:has(#planEventForm) .modal-head h2,
+.calendar-modal:has(.plan-conflict-warning) .modal-head h2{color:#e8ca91!important;font-family:Cinzel,Georgia,serif!important}
+.piggy-modal .field label,
+.calendar-modal:has(#planEventForm) .field label{color:#a88e66!important}
+.piggy-modal input,.piggy-modal select,
+.calendar-modal:has(#planEventForm) input,
+.calendar-modal:has(#planEventForm) select,
+.calendar-modal:has(#planEventForm) textarea{border-color:#60431f!important;background:#0d0906!important;color:#eadbbd!important}
+.piggy-modal .btn-primary,
+.calendar-modal:has(#planEventForm) .btn-primary,
+.calendar-modal:has(.plan-conflict-warning) .btn-primary{border-color:#9d6a29!important;background:linear-gradient(180deg,#553817,#26170a)!important;color:#f0ce89!important}
+.calendar-modal:has(#planEventForm) .plan-event-owner{border-color:#6a481d!important;background:rgba(47,30,12,.48)!important}
+.calendar-modal:has(#planEventForm) .plan-event-owner strong{color:#d9ad5d!important}
+.calendar-modal:has(.plan-conflict-warning) .plan-conflict-warning{border-color:#795222!important;background:rgba(62,38,14,.55)!important;color:#dcc8a3!important}
+
+@media(max-width:760px){
+  .plan-vintage-subsection-heading{margin:5px 2px 8px!important;padding:14px 38px 12px!important;border-radius:13px}
+  .plan-vintage-subsection-heading::before{left:11px}.plan-vintage-subsection-heading::after{right:11px}
+  .plan-vintage-subsection-heading .page-title{font-size:18px!important}
+  .plan-vintage-subsection-heading .page-subtitle{font-size:8px!important}
+  .plan-vintage-back{margin:0 2px 8px!important}
+  .plan-vintage-subsection-panel{margin:0;padding:10px!important;border-radius:14px}
+  .plan-vintage-summary{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+  .plan-vintage-summary>div{padding:6px 3px!important}
+  .plan-vintage-summary span{font-size:6px!important}
+  .plan-vintage-summary b{font-size:10px!important}
+  .plan-vintage-editor{padding:11px!important}
+  .plan-vintage-editor::before{font-size:7px;margin-bottom:7px}
+  .plan-vintage-editor .plan-card-title h3{font-size:13px!important}
+  .plan-vintage-recurring-row{padding:8px!important}
+  .plan-vintage-piggy-toolbar{padding:12px!important;display:grid!important;grid-template-columns:1fr!important}
+  .plan-vintage-piggy-toolbar::before{font-size:45px}
+  .plan-vintage-piggy-toolbar .piggy-add{width:100%!important}
+  .plan-vintage-currency-card{min-height:68px!important}
+  .plan-vintage-chest{min-height:175px!important}
+  .plan-vintage-subsection-footer{margin-top:11px}
+}
+
+@media(max-width:390px){
+  .plan-vintage-subsection-heading .page-subtitle{display:none!important}
+  .plan-vintage-subsection-heading{padding-top:13px!important;padding-bottom:11px!important}
+  .plan-vintage-back .btn{width:100%}
+}
