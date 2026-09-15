@@ -14,6 +14,14 @@ const skippedDirs=new Set(['.git','node_modules','www','android','test-results',
 const failures=[];
 let checked=0,total=0;
 
+function limitFor(relative){
+  // Retained high-resolution Plan PNGs are source/master artwork only.
+  // Runtime builds use optimized WebP copies from assets/plan-runtime and
+  // prepare-mobile.mjs intentionally excludes these masters from the APK.
+  if(/^assets\/plan-barque \(\d+\)\.png$/.test(relative))return 3*MiB;
+  return explicitLimits.get(relative)??defaultLimit;
+}
+
 async function walk(dir){
   for(const entry of await readdir(dir,{withFileTypes:true})){
     if(entry.isDirectory()&&skippedDirs.has(entry.name))continue;
@@ -25,7 +33,7 @@ async function walk(dir){
     if(!entry.isFile())continue;
     const info=await stat(absolute);
     const relative=path.relative(root,absolute).split(path.sep).join('/');
-    const limit=explicitLimits.get(relative)??defaultLimit;
+    const limit=limitFor(relative);
     checked+=1;total+=info.size;
     if(info.size>limit)failures.push({relative,size:info.size,limit});
   }
