@@ -15,7 +15,7 @@
   }
 
   function addCalendarDecor(root){
-    root.classList.add('plan-baroque-page','is-baroque-calendar');
+    root.classList.add('plan-baroque-page','is-baroque-calendar','plan-raster-artwork');
     addOuterFrame(root);
     if(!root.querySelector('.plan-baroque-side')){
       root.insertAdjacentHTML('afterbegin','<span class="plan-baroque-side is-left" aria-hidden="true"></span><span class="plan-baroque-side is-right" aria-hidden="true"></span>');
@@ -54,7 +54,8 @@
   }
 
   function addSubsectionDecor(root){
-    root.classList.add('plan-baroque-page','is-baroque-subsection');
+    const isExpenses=planSection==='recurring';
+    root.classList.add('plan-baroque-page','is-baroque-subsection','plan-raster-artwork',isExpenses?'is-expenses-section':'is-piggy-section');
     addOuterFrame(root);
     root.querySelector('.plan-vintage-actions')?.classList.add('plan-baroque-actions');
     root.querySelectorAll('.plan-vintage-action').forEach(button=>button.classList.add('plan-baroque-action'));
