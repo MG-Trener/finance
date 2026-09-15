@@ -6,6 +6,7 @@
   function addOuterFrame(root){
     if(root.querySelector('.plan-baroque-corner'))return;
     root.insertAdjacentHTML('afterbegin',
+      '<span class="plan-baroque-top-ornament" aria-hidden="true"></span>'+
       '<span class="plan-baroque-corner is-tl" aria-hidden="true"></span>'+
       '<span class="plan-baroque-corner is-tr" aria-hidden="true"></span>'+
       '<span class="plan-baroque-corner is-bl" aria-hidden="true"></span>'+
