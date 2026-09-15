@@ -1,17 +1,15 @@
 /* Final Plan corrections based on desktop/mobile screenshots.
    Loaded last among Plan styles so these rules are authoritative. */
 
-/* ---------- First-paint protection ----------
-   Keep the Plan layout in flow, but do not expose the older CSS/SVG treatment
-   while the raster WebP artwork is still decoding. */
-.plan-baroque-page.plan-artwork-loading{
-  visibility:hidden!important;
-  opacity:0!important;
-}
+/* ---------- Stable paint ----------
+   Plan is rendered in its final classes synchronously. Never hide/fade the page
+   during image decoding or background synchronization. */
+.plan-baroque-page,
+.plan-baroque-page.plan-artwork-loading,
 .plan-baroque-page.plan-artwork-ready{
   visibility:visible!important;
   opacity:1!important;
-  transition:opacity .12s ease!important;
+  transition:none!important;
 }
 
 /* ---------- Outer top corners ---------- */
@@ -90,7 +88,7 @@
 .plan-baroque-calendar-shell .plan-calendar-day.is-selected:nth-child(7n){border-right:0!important}
 
 /* ---------- Calendar legend ----------
-   The ornament is now a separator ABOVE the labels. Nothing is painted behind text. */
+   Clean reading row: no plaque/background artwork and nothing behind captions. */
 .plan-baroque-legend{
   position:relative!important;
   isolation:isolate!important;
@@ -98,28 +96,25 @@
   align-items:center!important;
   justify-content:center!important;
   flex-wrap:wrap!important;
-  gap:14px!important;
+  gap:16px!important;
   min-height:0!important;
-  margin:9px 3px 0!important;
-  padding:22px 8px 7px!important;
+  margin:8px 10px 0!important;
+  padding:9px 4px 4px!important;
+  border:0!important;
+  border-top:1px solid rgba(171,112,39,.42)!important;
+  border-radius:0!important;
   background:none!important;
+  background-image:none!important;
+  background-color:transparent!important;
   box-shadow:none!important;
   overflow:visible!important;
 }
-.plan-baroque-legend::before{
-  content:""!important;
-  position:absolute!important;
-  z-index:1!important;
-  top:0!important;
-  left:50%!important;
-  width:min(72%,330px)!important;
-  height:18px!important;
-  transform:translateX(-50%)!important;
-  background:var(--plan-art-divider-thin) center/contain no-repeat!important;
-  opacity:.82!important;
-  pointer-events:none!important;
+.plan-baroque-legend::before,
+.plan-baroque-legend::after{
+  content:none!important;
+  display:none!important;
+  background:none!important;
 }
-.plan-baroque-legend::after{content:none!important;display:none!important}
 .plan-baroque-legend>span:first-child{display:none!important}
 .plan-baroque-legend span:not(:first-child){
   position:relative!important;
@@ -132,75 +127,35 @@
   border:0!important;
   border-radius:0!important;
   background:transparent!important;
+  background-image:none!important;
   box-shadow:none!important;
   text-shadow:none!important;
-  color:#bfa476!important;
+  color:#c6aa79!important;
   line-height:1.2!important;
 }
-.plan-baroque-legend .plan-vintage-legend-svg{
-  flex:0 0 auto!important;
-}
+.plan-baroque-legend .plan-vintage-legend-svg{flex:0 0 auto!important}
 
-/* ---------- Lower section ---------- */
+/* ---------- Lower section ----------
+   The old slogan is removed from markup; keep this as a defensive fallback. */
+.plan-baroque-motto,
+.plan-vintage-motto{
+  display:none!important;
+}
 .plan-baroque-page.is-baroque-calendar{
-  padding-bottom:52px!important;
+  padding-bottom:34px!important;
 }
 .plan-baroque-events{
-  margin-bottom:10px!important;
-}
-
-/* Motto is text only. The page's own bottom corners/fleur provide the ornament,
-   so no divider is allowed inside the text block. */
-.plan-baroque-motto{
-  position:relative!important;
-  z-index:3!important;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:center!important;
-  width:auto!important;
-  min-height:0!important;
-  margin:10px 28px 38px!important;
-  padding:4px 12px 0!important;
-  background:none!important;
-  border:0!important;
-  box-shadow:none!important;
-  overflow:visible!important;
-  text-align:center!important;
-}
-.plan-baroque-motto::before,
-.plan-baroque-motto::after{
-  content:none!important;
-  display:none!important;
-  background:none!important;
-}
-.plan-baroque-motto>span{display:none!important}
-.plan-baroque-motto p{
-  position:relative!important;
-  z-index:3!important;
-  width:auto!important;
-  max-width:none!important;
-  margin:0!important;
-  padding:0!important;
-  background:transparent!important;
-  box-shadow:none!important;
-  color:#a9854d!important;
-  font-size:9px!important;
-  line-height:1.45!important;
-  letter-spacing:.18em!important;
-  text-align:center!important;
-  text-transform:uppercase!important;
-  white-space:nowrap!important;
-  text-shadow:0 1px 2px rgba(0,0,0,.75)!important;
+  margin-bottom:8px!important;
 }
 .plan-baroque-bottom-fleur{
-  bottom:-10px!important;
+  bottom:7px!important;
   z-index:6!important;
-  width:70px!important;
-  height:70px!important;
+  width:64px!important;
+  height:64px!important;
 }
 .plan-baroque-corner.is-bl,
 .plan-baroque-corner.is-br{
-  bottom:-3px!important;
+  bottom:4px!important;
 }
 
 /* ---------- Piggy Bank hero ---------- */
@@ -255,9 +210,8 @@
   .plan-baroque-page .plan-baroque-corner.is-tl{left:-1px!important}
   .plan-baroque-page .plan-baroque-corner.is-tr{right:-1px!important}
 
-  /* Shorter decorative tail on mobile. */
   .plan-baroque-page.is-baroque-calendar{
-    padding-bottom:42px!important;
+    padding-bottom:26px!important;
   }
   .plan-baroque-calendar-shell .plan-calendar-day.is-selected{
     background:
@@ -270,13 +224,9 @@
   }
 
   .plan-baroque-legend{
-    gap:10px!important;
-    margin-top:7px!important;
-    padding:18px 5px 5px!important;
-  }
-  .plan-baroque-legend::before{
-    width:68%!important;
-    height:14px!important;
+    gap:11px!important;
+    margin:7px 8px 0!important;
+    padding:8px 2px 3px!important;
   }
   .plan-baroque-legend span:not(:first-child){
     gap:3px!important;
@@ -287,23 +237,14 @@
     height:19px!important;
   }
 
-  .plan-baroque-events{margin-bottom:7px!important}
-  .plan-baroque-motto{
-    margin:7px 16px 27px!important;
-    padding:2px 8px 0!important;
-  }
-  .plan-baroque-motto p{
-    font-size:8px!important;
-    line-height:1.4!important;
-    letter-spacing:.14em!important;
-  }
+  .plan-baroque-events{margin-bottom:5px!important}
   .plan-baroque-bottom-fleur{
-    width:54px!important;
-    height:54px!important;
-    bottom:-7px!important;
+    width:48px!important;
+    height:48px!important;
+    bottom:6px!important;
   }
   .plan-baroque-corner.is-bl,
-  .plan-baroque-corner.is-br{bottom:-1px!important}
+  .plan-baroque-corner.is-br{bottom:3px!important}
 
   .is-piggy-section .plan-vintage-piggy-toolbar{
     grid-template-columns:minmax(0,1fr) 58px!important;
@@ -336,16 +277,9 @@
 @media(max-width:430px){
   .plan-baroque-legend{
     gap:8px!important;
-    padding-top:17px!important;
+    margin-inline:5px!important;
   }
   .plan-baroque-legend span:not(:first-child){font-size:8px!important}
-  .plan-baroque-motto{
-    margin-bottom:24px!important;
-  }
-  .plan-baroque-motto p{
-    font-size:7.5px!important;
-    letter-spacing:.12em!important;
-  }
   .is-piggy-section .plan-vintage-piggy-toolbar{
     grid-template-columns:minmax(0,1fr) 52px!important;
   }
