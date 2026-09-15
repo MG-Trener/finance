@@ -3,8 +3,20 @@
   if(typeof planPage!=='function')return;
   const basePlanPageBaroque=planPage;
 
+  function addOuterFrame(root){
+    if(root.querySelector('.plan-baroque-corner'))return;
+    root.insertAdjacentHTML('afterbegin',
+      '<span class="plan-baroque-corner is-tl" aria-hidden="true"></span>'+
+      '<span class="plan-baroque-corner is-tr" aria-hidden="true"></span>'+
+      '<span class="plan-baroque-corner is-bl" aria-hidden="true"></span>'+
+      '<span class="plan-baroque-corner is-br" aria-hidden="true"></span>'+
+      '<span class="plan-baroque-bottom-fleur" aria-hidden="true"></span>'
+    );
+  }
+
   function addCalendarDecor(root){
     root.classList.add('plan-baroque-page','is-baroque-calendar');
+    addOuterFrame(root);
     if(!root.querySelector('.plan-baroque-side')){
       root.insertAdjacentHTML('afterbegin','<span class="plan-baroque-side is-left" aria-hidden="true"></span><span class="plan-baroque-side is-right" aria-hidden="true"></span>');
     }
@@ -43,6 +55,7 @@
 
   function addSubsectionDecor(root){
     root.classList.add('plan-baroque-page','is-baroque-subsection');
+    addOuterFrame(root);
     root.querySelector('.plan-vintage-actions')?.classList.add('plan-baroque-actions');
     root.querySelectorAll('.plan-vintage-action').forEach(button=>button.classList.add('plan-baroque-action'));
     root.querySelector('.plan-vintage-subsection-heading')?.classList.add('plan-baroque-subsection-heading');
