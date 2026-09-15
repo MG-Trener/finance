@@ -19,21 +19,15 @@ const androidWorkflow=fs.readFileSync(path.join(root,'.github/workflows/android-
 assert(androidWorkflow.includes('Lock Android to portrait orientation'),'android workflow: portrait lock step is missing');
 assert(androidWorkflow.includes('android:screenOrientation="portrait"'),'android workflow: MainActivity portrait lock is missing');
 
-// Goal funding must remain one atomic accounting action: contribution + linked transaction.
-const goalMigration='supabase/migrations/20260826_006_link_goal_contributions_to_expenses.sql';
-const goalProtectionMigration='supabase/migrations/20260826_007_protect_linked_goal_transactions.sql';
-assert(exists(goalMigration),'goal accounting migration is missing');
-assert(exists(goalProtectionMigration),'goal transaction protection migration is missing');
-if(exists(goalMigration)){
-  const sql=fs.readFileSync(path.join(root,goalMigration),'utf8');
-  assert(sql.includes('function public.contribute_to_goal'),'goal migration: contribute_to_goal RPC is missing');
-  assert(sql.includes("'Цели и накопления'"),'goal migration: accounting category is missing');
-  assert(sql.includes('transaction_id'),'goal migration: contribution/transaction link is missing');
-  assert(sql.includes('person_id'),'goal migration: contributor person link is missing');
-}
-const goalsJs=fs.readFileSync(path.join(root,'src/js/features/goals.js'),'utf8');
-assert(goalsJs.includes("sb.rpc('contribute_to_goal'"),'goals UI must use atomic contribute_to_goal RPC');
-assert(goalsJs.includes('linked_user_id===state.user?.id'),'goals UI must attribute funding to the signed-in family member');
+// Goals were retired from the application in September 2026. Historical schema
+// migrations remain for auditability, but the UI, RPC and realtime subscriptions
+// must not return to the active application graph.
+const goalRetirementMigration='supabase/migrations/20260915_022_retire_financial_goals_rpc.sql';
+assert(exists(goalRetirementMigration),'goal retirement migration is missing');
+assert(!exists('src/js/features/goals.js'),'retired Goals UI module must remain removed');
+const noGoalsJs=fs.readFileSync(path.join(root,'src/js/core/no-goals.js'),'utf8');
+assert(noGoalsJs.includes("state.goals=[]"),'retired goal state must remain empty');
+assert(noGoalsJs.includes("state.goalContributions=[]"),'retired goal contribution state must remain empty');
 
 // The optimized artwork is the production background; the legacy PNG is only a tiny compatibility fallback.
 assert(exists('assets/backgrounds/site-bg.webp'),'optimized application background is missing');
@@ -47,8 +41,9 @@ assert(!html.includes('treasury-splash'),'custom startup splash must remain remo
 assert(!html.includes('src/js/ui/splash.js'),'splash animation script must not be loaded');
 assert(!html.includes('assets/splash-title-pirate.png'),'splash title artwork must not be loaded at startup');
 assert(html.includes('<div id="app"><div class="boot"></div></div>'),'startup must use the empty boot host');
+assert(!html.includes('src/js/features/goals.js'),'retired Goals UI must not be loaded by index.html');
 
-// Piggy Bank must remain a first-class third Plan section with four supported currencies.
+// Piggy Bank must remain a first-class Plan section with four supported currencies.
 const piggyMigration='supabase/migrations/20260904_019_piggy_bank_balances.sql';
 const piggyIndexMigration='supabase/migrations/20260904_020_piggy_bank_actor_indexes.sql';
 assert(exists(piggyMigration),'piggy bank migration is missing');
@@ -59,7 +54,7 @@ assert(exists('assets/piggy-chest.svg'),'piggy bank treasure chest artwork is mi
 assert(html.includes('src/js/features/piggy-bank.js'),'piggy bank UI module is not loaded');
 const piggyJs=fs.readFileSync(path.join(root,'src/js/features/piggy-bank.js'),'utf8');
 for(const code of ['KZT','RUB','USD','CNY'])assert(piggyJs.includes(code),`piggy bank currency is missing: ${code}`);
-assert(piggyJs.includes('Копилка'),'Plan third tab must be labelled Копилка');
+assert(piggyJs.includes('Копилка'),'Plan section must be labelled Копилка');
 assert(piggyJs.includes("uiSound(edit?'success':'income')"),'piggy bank add action must use the coin sound');
 if(exists(piggyMigration)){
   const sql=fs.readFileSync(path.join(root,piggyMigration),'utf8');
@@ -104,6 +99,8 @@ assert(transfersJs.includes("type:'transfer'"),'transfer UI does not create neut
 const offlineJs=fs.readFileSync(path.join(root,'src/js/core/offline-store.js'),'utf8');
 const realtimeJs=fs.readFileSync(path.join(root,'src/js/core/realtime.js'),'utf8');
 for(const [label,source] of [['runtime',runtimeJs],['offline',offlineJs],['realtime',realtimeJs]])assert(!/\bbudgets\b|\bbudget:\s*\{/.test(source),`${label}: obsolete Budget feature reference remains`);
+assert(!realtimeJs.includes("table:'financial_goals'"),'realtime: retired financial_goals subscription remains');
+assert(!realtimeJs.includes("table:'goal_contributions'"),'realtime: retired goal_contributions subscription remains');
 
 // Primary navigation requirements.
 const shellJs=fs.readFileSync(path.join(root,'src/js/ui/app-shell.js'),'utf8');
