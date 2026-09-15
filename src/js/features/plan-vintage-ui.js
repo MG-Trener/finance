@@ -5,6 +5,16 @@
 
   const basePlanPageVintage=planPage;
 
+  function ensureReferenceFont(){
+    if(document.querySelector('link[data-plan-reference-font]'))return;
+    const link=document.createElement('link');
+    link.rel='stylesheet';
+    link.href='https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&display=swap';
+    link.dataset.planReferenceFont='1';
+    document.head.appendChild(link);
+  }
+  ensureReferenceFont();
+
   const actionIcon=(kind)=>kind==='expenses'
     ?`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 6.5h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-14a2 2 0 0 1-2-2v-11h2Z"/><path d="M2.5 7V5.8a2.3 2.3 0 0 1 2.3-2.3h11.7V7"/><path d="M15.5 11h5v4h-5a2 2 0 1 1 0-4Z"/><circle cx="16.3" cy="13" r=".6"/></svg>`
     :`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 11.5c0-3.6 3-6.5 7-6.5 3.5 0 6.3 2 7.1 4.8l2.1 1v4l-2.1.8a6.7 6.7 0 0 1-2.2 2.2V21h-2.8v-2H9.4v2H6.7v-3.1A6.5 6.5 0 0 1 5 13.5v-2Z"/><path d="M8.5 6 7 3.8c2.6-.6 4.6-.2 6.2 1.2"/><circle cx="15.7" cy="9.4" r=".7"/><path d="M3 12H1.8"/></svg>`;
@@ -140,6 +150,13 @@
     }
   }
 
+  function addReferenceOrnaments(root){
+    root.classList.add('plan-reference-ornate');
+    if(planSection==='calendar'&&!root.querySelector('.plan-frame-corner')){
+      ['tl','tr','bl','br'].forEach(pos=>root.insertAdjacentHTML('beforeend',`<span class="plan-frame-corner ${pos}" aria-hidden="true"></span>`));
+    }
+  }
+
   planPage=function(){
     const html=basePlanPageVintage();
     const template=document.createElement('template');
@@ -153,6 +170,7 @@
     decorateActionTabs(root);
     if(planSection==='calendar')decorateCalendar(root);
     else decorateSubsection(root);
+    addReferenceOrnaments(root);
 
     return root.outerHTML;
   };
