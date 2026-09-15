@@ -25,7 +25,7 @@
   function visibleOn(dateKey,own=ownPerson()){
     return allOn(dateKey).filter(row=>canSee(row,own));
   }
-  function icon(type){return type==='birthday'?'🎂':type==='meeting'?'🤝':'✦'}
+  function visualClass(type){return type==='birthday'?'is-birthday':type==='meeting'?'is-meeting':'is-generic'}
   function label(type){return type==='birthday'?'День рождения':type==='meeting'?'Встреча':'Событие'}
   function html(value){
     if(typeof esc==='function')return esc(String(value??''));
@@ -52,7 +52,7 @@
       const types=[...new Set(events.map(row=>row.event_type||'other'))];
       const icons=document.createElement('span');
       icons.className='plan-day-icons';
-      icons.innerHTML=types.map(type=>`<span class="plan-day-type-icon ${type==='other'?'is-generic':''}" aria-hidden="true">${icon(type)}</span>`).join('');
+      icons.innerHTML=types.map(type=>`<span class="plan-day-type-icon ${visualClass(type)}" aria-hidden="true"></span>`).join('');
       const count=document.createElement('span');
       count.className='calendar-entry-count';
       count.textContent=String(events.length);
@@ -69,8 +69,9 @@
       <div class="plan-day-events">${events.map(row=>{
         const editable=Boolean(own&&row.person_id===own.id);
         const annual=isBirthday(row)?' · ежегодно':'';
-        return `<article class="plan-day-event ${row.event_type?`type-${row.event_type}`:'type-other'}">
-          <span class="plan-event-icon" aria-hidden="true">${icon(row.event_type)}</span>
+        const typeClass=row.event_type?`type-${row.event_type}`:'type-other';
+        return `<article class="plan-day-event ${typeClass}">
+          <span class="plan-event-icon ${visualClass(row.event_type)}" aria-hidden="true"></span>
           <div class="plan-event-copy"><strong>${html(row.title||'Мероприятие')}</strong><small>${html(personName(row.person_id))} · ${html(label(row.event_type))}${annual}</small>${row.comment?`<p>${html(row.comment)}</p>`:''}</div>
           ${editable?`<button type="button" class="btn btn-soft btn-small plan-edit-event" data-plan-edit="${html(row.id)}">Изменить</button>`:''}
         </article>`;
