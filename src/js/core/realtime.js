@@ -19,6 +19,8 @@
     {table:'subcategories',stateKey:'subcategories',noFamilyFilter:true}
   ];
 
+  function planIsOpen(){return state.view==='recurring'}
+
   function canRerenderSafely(){
     if(document.querySelector('.modal'))return false;
     const active=document.activeElement;
@@ -26,16 +28,21 @@
     return true;
   }
 
-  function requestRender(){
+  function requestRender(allowPlan=false){
     if(typeof renderApp!=='function'||!state.family)return;
+    // Most realtime entities do not change the visible Plan calendar. Rebuilding
+    // the entire ornate Plan for transaction/category updates creates a visible
+    // flash on Android. Only recurring-payment updates explicitly opt in.
+    if(planIsOpen()&&!allowPlan){pendingRender=false;return}
     if(canRerenderSafely()){pendingRender=false;renderApp()}else pendingRender=true;
   }
 
   function flushPendingRender(){
     if(pendingRender&&canRerenderSafely()){
-      pendingRender=false;renderApp();
+      pendingRender=false;
+      if(!planIsOpen())renderApp();
     }
-    if(pendingFullRefresh&&canRerenderSafely()){
+    if(pendingFullRefresh&&canRerenderSafely()&&!planIsOpen()){
       pendingFullRefresh=false;refreshFamilyData(true);
     }
   }
@@ -82,12 +89,12 @@
     if(payload.eventType==='DELETE'){
       state[config.stateKey]=list.filter(x=>x.id!==id);
       if(config.table==='categories')state.subcategories=state.subcategories.filter(x=>x.category_id!==id);
-      window.FinanceOffline?.persistSnapshotSoon?.();return requestRender();
+      window.FinanceOffline?.persistSnapshotSoon?.();return requestRender(config.table==='recurring_payments');
     }
 
     const row=payload.new;if(!entityBelongs(config,row))return;
     upsertById(list,row);sortEntityState(config);
-    window.FinanceOffline?.persistSnapshotSoon?.();requestRender();
+    window.FinanceOffline?.persistSnapshotSoon?.();requestRender(config.table==='recurring_payments');
   }
 
   function stopChannel(){
@@ -134,12 +141,20 @@
       if(active.error)throw active.error;if(trash.error)throw trash.error;
       for(const row of active.data||[]){const local=byId(state.transactions,row.id)||byId(state.trashTransactions,row.id);if(!local?._offline)syncTransactionState(row)}
       for(const row of trash.data||[]){const local=byId(state.transactions,row.id)||byId(state.trashTransactions,row.id);if(!local?._offline)syncTransactionState(row)}
-      lastForegroundRefresh=now;requestRender();
+      lastForegroundRefresh=now;
+      if(!planIsOpen())requestRender();
     }catch(error){console.warn('Фоновая синхронизация операций недоступна',error)}finally{refreshInFlight=false}
   }
 
   async function refreshFamilyData(force=false){
     if(!navigator.onLine||document.hidden||!state.family?.id||state.user?._offlineLocal||fullRefreshInFlight)return false;
+    // Realtime remains active while Plan is open. Avoid the safety-net full
+    // loadData() refresh because it reconstructs the entire ornate Plan and was
+    // the source of the once-per-minute visual blink.
+    if(planIsOpen()){
+      pendingFullRefresh=true;
+      return false;
+    }
     const now=Date.now();
     if(!force&&now-lastFullRefresh<FULL_REFRESH_INTERVAL)return false;
     if(!canRerenderSafely()){
@@ -194,11 +209,11 @@
 
   // Realtime remains the fast path. This one-minute check is only a safety net
   // for missed websocket events, Android network transitions and long-running
-  // sessions. It runs only while the app is visible and online.
+  // sessions. It does not rebuild Plan while that view is open.
   setInterval(()=>{
     if(document.hidden||!navigator.onLine)return;
     if(state.user?._offlineLocal)window.FinanceOfflineSession?.reconnectIfPossible?.();
-    else refreshFamilyData();
+    else if(!planIsOpen())refreshFamilyData();
   },FULL_REFRESH_INTERVAL);
 
   window.FinanceRealtime={
