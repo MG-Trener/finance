@@ -31,6 +31,13 @@
     }
   }
 
+  function compactDateLabel(value){
+    return String(value||'')
+      .replace(/^[^,]+,\s*/,'')
+      .replace(/\s+\d{4}\s*г?\.?$/i,'')
+      .trim();
+  }
+
   function decorateCalendar(root){
     const card=root.querySelector('.plan-calendar-card');
     if(!card)return;
@@ -55,11 +62,22 @@
       const text=icon.textContent||'';
       if(text.includes('🎂'))icon.classList.add('is-birthday');
       else if(text.includes('🤝'))icon.classList.add('is-meeting');
-      else icon.classList.add('is-generic-event');
+      else{
+        icon.classList.add('is-generic-event');
+        icon.textContent='★';
+      }
     });
 
     const list=root.querySelector('.plan-day-list-card,.plan-day-empty');
     if(list)list.classList.add('plan-vintage-events');
+    const listHead=root.querySelector('.plan-day-list-head');
+    if(listHead){
+      const label=listHead.querySelector('span');
+      const title=listHead.querySelector('strong');
+      if(label)label.textContent='Семейный план';
+      if(title)title.textContent=`События на ${compactDateLabel(title.textContent)}`;
+    }
+
     const workspace=root.querySelector('.plan-calendar-workspace');
     if(workspace&&!workspace.querySelector('.plan-vintage-motto')){
       workspace.insertAdjacentHTML('beforeend',`<div class="plan-vintage-motto" aria-hidden="true"><span></span><p>Большие дела<br>начинаются с сегодня</p><span></span></div>`);
