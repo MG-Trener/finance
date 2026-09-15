@@ -1,0 +1,109 @@
+/* Reference-driven ornament layer for Plan. Loaded after the base vintage skin. */
+.plan-vintage-page.plan-reference-ornate{
+  font-family:Inter,sans-serif;
+}
+.plan-vintage-page.plan-reference-ornate.is-calendar{
+  position:relative;
+  padding:34px 24px 28px;
+  border:1px solid #7c541d;
+  border-radius:22px;
+  background:
+    radial-gradient(ellipse at 50% 0,rgba(169,105,31,.14),transparent 28%),
+    repeating-linear-gradient(102deg,rgba(255,255,255,.006) 0 1px,transparent 1px 4px),
+    linear-gradient(180deg,#100b07,#080604 72%,#0d0906);
+  box-shadow:
+    inset 0 0 0 3px #070503,
+    inset 0 0 0 4px rgba(221,163,64,.38),
+    inset 0 0 0 9px rgba(46,29,9,.92),
+    inset 0 0 0 10px rgba(157,101,30,.28),
+    inset 0 0 70px rgba(103,63,17,.09),
+    0 16px 42px rgba(0,0,0,.5);
+}
+.plan-frame-corner{position:absolute;z-index:5;width:118px;height:118px;background:url('../../assets/plan-vintage-corner.svg') center/contain no-repeat;pointer-events:none;filter:drop-shadow(0 0 4px rgba(216,153,54,.12))}
+.plan-frame-corner.tl{top:4px;left:4px}
+.plan-frame-corner.tr{top:4px;right:4px;transform:scaleX(-1)}
+.plan-frame-corner.bl{bottom:4px;left:4px;transform:scaleY(-1)}
+.plan-frame-corner.br{right:4px;bottom:4px;transform:scale(-1)}
+
+.plan-reference-ornate .plan-vintage-actions{margin:0 16px -7px;padding:0 20px}
+.plan-reference-ornate .plan-vintage-actions::before{content:"";width:42px;height:52px;background:url('../../assets/plan-vintage-fleur.svg') center/contain no-repeat;filter:drop-shadow(0 0 7px rgba(212,148,50,.2))}
+.plan-reference-ornate .plan-vintage-action{border-radius:7px!important;border-color:#9b6d2b!important;box-shadow:inset 0 0 0 2px #100a05,inset 0 0 0 3px rgba(230,176,78,.28),0 6px 17px #0009!important}
+
+.plan-reference-ornate .plan-vintage-calendar{border-radius:13px!important;padding:26px 19px 17px!important;background:linear-gradient(180deg,rgba(19,13,8,.96),rgba(9,6,4,.98))!important}
+.plan-reference-ornate .plan-vintage-calendar::before,.plan-reference-ornate .plan-vintage-calendar::after{content:""!important;width:66px;height:66px;top:4px;background:url('../../assets/plan-vintage-corner.svg') center/contain no-repeat;opacity:.82}
+.plan-reference-ornate .plan-vintage-calendar::before{left:4px!important;transform:none!important}
+.plan-reference-ornate .plan-vintage-calendar::after{right:4px!important;transform:scaleX(-1)!important}
+
+.plan-reference-ornate .plan-vintage-crown{top:-29px;width:76px;height:87px;font-size:0!important;background:url('../../assets/plan-vintage-fleur.svg') center/contain no-repeat;filter:drop-shadow(0 2px 0 #3a2109) drop-shadow(0 0 9px rgba(225,159,54,.17))}
+.plan-reference-ornate .plan-vintage-crown span{display:none}
+.plan-reference-ornate .plan-vintage-crown::before,.plan-reference-ornate .plan-vintage-crown::after{top:48px;width:86px;background:linear-gradient(90deg,transparent,#7d511c,#d39a3d)}
+.plan-reference-ornate .plan-vintage-crown::before{right:62px}.plan-reference-ornate .plan-vintage-crown::after{left:62px}
+
+.plan-reference-ornate .plan-vintage-month-toolbar{grid-template-columns:92px minmax(0,1fr) 92px!important;padding:25px 9px 24px!important;gap:4px!important}
+.plan-reference-ornate .plan-vintage-month-title{
+  min-height:150px;
+  border:0!important;
+  border-radius:0!important;
+  padding:28px 82px 18px!important;
+  background:
+    url('../../assets/plan-vintage-cartouche.svg') center/100% 100% no-repeat,
+    radial-gradient(ellipse at center,rgba(78,48,16,.16),transparent 64%)!important;
+  box-shadow:none!important;
+}
+.plan-reference-ornate .plan-vintage-month-title::before,.plan-reference-ornate .plan-vintage-month-title::after{display:none!important}
+.plan-reference-ornate .plan-vintage-flourish{display:none}
+.plan-reference-ornate .plan-vintage-month-title strong{font-family:"Cormorant Garamond",Georgia,serif!important;font-size:50px!important;font-weight:600!important;letter-spacing:.01em;color:#f0dfbd!important;text-shadow:0 1px 0 #2d1907,0 0 12px rgba(225,167,67,.13)}
+.plan-reference-ornate .plan-vintage-year{font-family:"Cormorant Garamond",Georgia,serif;font-size:24px;letter-spacing:.35em;text-indent:.35em;margin-top:0;color:#e9cf95}
+.plan-reference-ornate .plan-vintage-month-title small{margin-top:6px!important;font-family:Inter,sans-serif;font-size:8px!important;color:#806943!important;letter-spacing:.08em}
+
+.plan-reference-ornate .plan-vintage-month-toolbar .calendar-arrow{position:relative;width:56px!important;height:56px!important;z-index:2}
+.plan-reference-ornate .plan-vintage-month-toolbar .calendar-arrow::before{content:"";position:absolute;z-index:-1;width:142px;height:83px;top:50%;left:50%;background:url('../../assets/plan-vintage-laurel.svg') center/contain no-repeat;transform:translate(-56%,-48%) rotate(-7deg);pointer-events:none;opacity:.92}
+.plan-reference-ornate .plan-vintage-month-toolbar .calendar-arrow:last-child::before{transform:translate(-44%,-48%) scaleX(-1) rotate(-7deg)}
+
+.plan-reference-ornate .plan-vintage-calendar .husband-calendar-swipe{border-radius:8px!important;border-color:#815a22!important;box-shadow:inset 0 0 0 2px #090604,inset 0 0 0 3px rgba(190,127,38,.2)!important}
+.plan-reference-ornate .plan-vintage-calendar .calendar-weekdays>div{font-family:"Cormorant Garamond",Georgia,serif;font-size:17px!important;font-weight:600;min-height:50px}
+.plan-reference-ornate .plan-vintage-calendar .calendar-day-number{font-family:"Cormorant Garamond",Georgia,serif;font-size:27px!important;font-weight:600!important;line-height:42px}
+.plan-reference-ornate .plan-vintage-calendar .plan-calendar-day{min-height:96px!important;background:linear-gradient(180deg,rgba(27,18,10,.28),rgba(10,7,4,.38))!important}
+.plan-reference-ornate .plan-vintage-calendar .plan-calendar-day.is-selected::before{top:8px;width:55px;height:55px;border:2px solid #d39a3f;box-shadow:inset 0 0 0 3px #251506,inset 0 0 0 4px rgba(245,194,99,.5),0 0 19px rgba(215,149,48,.52),0 0 0 7px rgba(113,72,22,.14)}
+
+.plan-reference-ornate .plan-vintage-calendar .plan-calendar-legend{position:relative;margin:18px 8px 0!important;padding:18px 15px 10px!important;border:1px solid rgba(137,91,29,.65);border-radius:9px;background:rgba(13,9,5,.62)}
+.plan-reference-ornate .plan-vintage-calendar .plan-calendar-legend::before{content:"";position:absolute;width:110px;height:24px;left:50%;top:-13px;transform:translateX(-50%);background:url('../../assets/plan-vintage-cartouche.svg') center/contain no-repeat;opacity:.48}
+.plan-reference-ornate .plan-vintage-calendar .plan-calendar-legend>span:first-child{display:none}
+
+.plan-reference-ornate .plan-vintage-events{margin:0 5px;border-radius:10px!important}
+.plan-reference-ornate .plan-vintage-events .plan-day-list-head strong{font-family:"Cormorant Garamond",Georgia,serif!important;font-size:30px!important;font-weight:600!important}
+.plan-reference-ornate .plan-vintage-events::before,.plan-reference-ornate .plan-vintage-events::after{content:"";top:7px;width:54px;height:54px;background:url('../../assets/plan-vintage-corner.svg') center/contain no-repeat;opacity:.58}
+.plan-reference-ornate .plan-vintage-events::before{left:5px}.plan-reference-ornate .plan-vintage-events::after{right:5px;transform:scaleX(-1)}
+
+.plan-reference-ornate .plan-vintage-motto{position:relative;margin-top:7px;padding:30px 120px 23px!important}
+.plan-reference-ornate .plan-vintage-motto::before,.plan-reference-ornate .plan-vintage-motto::after{content:"";position:absolute;bottom:0;width:112px;height:74px;background:url('../../assets/plan-vintage-laurel.svg') center/contain no-repeat;opacity:.72}
+.plan-reference-ornate .plan-vintage-motto::before{left:20px;transform:rotate(4deg)}
+.plan-reference-ornate .plan-vintage-motto::after{right:20px;transform:scaleX(-1) rotate(4deg)}
+.plan-reference-ornate .plan-vintage-motto p{font-family:Cinzel,Georgia,serif;color:#b38b4c;font-size:10px;letter-spacing:.34em;line-height:1.9}
+
+@media(max-width:760px){
+  .plan-vintage-page.plan-reference-ornate.is-calendar{padding:23px 7px 18px;border-radius:14px}
+  .plan-frame-corner{width:72px;height:72px}
+  .plan-reference-ornate .plan-vintage-actions{margin:0 2px -4px;padding:0 5px}
+  .plan-reference-ornate .plan-vintage-actions::before{display:none}
+  .plan-reference-ornate .plan-vintage-calendar{padding:18px 5px 9px!important}
+  .plan-reference-ornate .plan-vintage-calendar::before,.plan-reference-ornate .plan-vintage-calendar::after{width:42px;height:42px}
+  .plan-reference-ornate .plan-vintage-crown{top:-18px;width:48px;height:56px}
+  .plan-reference-ornate .plan-vintage-crown::before,.plan-reference-ornate .plan-vintage-crown::after{top:32px;width:39px}.plan-reference-ornate .plan-vintage-crown::before{right:39px}.plan-reference-ornate .plan-vintage-crown::after{left:39px}
+  .plan-reference-ornate .plan-vintage-month-toolbar{grid-template-columns:43px minmax(0,1fr) 43px!important;padding:14px 0 13px!important}
+  .plan-reference-ornate .plan-vintage-month-title{min-height:99px;padding:17px 28px 11px!important}
+  .plan-reference-ornate .plan-vintage-month-title strong{font-size:29px!important}
+  .plan-reference-ornate .plan-vintage-year{font-size:15px;letter-spacing:.28em;text-indent:.28em}
+  .plan-reference-ornate .plan-vintage-month-title small{display:none}
+  .plan-reference-ornate .plan-vintage-month-toolbar .calendar-arrow{width:36px!important;height:36px!important}
+  .plan-reference-ornate .plan-vintage-month-toolbar .calendar-arrow::before{width:80px;height:48px}
+  .plan-reference-ornate .plan-vintage-calendar .calendar-weekdays>div{min-height:34px;font-size:12px!important}
+  .plan-reference-ornate .plan-vintage-calendar .plan-calendar-day{min-height:59px!important}
+  .plan-reference-ornate .plan-vintage-calendar .calendar-day-number{font-size:18px!important;line-height:27px}
+  .plan-reference-ornate .plan-vintage-calendar .plan-calendar-day.is-selected::before{top:4px;width:35px;height:35px}
+  .plan-reference-ornate .plan-vintage-calendar .plan-calendar-legend{margin:10px 3px 0!important;padding:12px 5px 6px!important}
+  .plan-reference-ornate .plan-vintage-events .plan-day-list-head strong{font-size:21px!important}
+  .plan-reference-ornate .plan-vintage-motto{padding:20px 55px 13px!important}
+  .plan-reference-ornate .plan-vintage-motto::before,.plan-reference-ornate .plan-vintage-motto::after{width:55px;height:43px}.plan-reference-ornate .plan-vintage-motto::before{left:2px}.plan-reference-ornate .plan-vintage-motto::after{right:2px}
+  .plan-reference-ornate .plan-vintage-motto p{font-size:7px;letter-spacing:.22em}
+}
