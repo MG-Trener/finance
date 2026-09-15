@@ -1,4 +1,4 @@
-// Final Plan calendar presentation details: generic event legend and persistent today marker.
+// Final Plan calendar presentation details: baroque event artwork and persistent today marker.
 (function(){
   if(typeof planPage!=='function')return;
   const basePlanPage=planPage;
@@ -10,16 +10,36 @@
     const root=template.content.querySelector('.plan-baroque-page,.plan-vintage-page');
     if(!root)return html;
 
-    // Untyped Plan rows are ordinary family events. Give them a real visual
-    // identity instead of the old bullet / "Без типа" wording.
-    root.querySelectorAll('.plan-day-type-icon.is-generic').forEach(icon=>{icon.textContent='✦'});
+    // Normalize legacy Plan event markers. No system emoji are shown in the final UI:
+    // birthday, meeting and generic event all use dedicated baroque runtime artwork.
+    root.querySelectorAll('.plan-day-type-icon').forEach(icon=>{
+      const text=String(icon.textContent||'').trim();
+      if(text==='🎂')icon.classList.add('is-birthday');
+      else if(text==='🤝')icon.classList.add('is-meeting');
+      else icon.classList.add('is-generic');
+      icon.textContent='';
+    });
+    root.querySelectorAll('.plan-day-event.type-birthday .plan-event-icon').forEach(icon=>{icon.classList.add('is-birthday');icon.textContent=''});
+    root.querySelectorAll('.plan-day-event.type-meeting .plan-event-icon').forEach(icon=>{icon.classList.add('is-meeting');icon.textContent=''});
+    root.querySelectorAll('.plan-day-event.type-other .plan-event-icon').forEach(icon=>{icon.classList.add('is-generic');icon.textContent=''});
     root.querySelectorAll('.plan-day-event.type-other .plan-event-copy small').forEach(label=>{
       label.textContent=String(label.textContent||'').replace(/Без типа\s*$/,'Событие');
     });
 
     const legend=root.querySelector('.plan-calendar-legend');
-    if(legend&&!legend.querySelector('[data-plan-legend-event]')){
-      legend.insertAdjacentHTML('beforeend','<span data-plan-legend-event="1"><span class="plan-legend-icon plan-legend-event-icon" aria-hidden="true">✦</span>Событие</span>');
+    if(legend){
+      const items=[...legend.querySelectorAll(':scope > span')];
+      items.forEach(item=>{
+        const text=String(item.textContent||'');
+        const icon=item.querySelector('.plan-legend-icon');
+        if(!icon)return;
+        if(/День рождения/i.test(text))icon.classList.add('plan-legend-birthday-icon');
+        else if(/Встреча/i.test(text))icon.classList.add('plan-legend-meeting-icon');
+        icon.textContent='';
+      });
+      if(!legend.querySelector('[data-plan-legend-event]')){
+        legend.insertAdjacentHTML('beforeend','<span data-plan-legend-event="1"><span class="plan-legend-icon plan-legend-event-icon" aria-hidden="true"></span>Событие</span>');
+      }
     }
 
     // Today has its own overlay so the blinking gold frame remains visible even
