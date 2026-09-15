@@ -32,6 +32,34 @@
 }
 .plan-baroque-page.is-baroque-calendar::before{border:1px solid rgba(208,147,54,.26)}
 .plan-baroque-page.is-baroque-calendar::after{inset:14px;border:1px solid rgba(99,62,21,.65)}
+
+.plan-baroque-corner{
+  position:absolute;
+  z-index:5;
+  width:112px;
+  height:112px;
+  background:url('../../../assets/plan-vintage-corner.svg') center/contain no-repeat;
+  opacity:.94;
+  pointer-events:none;
+  filter:drop-shadow(0 2px 7px rgba(0,0,0,.54));
+}
+.plan-baroque-corner.is-tl{left:-13px;top:-12px}
+.plan-baroque-corner.is-tr{right:-13px;top:-12px;transform:rotate(90deg)}
+.plan-baroque-corner.is-br{right:-13px;bottom:-12px;transform:rotate(180deg)}
+.plan-baroque-corner.is-bl{left:-13px;bottom:-12px;transform:rotate(270deg)}
+.plan-baroque-bottom-fleur{
+  position:absolute;
+  z-index:4;
+  left:50%;
+  bottom:-22px;
+  width:66px;
+  height:66px;
+  transform:translateX(-50%) rotate(180deg);
+  background:url('../../../assets/plan-vintage-fleur.svg') center/contain no-repeat;
+  opacity:.9;
+  pointer-events:none;
+  filter:drop-shadow(0 3px 7px rgba(0,0,0,.52));
+}
 .plan-baroque-side{
   position:absolute;
   z-index:1;
@@ -102,14 +130,34 @@
   background:rgba(54,32,10,.52)!important;
 }
 
+.plan-baroque-calendar-shell .plan-vintage-crown{
+  top:-31px!important;
+  width:76px!important;
+  height:76px!important;
+  background:url('../../../assets/plan-vintage-fleur.svg') center/contain no-repeat;
+  font-size:0!important;
+  filter:drop-shadow(0 2px 7px rgba(0,0,0,.48));
+}
+.plan-baroque-calendar-shell .plan-vintage-crown>span{display:none!important}
+.plan-baroque-calendar-shell .plan-vintage-crown::before,
+.plan-baroque-calendar-shell .plan-vintage-crown::after{top:39px!important;width:90px!important;background:linear-gradient(90deg,transparent,#8b5e24,#d6a149)!important}
+.plan-baroque-calendar-shell .plan-vintage-crown::before{right:64px!important}
+.plan-baroque-calendar-shell .plan-vintage-crown::after{left:64px!important}
+
 @media(max-width:760px){
   .plan-baroque-page.is-baroque-calendar{padding:15px 7px 18px;border-radius:14px}
   .plan-baroque-page.is-baroque-calendar::before{inset:5px}
   .plan-baroque-page.is-baroque-calendar::after{inset:9px}
+  .plan-baroque-corner{width:60px;height:60px;opacity:.72}
+  .plan-baroque-corner.is-tl{left:-5px;top:-5px}.plan-baroque-corner.is-tr{right:-5px;top:-5px}.plan-baroque-corner.is-br{right:-5px;bottom:-5px}.plan-baroque-corner.is-bl{left:-5px;bottom:-5px}
+  .plan-baroque-bottom-fleur{bottom:-15px;width:44px;height:44px}
   .plan-baroque-side{display:none}
   .plan-baroque-actions{margin:0 2px 5px!important;gap:7px!important}
   .plan-baroque-actions::before{display:none!important}
   .plan-baroque-action{min-height:47px!important;background-size:100% 100%!important}
   .plan-baroque-action .plan-action-icon{width:22px!important;height:22px!important}
   .plan-baroque-action>span:not(.plan-action-icon):not(.plan-baroque-button-glint){font-size:13px!important}
+  .plan-baroque-calendar-shell .plan-vintage-crown{top:-21px!important;width:51px!important;height:51px!important}
+  .plan-baroque-calendar-shell .plan-vintage-crown::before,.plan-baroque-calendar-shell .plan-vintage-crown::after{top:27px!important;width:45px!important}
+  .plan-baroque-calendar-shell .plan-vintage-crown::before{right:42px!important}.plan-baroque-calendar-shell .plan-vintage-crown::after{left:42px!important}
 }
