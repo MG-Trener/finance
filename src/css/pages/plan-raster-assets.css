@@ -1,0 +1,217 @@
+/* Generated raster artwork layer for Plan.
+   Originals stay in assets as masters; images are requested only when matching UI exists. */
+
+.plan-baroque-page,
+.plan-vintage-modal-shell{
+  --plan-art-event-generic:url("../../../assets/plan-barque (1).png");
+  --plan-art-event-generic-plaque:url("../../../assets/plan-barque (2).png");
+  --plan-art-event-meeting:url("../../../assets/plan-barque (3).png");
+  --plan-art-event-meeting-plaque:url("../../../assets/plan-barque (4).png");
+  --plan-art-event-birthday:url("../../../assets/plan-barque (5).png");
+  --plan-art-event-birthday-plaque:url("../../../assets/plan-barque (6).png");
+  --plan-art-expenses-medallion:url("../../../assets/plan-barque (7).png");
+  --plan-art-piggy-medallion:url("../../../assets/plan-barque (8).png");
+  --plan-art-expenses-plaque:url("../../../assets/plan-barque (9).png");
+  --plan-art-piggy-plaque:url("../../../assets/plan-barque (10).png");
+  --plan-art-corner-bl:url("../../../assets/plan-barque (11).png");
+  --plan-art-divider-ornate:url("../../../assets/plan-barque (12).png");
+  --plan-art-corner-tr:url("../../../assets/plan-barque (13).png");
+  --plan-art-side:url("../../../assets/plan-barque (14).png");
+  --plan-art-plaque-wide:url("../../../assets/plan-barque (15).png");
+  --plan-art-plaque-small:url("../../../assets/plan-barque (16).png");
+  --plan-art-plaque-thin:url("../../../assets/plan-barque (17).png");
+  --plan-art-selected:url("../../../assets/plan-barque (18).png");
+  --plan-art-divider-thin:url("../../../assets/plan-barque (19).png");
+  --plan-art-fleur:url("../../../assets/plan-barque (20).png");
+}
+
+/* Main screen frame: use one high-detail corner and mirror it, so only one corner PNG is fetched. */
+.plan-baroque-corner{
+  width:128px!important;
+  height:128px!important;
+  background:var(--plan-art-corner-tr) center/contain no-repeat!important;
+  opacity:.92!important;
+  filter:drop-shadow(0 4px 8px rgba(0,0,0,.6))!important;
+}
+.plan-baroque-corner.is-tr{right:-7px!important;top:-7px!important;transform:none!important}
+.plan-baroque-corner.is-tl{left:-7px!important;top:-7px!important;transform:scaleX(-1)!important}
+.plan-baroque-corner.is-br{right:-7px!important;bottom:-7px!important;transform:scaleY(-1)!important}
+.plan-baroque-corner.is-bl{left:-7px!important;bottom:-7px!important;transform:scale(-1,-1)!important}
+.plan-baroque-side{
+  width:62px!important;
+  background:var(--plan-art-side) center/contain no-repeat!important;
+  opacity:.72!important;
+}
+.plan-baroque-bottom-fleur,
+.plan-baroque-calendar-shell .plan-vintage-crown,
+.plan-vintage-modal-shell .plan-modal-crest{
+  background:var(--plan-art-fleur) center/contain no-repeat!important;
+}
+
+/* Generated top plaques replace the former CSS/SVG imitation. */
+.plan-baroque-actions{
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:16px!important;
+}
+.plan-baroque-actions::before{display:none!important}
+.plan-baroque-action{
+  flex:0 1 230px!important;
+  width:min(42vw,230px)!important;
+  aspect-ratio:3/1!important;
+  min-height:0!important;
+  height:auto!important;
+  padding:0!important;
+  border:0!important;
+  background-position:center!important;
+  background-size:contain!important;
+  background-repeat:no-repeat!important;
+  filter:drop-shadow(0 5px 8px rgba(0,0,0,.46))!important;
+}
+.plan-baroque-action.is-expenses{background-image:var(--plan-art-expenses-plaque)!important}
+.plan-baroque-action.is-piggy{background-image:var(--plan-art-piggy-plaque)!important}
+.plan-baroque-action>*{opacity:0!important;pointer-events:none!important}
+.plan-baroque-action:hover,.plan-baroque-action.active{
+  filter:brightness(1.08) drop-shadow(0 6px 10px rgba(0,0,0,.55)) drop-shadow(0 0 7px rgba(231,169,66,.14))!important;
+}
+.plan-baroque-action:focus-visible{
+  outline:2px solid rgba(241,193,96,.82)!important;
+  outline-offset:2px!important;
+}
+
+/* Month cartouche and crest. */
+.plan-baroque-month-stage{min-height:166px!important}
+.plan-baroque-month-title{
+  min-height:148px!important;
+  padding:33px 96px 20px!important;
+  background:var(--plan-art-plaque-wide) center/100% 100% no-repeat!important;
+  filter:drop-shadow(0 8px 12px rgba(0,0,0,.45))!important;
+}
+.plan-baroque-month-title strong{
+  color:#f2d79e!important;
+  text-shadow:0 2px 1px #160d05,0 0 9px rgba(228,168,68,.2)!important;
+}
+.plan-baroque-laurel{display:none!important}
+.plan-baroque-calendar-shell .plan-vintage-crown{
+  top:-33px!important;
+  width:82px!important;
+  height:82px!important;
+  z-index:5!important;
+}
+
+/* Navigation arrows and selected day use the dedicated round artwork. */
+.plan-baroque-arrow{
+  width:58px!important;
+  height:58px!important;
+  background:var(--plan-art-selected) center/contain no-repeat!important;
+  border-radius:50%!important;
+}
+.plan-baroque-calendar-shell .plan-calendar-day.is-selected::before{
+  top:4px!important;
+  width:58px!important;
+  height:58px!important;
+  border:0!important;
+  border-radius:0!important;
+  background:var(--plan-art-selected) center/contain no-repeat!important;
+  box-shadow:none!important;
+  filter:drop-shadow(0 0 9px rgba(230,165,67,.38))!important;
+}
+.plan-baroque-calendar-shell .plan-calendar-day.is-selected .calendar-day-number{
+  z-index:6!important;
+  color:#ffe4a9!important;
+}
+
+/* Calendar and footer ornament. */
+.plan-baroque-grid-frame::before,
+.plan-baroque-grid-frame::after{
+  background:var(--plan-art-corner-tr) center/contain no-repeat!important;
+}
+.plan-baroque-grid-frame::before{transform:scaleX(-1)!important}
+.plan-baroque-grid-frame::after{transform:scaleY(-1)!important}
+.plan-baroque-legend{
+  background:var(--plan-art-divider-ornate) top center/72% auto no-repeat!important;
+}
+.plan-baroque-motto{
+  background:var(--plan-art-divider-thin) top center/74% auto no-repeat!important;
+}
+
+/* Events panel gets a real generated plaque rather than a synthetic SVG. */
+.plan-baroque-event-crown{
+  top:-18px!important;
+  width:84%!important;
+  height:62px!important;
+  background:var(--plan-art-plaque-thin) center/100% 100% no-repeat!important;
+  filter:drop-shadow(0 5px 8px rgba(0,0,0,.42));
+}
+
+/* Subsections use their dedicated medallions only when those screens are opened. */
+.is-expenses-section .plan-subsection-emblem{
+  background:var(--plan-art-expenses-medallion) center/contain no-repeat!important;
+  color:transparent!important;
+  font-size:0!important;
+}
+.is-piggy-section .plan-subsection-emblem{
+  background:var(--plan-art-piggy-medallion) center/contain no-repeat!important;
+  color:transparent!important;
+  font-size:0!important;
+}
+.is-expenses-section .plan-vintage-subsection-heading,
+.is-piggy-section .plan-vintage-subsection-heading{
+  padding-top:18px!important;
+}
+.is-expenses-section .plan-subsection-emblem,
+.is-piggy-section .plan-subsection-emblem{
+  width:92px!important;
+  height:92px!important;
+  border:0!important;
+  box-shadow:none!important;
+  filter:drop-shadow(0 5px 10px rgba(0,0,0,.46));
+}
+
+/* Modal/event type artwork is loaded only when an event editor is actually opened. */
+.plan-vintage-modal-shell .modal-head{
+  background:var(--plan-art-plaque-small) center/100% 100% no-repeat!important;
+}
+.plan-event-editor-modal .plan-event-type-choice-icon{
+  width:72px!important;
+  height:72px!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background-position:center!important;
+  background-size:contain!important;
+  background-repeat:no-repeat!important;
+  filter:drop-shadow(0 4px 7px rgba(0,0,0,.4));
+}
+.plan-event-editor-modal .plan-event-type-choice-icon svg{display:none!important}
+.plan-event-editor-modal .plan-event-type-choice[data-plan-event-type-choice=""] .plan-event-type-choice-icon{background-image:var(--plan-art-event-generic)!important}
+.plan-event-editor-modal .plan-event-type-choice[data-plan-event-type-choice="birthday"] .plan-event-type-choice-icon{background-image:var(--plan-art-event-birthday)!important}
+.plan-event-editor-modal .plan-event-type-choice[data-plan-event-type-choice="meeting"] .plan-event-type-choice-icon{background-image:var(--plan-art-event-meeting)!important}
+.plan-event-editor-modal .plan-event-type-choice.is-selected{
+  border-color:rgba(217,153,57,.75)!important;
+  box-shadow:inset 0 0 0 1px #050302,0 0 14px rgba(223,157,56,.18)!important;
+}
+.plan-vintage-form-actions .btn-primary,
+.plan-vintage-form-actions .plan-vintage-save-event{
+  background:var(--plan-art-plaque-small) center/100% 100% no-repeat!important;
+}
+
+@media(max-width:760px){
+  .plan-baroque-corner{width:73px!important;height:73px!important;opacity:.86!important}
+  .plan-baroque-corner.is-tr{right:-2px!important;top:-2px!important}
+  .plan-baroque-corner.is-tl{left:-2px!important;top:-2px!important}
+  .plan-baroque-corner.is-br{right:-2px!important;bottom:-2px!important}
+  .plan-baroque-corner.is-bl{left:-2px!important;bottom:-2px!important}
+  .plan-baroque-actions{gap:5px!important;margin:0 2px 6px!important}
+  .plan-baroque-action{width:47%!important;max-width:180px!important}
+  .plan-baroque-calendar-shell .plan-vintage-crown{top:-20px!important;width:50px!important;height:50px!important}
+  .plan-baroque-month-stage{min-height:110px!important}
+  .plan-baroque-month-title{min-height:98px!important;padding:19px 44px 10px!important}
+  .plan-baroque-arrow{width:40px!important;height:40px!important}
+  .plan-baroque-calendar-shell .plan-calendar-day.is-selected::before{top:1px!important;width:42px!important;height:42px!important}
+  .plan-baroque-event-crown{top:-10px!important;width:94%!important;height:46px!important}
+  .plan-baroque-legend{background-size:96% auto!important}
+  .plan-baroque-motto{background-size:92% auto!important}
+  .is-expenses-section .plan-subsection-emblem,.is-piggy-section .plan-subsection-emblem{width:70px!important;height:70px!important}
+  .plan-event-editor-modal .plan-event-type-choice-icon{width:52px!important;height:52px!important}
+}
