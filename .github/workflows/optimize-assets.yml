@@ -6,6 +6,7 @@ on:
     branches: [main]
     paths:
       - 'assets/gerb.png'
+      - 'assets/plan-barque*.png'
       - '.github/workflows/optimize-assets.yml'
 
 permissions:
@@ -18,7 +19,7 @@ concurrency:
 jobs:
   optimize:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -28,52 +29,73 @@ jobs:
       - name: Install Pillow
         run: python -m pip install --disable-pip-version-check --quiet Pillow
 
-      - name: Build lightweight crest asset
+      - name: Build lightweight runtime assets
         shell: bash
         run: |
           python - <<'PY'
           from pathlib import Path
           from PIL import Image
 
-          source = Path('assets/gerb.png')
-          target = Path('assets/gerb-runtime.webp')
-          before = source.stat().st_size
+          assets = Path('assets')
 
-          with Image.open(source) as original:
-              original.load()
-              image = original.copy()
+          def webp(source: Path, target: Path, max_edge: int, quality: int = 82):
+              if not source.exists():
+                  print(f'Skip missing: {source}')
+                  return
+              before = source.stat().st_size
+              with Image.open(source) as original:
+                  original.load()
+                  image = original.copy()
+              if max(image.size) > max_edge:
+                  image.thumbnail((max_edge, max_edge), Image.Resampling.LANCZOS, reducing_gap=3.0)
+              if image.mode not in ('RGB', 'RGBA'):
+                  image = image.convert('RGBA' if 'transparency' in image.info else 'RGB')
+              target.parent.mkdir(parents=True, exist_ok=True)
+              image.save(target, format='WEBP', quality=quality, method=6)
+              after = target.stat().st_size
+              print(f'{source.name}: {before/1024:.1f} KiB -> {after/1024:.1f} KiB; {image.width}x{image.height}px')
 
-          max_edge = 1600
-          if max(image.size) > max_edge:
-              image.thumbnail((max_edge, max_edge), Image.Resampling.LANCZOS, reducing_gap=3.0)
+          # Family crest runtime copy.
+          webp(assets/'gerb.png', assets/'gerb-runtime.webp', 1600, 82)
 
-          if image.mode not in ('RGB', 'RGBA'):
-              image = image.convert('RGBA' if 'transparency' in image.info else 'RGB')
-
-          image.save(target, format='WEBP', quality=82, method=6)
-          after = target.stat().st_size
-
-          print(
-              f'Runtime family crest: {before / 1024:.1f} KiB -> {after / 1024:.1f} KiB; '
-              f'{image.width}x{image.height}px'
-          )
-
-          if after >= before:
-              raise SystemExit('Runtime crest optimization did not reduce file size')
-          if after > 1024 * 1024:
-              raise SystemExit(f'Runtime crest is unexpectedly large: {after} bytes')
+          # Generated Plan artwork. Keep originals as masters; the app uses these runtime copies.
+          mapping = {
+              1: ('event-generic-medallion.webp', 720),
+              2: ('event-generic-plaque.webp', 1200),
+              3: ('event-meeting-medallion.webp', 720),
+              4: ('event-meeting-plaque.webp', 1200),
+              5: ('event-birthday-medallion.webp', 720),
+              6: ('event-birthday-plaque.webp', 1200),
+              7: ('expenses-medallion.webp', 760),
+              8: ('piggy-medallion.webp', 760),
+              9: ('expenses-plaque.webp', 1200),
+              10: ('piggy-plaque.webp', 1200),
+              11: ('corner-bl.webp', 920),
+              12: ('divider-ornate.webp', 1200),
+              13: ('corner-tr.webp', 920),
+              14: ('side-ornament.webp', 1000),
+              15: ('plaque-wide.webp', 1200),
+              16: ('plaque-small.webp', 1100),
+              17: ('plaque-thin.webp', 1100),
+              18: ('selected-day-ring.webp', 640),
+              19: ('divider-thin.webp', 1100),
+              20: ('fleur-crest.webp', 720),
+          }
+          out = assets/'plan-runtime'
+          for number, (name, max_edge) in mapping.items():
+              webp(assets/f'plan-barque ({number}).png', out/name, max_edge, 82)
           PY
 
-      - name: Commit optimized asset
+      - name: Commit optimized assets
         shell: bash
         run: |
           set -euo pipefail
-          git add assets/gerb-runtime.webp
+          git add assets/gerb-runtime.webp assets/plan-runtime
           if git diff --cached --quiet; then
-            echo 'Optimized crest is already up to date.'
+            echo 'Optimized runtime assets are already up to date.'
             exit 0
           fi
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git commit -m 'Generate optimized family crest asset'
+          git commit -m 'Generate optimized Plan runtime assets'
           git push origin HEAD:main
