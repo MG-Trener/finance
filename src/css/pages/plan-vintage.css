@@ -1,0 +1,495 @@
+/* Vintage dark-gold skin for the family Plan calendar. */
+.plan-vintage-page{
+  --plan-gold:#c99745;
+  --plan-gold-bright:#efc878;
+  --plan-gold-soft:#8d6327;
+  --plan-ink:#0c0906;
+  --plan-ink-2:#15100a;
+  --plan-cream:#ead9b4;
+  --plan-muted:#a88d61;
+  position:relative;
+  width:min(100%,980px);
+  margin:0 auto;
+}
+
+.plan-vintage-page.is-calendar .plan-vintage-heading{display:none}
+.plan-vintage-page.is-subsection .plan-vintage-heading{margin-bottom:10px}
+
+.plan-vintage-actions{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:14px;
+  margin:0 12px -4px;
+  padding:0 18px;
+  position:relative;
+  z-index:4;
+}
+.plan-vintage-actions::before{
+  content:"⚜";
+  position:absolute;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%);
+  color:#b98234;
+  font-family:Georgia,serif;
+  font-size:30px;
+  text-shadow:0 0 14px rgba(229,176,77,.28);
+  pointer-events:none;
+}
+.plan-vintage-actions .plan-tab.plan-vintage-action{
+  min-width:150px;
+  min-height:48px;
+  display:flex;
+  flex:0 1 210px;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  border:1px solid #8f6429;
+  border-radius:12px;
+  color:#dcb66e;
+  background:
+    linear-gradient(180deg,rgba(45,31,15,.96),rgba(14,10,7,.98)),
+    #120d08;
+  box-shadow:
+    inset 0 0 0 2px rgba(35,22,10,.95),
+    inset 0 0 0 3px rgba(207,151,59,.18),
+    0 6px 18px rgba(0,0,0,.42),
+    0 0 16px rgba(173,116,35,.08);
+  font-family:Cinzel,Georgia,serif;
+  letter-spacing:.015em;
+  cursor:pointer;
+  position:relative;
+  overflow:hidden;
+  transition:border-color .18s ease,transform .18s ease,box-shadow .18s ease,color .18s ease;
+}
+.plan-vintage-actions .plan-tab.plan-vintage-action::before,
+.plan-vintage-actions .plan-tab.plan-vintage-action::after{
+  content:"";
+  position:absolute;
+  width:18px;
+  height:18px;
+  border-color:rgba(231,185,102,.72);
+  pointer-events:none;
+}
+.plan-vintage-actions .plan-tab.plan-vintage-action::before{left:5px;top:5px;border-left:1px solid;border-top:1px solid;border-radius:7px 0 0 0}
+.plan-vintage-actions .plan-tab.plan-vintage-action::after{right:5px;bottom:5px;border-right:1px solid;border-bottom:1px solid;border-radius:0 0 7px 0}
+.plan-vintage-actions .plan-tab.plan-vintage-action:hover,
+.plan-vintage-actions .plan-tab.plan-vintage-action.active{
+  color:#ffe0a2;
+  border-color:#c28a37;
+  transform:translateY(-1px);
+  box-shadow:inset 0 0 0 2px rgba(35,22,10,.95),inset 0 0 0 3px rgba(234,180,82,.26),0 8px 22px rgba(0,0,0,.5),0 0 18px rgba(201,141,48,.16);
+}
+.plan-vintage-action>span:not(.plan-action-icon){font-size:14px}
+.plan-vintage-action>b{
+  min-width:22px;
+  height:22px;
+  padding:0 6px;
+  border-radius:999px;
+  display:grid;
+  place-items:center;
+  background:rgba(207,151,59,.12);
+  border:1px solid rgba(207,151,59,.24);
+  color:#eac57f;
+  font:700 10px Inter,sans-serif;
+}
+.plan-action-icon{width:26px;height:26px;color:#d6a34d;display:grid;place-items:center;filter:drop-shadow(0 0 7px rgba(220,160,66,.28))}
+.plan-action-icon svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+
+.plan-calendar-workspace{
+  position:relative;
+  gap:13px;
+  padding:0 2px 10px;
+}
+.plan-vintage-calendar{
+  position:relative;
+  overflow:visible!important;
+  border:1px solid #76501f!important;
+  border-radius:22px!important;
+  padding:24px 18px 17px;
+  color:var(--plan-cream);
+  background:
+    radial-gradient(ellipse at 50% -8%,rgba(155,103,34,.22),transparent 38%),
+    radial-gradient(circle at 18% 28%,rgba(116,75,25,.08),transparent 25%),
+    linear-gradient(180deg,rgba(19,14,9,.99),rgba(8,6,4,.995));
+  box-shadow:
+    inset 0 0 0 3px #100b07,
+    inset 0 0 0 4px rgba(202,145,57,.36),
+    inset 0 0 45px rgba(117,77,24,.08),
+    0 12px 30px rgba(0,0,0,.42);
+}
+.plan-vintage-calendar::before,
+.plan-vintage-calendar::after{
+  position:absolute;
+  top:6px;
+  color:#c18b39;
+  font-family:Georgia,serif;
+  font-size:26px;
+  line-height:1;
+  text-shadow:0 0 10px rgba(212,158,65,.25);
+  pointer-events:none;
+}
+.plan-vintage-calendar::before{content:"❦";left:12px;transform:rotate(-18deg)}
+.plan-vintage-calendar::after{content:"❦";right:12px;transform:scaleX(-1) rotate(-18deg)}
+.plan-vintage-crown{
+  position:absolute;
+  z-index:2;
+  top:-21px;
+  left:50%;
+  transform:translateX(-50%);
+  width:92px;
+  height:46px;
+  display:grid;
+  place-items:center;
+  color:#d5a047;
+  font-size:38px;
+  text-shadow:0 2px 0 #4b2f10,0 0 16px rgba(232,175,77,.22);
+  pointer-events:none;
+}
+.plan-vintage-crown::before,.plan-vintage-crown::after{
+  content:"";
+  position:absolute;
+  top:24px;
+  width:66px;
+  height:1px;
+  background:linear-gradient(90deg,transparent,#8b5e24,#d6a149);
+}
+.plan-vintage-crown::before{right:68px}
+.plan-vintage-crown::after{left:68px;transform:scaleX(-1)}
+
+.plan-vintage-month-toolbar{
+  grid-template-columns:68px minmax(0,1fr) 68px!important;
+  gap:15px!important;
+  padding:19px 5px 20px!important;
+  border:0!important;
+  align-items:center;
+}
+.plan-vintage-month-title{
+  position:relative;
+  min-height:126px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding:17px 44px 13px;
+  border:1px solid #7c5624;
+  border-radius:48% 48% 18px 18px / 34% 34% 18px 18px;
+  background:radial-gradient(ellipse at 50% 15%,rgba(104,69,25,.18),transparent 60%),linear-gradient(180deg,#161008,#0d0906);
+  box-shadow:inset 0 0 0 3px #0a0705,inset 0 0 0 4px rgba(188,132,49,.27),0 7px 22px rgba(0,0,0,.38);
+}
+.plan-vintage-month-title::before,
+.plan-vintage-month-title::after{
+  content:"";
+  position:absolute;
+  top:50%;
+  width:54px;
+  height:48px;
+  border-top:1px solid rgba(197,140,55,.55);
+  border-bottom:1px solid rgba(197,140,55,.28);
+  opacity:.9;
+}
+.plan-vintage-month-title::before{right:100%;border-radius:100% 0 0 100%;transform:translate(15px,-10px) rotate(-13deg)}
+.plan-vintage-month-title::after{left:100%;border-radius:0 100% 100% 0;transform:translate(-15px,-10px) rotate(13deg)}
+.plan-vintage-month-title strong{
+  display:block;
+  color:#eed8ac!important;
+  font-family:Cinzel,Georgia,serif!important;
+  font-size:clamp(26px,4vw,42px)!important;
+  line-height:1.03;
+  font-weight:600!important;
+  text-shadow:0 2px 0 #29190a,0 0 18px rgba(215,159,65,.12);
+}
+.plan-vintage-year{
+  margin-top:7px;
+  color:#e4c78b;
+  font-family:Cinzel,Georgia,serif;
+  font-size:18px;
+  letter-spacing:.42em;
+  text-indent:.42em;
+  text-shadow:0 1px 0 #211407;
+}
+.plan-vintage-flourish{
+  position:absolute;
+  top:-14px;
+  left:50%;
+  transform:translateX(-50%);
+  color:#c28b37;
+  font-size:28px;
+  text-shadow:0 0 12px rgba(215,159,65,.18);
+}
+.plan-vintage-month-title small{
+  margin-top:11px!important;
+  color:#8e7753!important;
+  font-size:10px!important;
+  letter-spacing:.045em;
+}
+.plan-vintage-month-toolbar .calendar-arrow{
+  width:56px!important;
+  height:56px!important;
+  justify-self:center;
+  border:1px solid #865d27!important;
+  border-radius:50%!important;
+  background:radial-gradient(circle at 45% 35%,#21170e,#0d0906 67%)!important;
+  color:#dcb268!important;
+  font-family:Georgia,serif;
+  font-size:36px!important;
+  box-shadow:inset 0 0 0 3px #0a0705,inset 0 0 0 4px rgba(205,146,57,.36),0 6px 16px rgba(0,0,0,.48),0 0 0 7px rgba(126,86,35,.12);
+}
+.plan-vintage-month-toolbar .calendar-arrow:hover{color:#ffe2a5!important;border-color:#bd8537!important;box-shadow:inset 0 0 0 3px #0a0705,inset 0 0 0 4px rgba(230,172,78,.48),0 6px 18px rgba(0,0,0,.52),0 0 17px rgba(208,147,57,.16)}
+
+.plan-vintage-calendar .husband-calendar-swipe{
+  padding:0!important;
+  border:1px solid #6f4b1d;
+  border-radius:13px;
+  overflow:hidden;
+  background:rgba(4,3,2,.35);
+  box-shadow:inset 0 0 0 2px #0a0705,inset 0 0 0 3px rgba(158,107,36,.17);
+}
+.plan-vintage-calendar .calendar-weekdays,
+.plan-vintage-calendar .calendar-grid{gap:0!important}
+.plan-vintage-calendar .calendar-weekdays{margin:0!important;border-bottom:1px solid #64441c}
+.plan-vintage-calendar .calendar-weekdays>div{
+  min-height:48px;
+  display:grid;
+  place-items:center;
+  padding:0!important;
+  border-right:1px solid rgba(110,75,29,.62);
+  color:#cdbb98!important;
+  background:linear-gradient(180deg,rgba(36,25,13,.52),rgba(16,11,7,.82));
+  font-family:Cinzel,Georgia,serif;
+  font-size:13px!important;
+  text-transform:none!important;
+  letter-spacing:.02em!important;
+}
+.plan-vintage-calendar .calendar-weekdays>div:last-child{border-right:0}
+.plan-vintage-calendar .calendar-weekdays>div.is-weekend{color:#d79d47!important}
+.plan-vintage-calendar .plan-calendar-day{
+  min-height:88px!important;
+  border:0!important;
+  border-right:1px solid rgba(111,76,30,.56)!important;
+  border-bottom:1px solid rgba(111,76,30,.56)!important;
+  border-radius:0!important;
+  padding:8px!important;
+  display:flex;
+  align-items:flex-start;
+  justify-content:center;
+  overflow:visible;
+  color:#e5d5b4!important;
+  background:linear-gradient(180deg,rgba(26,18,10,.34),rgba(9,6,4,.44))!important;
+  box-shadow:none!important;
+  transition:background .15s ease,color .15s ease;
+}
+.plan-vintage-calendar .plan-calendar-day:nth-child(7n){border-right:0!important}
+.plan-vintage-calendar .plan-calendar-day:hover{background:radial-gradient(circle at 50% 45%,rgba(178,119,38,.16),rgba(12,8,5,.5))!important}
+.plan-vintage-calendar .plan-calendar-day.is-weekend{color:#db9e48!important;background:linear-gradient(180deg,rgba(48,29,10,.34),rgba(13,8,5,.5))!important}
+.plan-vintage-calendar .plan-calendar-day.has-entry{background:radial-gradient(circle at 50% 52%,rgba(151,98,29,.13),transparent 65%),rgba(12,8,5,.42)!important}
+.plan-vintage-calendar .plan-calendar-day.is-today:not(.is-selected){box-shadow:inset 0 0 0 1px rgba(206,151,63,.43)!important}
+.plan-vintage-calendar .plan-calendar-day.is-selected{
+  outline:0!important;
+  background:radial-gradient(circle at 50% 42%,rgba(176,117,35,.22),rgba(12,8,5,.4) 62%)!important;
+}
+.plan-vintage-calendar .plan-calendar-day.is-selected::before{
+  content:"";
+  position:absolute;
+  top:9px;
+  left:50%;
+  width:48px;
+  height:48px;
+  transform:translateX(-50%);
+  border-radius:50%;
+  border:1px solid #d59b41;
+  box-shadow:inset 0 0 0 3px rgba(31,18,6,.9),inset 0 0 0 4px rgba(231,177,79,.48),0 0 18px rgba(217,151,55,.38),0 0 0 7px rgba(117,76,24,.12);
+  pointer-events:none;
+}
+.plan-vintage-calendar .calendar-day-number{
+  position:relative;
+  z-index:1;
+  font-family:Cinzel,Georgia,serif;
+  font-size:21px!important;
+  line-height:38px;
+  font-weight:600!important;
+  text-shadow:0 1px 0 #1b1005;
+}
+.plan-vintage-calendar .plan-calendar-day.is-selected .calendar-day-number{color:#ffe1a3!important}
+.plan-vintage-calendar .plan-day-icons{
+  left:50%!important;
+  bottom:8px!important;
+  transform:translateX(-50%);
+  justify-content:center;
+  max-width:90%!important;
+  gap:5px!important;
+}
+.plan-vintage-calendar .plan-day-type-icon{
+  color:#d79a3c!important;
+  font-size:16px!important;
+  filter:sepia(1) saturate(1.55) hue-rotate(345deg) brightness(1.08) drop-shadow(0 0 5px rgba(216,147,49,.26));
+}
+.plan-vintage-calendar .plan-day-type-icon.is-generic-event{font-size:20px!important}
+.plan-vintage-calendar .calendar-entry-count{
+  left:auto!important;
+  right:6px!important;
+  bottom:5px!important;
+  min-width:16px!important;
+  height:16px!important;
+  padding:0 4px!important;
+  color:#b99251!important;
+  border:0!important;
+  background:rgba(100,63,19,.24)!important;
+  font-size:8px!important;
+}
+
+.plan-vintage-calendar .plan-calendar-legend{
+  justify-content:center;
+  gap:24px!important;
+  margin-top:13px;
+  padding:14px 15px 3px!important;
+  border-top:1px solid rgba(117,80,30,.44);
+  color:#bea77c!important;
+  font-family:Cinzel,Georgia,serif;
+  font-size:10px!important;
+}
+.plan-vintage-calendar .plan-calendar-legend>span:first-child{opacity:.72}
+.plan-vintage-calendar .legend-today{border-color:#a97730!important;border-radius:50%!important;background:rgba(139,91,28,.08)!important}
+.plan-vintage-calendar .plan-legend-icon{font-size:16px!important;filter:sepia(1) saturate(1.5) hue-rotate(345deg) brightness(1.08)}
+
+.plan-vintage-events{
+  position:relative;
+  border:1px solid #704c1e!important;
+  border-radius:16px!important;
+  background:linear-gradient(180deg,rgba(22,15,9,.98),rgba(9,6,4,.99))!important;
+  box-shadow:inset 0 0 0 2px #0a0705,inset 0 0 0 3px rgba(179,124,43,.2),0 9px 24px rgba(0,0,0,.32)!important;
+}
+.plan-vintage-events::before,
+.plan-vintage-events::after{
+  content:"✦";
+  position:absolute;
+  top:15px;
+  color:#a8742b;
+  font-size:11px;
+  pointer-events:none;
+}
+.plan-vintage-events::before{left:17px}
+.plan-vintage-events::after{right:17px}
+.plan-vintage-events.plan-day-list-card{padding:19px 18px 18px!important}
+.plan-vintage-events .plan-day-list-head{
+  justify-content:center!important;
+  text-align:center;
+  margin:0 36px 16px!important;
+  padding-bottom:12px;
+  border-bottom:1px solid rgba(130,88,31,.38);
+}
+.plan-vintage-events .plan-day-list-head>div{display:flex!important;flex-direction:column-reverse;gap:5px!important}
+.plan-vintage-events .plan-day-list-head span{color:#9f855c!important;font-size:10px!important}
+.plan-vintage-events .plan-day-list-head strong{
+  color:#e6c88d;
+  font:600 21px Cinzel,Georgia,serif!important;
+}
+.plan-vintage-events .plan-day-list-head>b{display:none!important}
+.plan-vintage-events .plan-day-events{gap:8px!important}
+.plan-vintage-events .plan-day-event{
+  min-height:66px;
+  border:1px solid rgba(151,102,36,.52)!important;
+  border-radius:9px!important;
+  background:linear-gradient(90deg,rgba(48,31,13,.5),rgba(16,11,7,.68))!important;
+  box-shadow:inset 0 0 0 1px rgba(24,15,7,.8)!important;
+  padding:11px 13px!important;
+}
+.plan-vintage-events .plan-day-event.type-birthday,
+.plan-vintage-events .plan-day-event.type-meeting{border-color:rgba(170,116,39,.58)!important}
+.plan-vintage-events .plan-event-icon{
+  color:#d9a048;
+  filter:sepia(1) saturate(1.45) hue-rotate(345deg) brightness(1.06) drop-shadow(0 0 6px rgba(214,148,51,.22));
+  font-size:23px!important;
+}
+.plan-vintage-events .plan-event-copy strong{color:#e9d7b2!important;font:600 15px Cinzel,Georgia,serif!important}
+.plan-vintage-events .plan-event-copy small{color:#9d835a!important}
+.plan-vintage-events .plan-event-copy p{color:#b7a382!important}
+.plan-vintage-events .plan-edit-event{
+  border:1px solid rgba(174,120,43,.5)!important;
+  color:#d1ab67!important;
+  background:rgba(65,42,15,.32)!important;
+  border-radius:8px!important;
+}
+.plan-vintage-events.plan-day-empty{
+  text-align:center!important;
+  padding:18px!important;
+}
+.plan-vintage-events.plan-day-empty strong{color:#e2c385;font:600 18px Cinzel,Georgia,serif}
+.plan-vintage-events.plan-day-empty span,.plan-vintage-events.plan-day-empty small{color:#9d8765!important}
+
+.plan-vintage-motto{
+  display:grid;
+  grid-template-columns:1fr auto 1fr;
+  align-items:center;
+  gap:17px;
+  padding:3px 30px 0;
+  color:#9e793e;
+  text-align:center;
+  font-family:Cinzel,Georgia,serif;
+  text-transform:uppercase;
+  letter-spacing:.26em;
+}
+.plan-vintage-motto span{height:1px;background:linear-gradient(90deg,transparent,#8a5e26)}
+.plan-vintage-motto span:last-child{transform:scaleX(-1)}
+.plan-vintage-motto p{margin:0;font-size:9px;line-height:1.7}
+
+.plan-vintage-page.is-subsection .plan-vintage-actions{margin-bottom:12px}
+.plan-vintage-back .btn{
+  border-color:rgba(166,113,40,.45)!important;
+  color:#d0ad6c!important;
+  background:linear-gradient(180deg,rgba(37,25,13,.8),rgba(14,10,7,.9))!important;
+}
+
+@media(max-width:760px){
+  .plan-vintage-page{width:100%}
+  .plan-vintage-actions{margin:0 2px -2px;padding:0 7px;gap:8px}
+  .plan-vintage-actions::before{display:none}
+  .plan-vintage-actions .plan-tab.plan-vintage-action{min-width:0;min-height:43px;flex:1 1 0;border-radius:10px;gap:7px;padding:0 9px}
+  .plan-vintage-action>span:not(.plan-action-icon){font-size:11px}
+  .plan-action-icon{width:21px;height:21px}
+  .plan-action-icon svg{width:20px;height:20px}
+  .plan-vintage-action>b{min-width:18px;height:18px;padding:0 4px;font-size:8px}
+
+  .plan-vintage-calendar{padding:18px 7px 11px;border-radius:15px!important}
+  .plan-vintage-calendar::before,.plan-vintage-calendar::after{font-size:19px;top:5px}
+  .plan-vintage-crown{top:-15px;font-size:28px;width:64px;height:34px}
+  .plan-vintage-crown::before,.plan-vintage-crown::after{width:35px;top:18px}
+  .plan-vintage-crown::before{right:46px}.plan-vintage-crown::after{left:46px}
+
+  .plan-vintage-month-toolbar{grid-template-columns:45px minmax(0,1fr) 45px!important;gap:5px!important;padding:11px 0 13px!important}
+  .plan-vintage-month-toolbar .calendar-arrow{width:39px!important;height:39px!important;font-size:28px!important;box-shadow:inset 0 0 0 2px #0a0705,inset 0 0 0 3px rgba(205,146,57,.32),0 4px 12px rgba(0,0,0,.42)}
+  .plan-vintage-month-title{min-height:88px;padding:12px 17px 9px;border-radius:42% 42% 12px 12px / 28% 28% 12px 12px}
+  .plan-vintage-month-title strong{font-size:23px!important}
+  .plan-vintage-year{font-size:12px;letter-spacing:.36em;text-indent:.36em;margin-top:5px}
+  .plan-vintage-flourish{top:-11px;font-size:20px}
+  .plan-vintage-month-title small{font-size:7px!important;margin-top:7px!important;white-space:nowrap}
+  .plan-vintage-month-title::before,.plan-vintage-month-title::after{display:none}
+
+  .plan-vintage-calendar .calendar-weekdays>div{min-height:34px;font-size:9px!important}
+  .plan-vintage-calendar .plan-calendar-day{min-height:58px!important;padding:4px!important}
+  .plan-vintage-calendar .calendar-day-number{font-size:14px!important;line-height:26px}
+  .plan-vintage-calendar .plan-calendar-day.is-selected::before{top:5px;width:32px;height:32px;box-shadow:inset 0 0 0 2px rgba(31,18,6,.9),inset 0 0 0 3px rgba(231,177,79,.44),0 0 12px rgba(217,151,55,.3),0 0 0 4px rgba(117,76,24,.1)}
+  .plan-vintage-calendar .plan-day-icons{bottom:5px!important;gap:2px!important}
+  .plan-vintage-calendar .plan-day-type-icon{font-size:11px!important}
+  .plan-vintage-calendar .calendar-entry-count{right:2px!important;bottom:2px!important;min-width:13px!important;height:13px!important;font-size:7px!important}
+  .plan-vintage-calendar .plan-calendar-legend{gap:10px!important;margin-top:9px;padding:10px 5px 1px!important;font-size:8px!important}
+  .plan-vintage-calendar .plan-legend-icon{font-size:12px!important}
+
+  .plan-vintage-events.plan-day-list-card{padding:15px 9px 10px!important}
+  .plan-vintage-events .plan-day-list-head{margin:0 24px 10px!important;padding-bottom:9px}
+  .plan-vintage-events .plan-day-list-head strong{font-size:16px!important}
+  .plan-vintage-events .plan-day-event{grid-template-columns:auto minmax(0,1fr);min-height:58px;padding:9px!important}
+  .plan-vintage-events .plan-edit-event{grid-column:2;justify-self:start}
+  .plan-vintage-events .plan-event-copy strong{font-size:13px!important}
+  .plan-vintage-motto{gap:10px;padding:0 10px;letter-spacing:.18em}
+  .plan-vintage-motto p{font-size:7px}
+}
+
+@media(max-width:380px){
+  .plan-vintage-action>span:not(.plan-action-icon){font-size:10px}
+  .plan-action-icon{display:none}
+  .plan-vintage-calendar .plan-calendar-day{min-height:53px!important}
+  .plan-vintage-month-title strong{font-size:20px!important}
+  .plan-vintage-month-title small{display:none}
+}
