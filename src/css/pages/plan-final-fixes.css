@@ -25,7 +25,7 @@
 }
 
 /* ---------- Calendar date state ----------
-   Selected day is now the whole cell, not a circular medallion. */
+   Selected day is the whole cell, not a circular medallion. */
 .plan-baroque-calendar-shell .plan-calendar-day{
   -webkit-tap-highlight-color:transparent!important;
   outline:0!important;
@@ -89,29 +89,62 @@
   border-right:0!important;
 }
 
+/* ---------- Calendar legend ----------
+   Artwork stays decorative; captions get their own dark reading surface so flourishes never cross letters. */
+.plan-baroque-legend{
+  position:relative!important;
+  isolation:isolate!important;
+  min-height:56px!important;
+}
+.plan-baroque-legend span:not(:first-child){
+  position:relative!important;
+  z-index:2!important;
+  padding:2px 6px!important;
+  border-radius:999px!important;
+  background:rgba(8,5,3,.76)!important;
+  box-shadow:0 0 8px rgba(8,5,3,.72)!important;
+  text-shadow:0 1px 1px #000!important;
+}
+
 /* ---------- Lower section ----------
-   Reserve real space between the selected-day text and the decorative bottom frame. */
+   Text and ornamental artwork occupy separate vertical zones. */
 .plan-baroque-page.is-baroque-calendar{
   padding-bottom:72px!important;
 }
 .plan-baroque-events{
-  margin-bottom:12px!important;
+  margin-bottom:14px!important;
 }
 .plan-baroque-motto{
   position:relative!important;
   z-index:3!important;
-  margin:12px 24px 38px!important;
-  padding:12px 18px 8px!important;
-  min-height:46px!important;
-  background:var(--plan-art-divider-thin) top center/72% auto no-repeat!important;
+  margin:12px 24px 42px!important;
+  padding:8px 18px 48px!important;
+  min-height:76px!important;
+  background:none!important;
+  overflow:visible!important;
+}
+.plan-baroque-motto::after{
+  content:""!important;
+  position:absolute!important;
+  z-index:1!important;
+  left:50%!important;
+  bottom:0!important;
+  width:min(92%,420px)!important;
+  height:42px!important;
+  transform:translateX(-50%)!important;
+  background:var(--plan-art-divider-thin) center/contain no-repeat!important;
+  opacity:.95!important;
+  pointer-events:none!important;
 }
 .plan-baroque-motto p{
   position:relative!important;
-  z-index:2!important;
-  margin:12px 0 0!important;
+  z-index:3!important;
+  margin:0!important;
   padding:0 18px!important;
   line-height:1.55!important;
+  text-shadow:0 1px 2px #000!important;
 }
+.plan-baroque-motto>span{display:none!important}
 .plan-baroque-bottom-fleur{
   bottom:-13px!important;
   z-index:6!important;
@@ -119,6 +152,49 @@
 .plan-baroque-corner.is-bl,
 .plan-baroque-corner.is-br{
   bottom:-4px!important;
+}
+
+/* ---------- Piggy Bank hero ----------
+   The medallion is a real grid item instead of an inline pseudo-element, preventing text collisions. */
+.is-piggy-section .plan-vintage-piggy-toolbar{
+  position:relative!important;
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) 72px auto!important;
+  grid-template-areas:"copy medallion action"!important;
+  align-items:center!important;
+  gap:10px 14px!important;
+  padding:14px 16px!important;
+  overflow:visible!important;
+}
+.is-piggy-section .plan-vintage-piggy-toolbar::before{
+  grid-area:medallion!important;
+  position:static!important;
+  display:block!important;
+  width:66px!important;
+  height:66px!important;
+  margin:0!important;
+  justify-self:center!important;
+  align-self:center!important;
+  background:var(--plan-art-piggy-medallion) center/contain no-repeat!important;
+  filter:drop-shadow(0 5px 9px rgba(0,0,0,.48))!important;
+}
+.is-piggy-section .plan-vintage-piggy-toolbar .piggy-toolbar-copy{
+  grid-area:copy!important;
+  min-width:0!important;
+  position:relative!important;
+  z-index:2!important;
+}
+.is-piggy-section .plan-vintage-piggy-toolbar .piggy-toolbar-copy p{
+  max-width:34em!important;
+  line-height:1.45!important;
+}
+.is-piggy-section .plan-vintage-piggy-toolbar .piggy-add{
+  grid-area:action!important;
+  position:relative!important;
+  z-index:2!important;
+  justify-self:end!important;
+  align-self:center!important;
+  margin:0!important;
 }
 
 @media(max-width:760px){
@@ -143,19 +219,70 @@
       inset 0 0 0 2px rgba(77,43,13,.68),
       inset 0 0 14px rgba(221,154,53,.14)!important;
   }
-  .plan-baroque-events{margin-bottom:9px!important}
+  .plan-baroque-legend{
+    min-height:54px!important;
+    gap:8px!important;
+  }
+  .plan-baroque-legend span:not(:first-child){
+    padding:2px 4px!important;
+    font-size:9px!important;
+  }
+  .plan-baroque-events{margin-bottom:10px!important}
   .plan-baroque-motto{
-    margin:9px 16px 34px!important;
-    padding:10px 12px 8px!important;
-    min-height:42px!important;
-    background-size:84% auto!important;
+    margin:10px 12px 38px!important;
+    padding:8px 10px 43px!important;
+    min-height:70px!important;
+  }
+  .plan-baroque-motto::after{
+    width:94%!important;
+    height:38px!important;
   }
   .plan-baroque-motto p{
-    margin-top:10px!important;
-    padding:0 16px!important;
+    margin:0!important;
+    padding:0 18px!important;
     line-height:1.5!important;
   }
   .plan-baroque-bottom-fleur{bottom:-11px!important}
   .plan-baroque-corner.is-bl,
   .plan-baroque-corner.is-br{bottom:-2px!important}
+
+  .is-piggy-section .plan-vintage-piggy-toolbar{
+    grid-template-columns:minmax(0,1fr) 62px!important;
+    grid-template-areas:
+      "copy medallion"
+      "action action"!important;
+    gap:8px 10px!important;
+    padding:12px!important;
+  }
+  .is-piggy-section .plan-vintage-piggy-toolbar::before{
+    width:58px!important;
+    height:58px!important;
+  }
+  .is-piggy-section .plan-vintage-piggy-toolbar .piggy-toolbar-copy h3{
+    margin-top:3px!important;
+    line-height:1.18!important;
+  }
+  .is-piggy-section .plan-vintage-piggy-toolbar .piggy-toolbar-copy p{
+    font-size:9px!important;
+    line-height:1.4!important;
+  }
+  .is-piggy-section .plan-vintage-piggy-toolbar .piggy-add{
+    justify-self:center!important;
+    width:auto!important;
+    min-width:190px!important;
+    margin-top:2px!important;
+  }
+}
+
+@media(max-width:430px){
+  .is-piggy-section .plan-vintage-piggy-toolbar{
+    grid-template-columns:minmax(0,1fr) 54px!important;
+  }
+  .is-piggy-section .plan-vintage-piggy-toolbar::before{
+    width:52px!important;
+    height:52px!important;
+  }
+  .is-piggy-section .plan-vintage-piggy-toolbar .piggy-toolbar-copy p{
+    max-width:none!important;
+  }
 }
