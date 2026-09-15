@@ -10,7 +10,7 @@ const CORS={'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'au
 const json=(data:unknown,status=200)=>new Response(JSON.stringify(data),{status,headers:{...CORS,'Content-Type':'application/json','Connection':'keep-alive'}});
 
 function isPlanQuestion(text:string){
-  return /(\bплан\b|планов\w*\s+календар|дн(?:ень|и|я|ей)?\s+рожд|рождени|встреч|событ|мероприят|важн\w*\s+дат|семейн\w*\s+календар|что\s+(?:у нас\s+)?запланирован)/iu.test(text);
+  return /(\bплан\b|планов\w*\s+календар|дн(?:ень|и|я|ей)?\s+рожд|рождени|встреч|событ|мероприят|важн\w*\s+дат|семейн\w*\s+календар|что\s+(?:у нас\s+)?запланирован|копилк|ежемесячн\w*\s+затрат|регулярн\w*\s+плат|запланирован\w*\s+расход)/iu.test(text);
 }
 
 function localDate(timeZone:string){
@@ -33,7 +33,7 @@ function responseText(payload:any){
 async function enrichPlanAnswer(transcript:string,baseAnswer:string,familyId:string,timeZone:string){
   if(!OPENAI_API_KEY)return baseAnswer;
   const admin=createClient(SUPABASE_URL,SERVICE_KEY,{auth:{persistSession:false,autoRefreshToken:false}});
-  const [{data:events,error:eventError},{data:people,error:peopleError}]=await Promise.all([
+  const [eventsResult,peopleResult,recurringResult,piggyResult,categoriesResult]=await Promise.all([
     admin.from('calendar_entries')
       .select('entry_date,event_type,title,comment,person_id,created_at')
       .eq('family_id',familyId)
@@ -42,13 +42,21 @@ async function enrichPlanAnswer(transcript:string,baseAnswer:string,familyId:str
       .gte('entry_date','2026-01-01')
       .order('entry_date',{ascending:true})
       .order('created_at',{ascending:true}),
-    admin.from('people').select('id,label,display_name').eq('family_id',familyId)
+    admin.from('people').select('id,label,display_name').eq('family_id',familyId),
+    admin.from('recurring_payments')
+      .select('person_id,type,amount,category_id,description,day_of_month,frequency,next_due_date,reminder_days,active')
+      .eq('family_id',familyId)
+      .order('next_due_date',{ascending:true}),
+    admin.from('piggy_bank_balances').select('currency_code,amount,updated_at').eq('family_id',familyId).order('currency_code'),
+    admin.from('categories').select('id,name,family_id').or(`family_id.is.null,family_id.eq.${familyId}`)
   ]);
-  if(eventError)throw eventError;
-  if(peopleError)throw peopleError;
+  const firstError=[eventsResult,peopleResult,recurringResult,piggyResult,categoriesResult].find(result=>result.error)?.error;
+  if(firstError)throw firstError;
 
-  const personMap=new Map<string,string>((people||[]).map((person:any)=>[String(person.id),String(person.display_name||person.label||'Участник семьи')]));
-  const planEvents=(events||[]).map((row:any)=>({
+  const personMap=new Map<string,string>((peopleResult.data||[]).map((person:any)=>[String(person.id),String(person.display_name||person.label||'Участник семьи')]));
+  const categoryMap=new Map<string,string>((categoriesResult.data||[]).map((category:any)=>[String(category.id),String(category.name||'Без категории')]));
+
+  const planEvents=(eventsResult.data||[]).map((row:any)=>({
     date:String(row.entry_date||''),
     type:row.event_type==='birthday'?'День рождения':row.event_type==='meeting'?'Встреча':'Событие',
     type_code:row.event_type||'event',
@@ -57,20 +65,44 @@ async function enrichPlanAnswer(transcript:string,baseAnswer:string,familyId:str
     comment:row.comment||null
   }));
 
+  const recurringExpenses=(recurringResult.data||[]).filter((row:any)=>row.type==='expense').map((row:any)=>({
+    description:row.description||categoryMap.get(String(row.category_id||''))||'Запланированный расход',
+    category:categoryMap.get(String(row.category_id||''))||'Без категории',
+    person:personMap.get(String(row.person_id||''))||'Участник семьи',
+    amount_kzt:Number(row.amount||0),
+    frequency:row.frequency||'monthly',
+    day_of_month:row.day_of_month||null,
+    next_due_date:row.next_due_date||null,
+    reminder_days:Number(row.reminder_days||0),
+    active:row.active===true
+  }));
+
+  const piggyBank=(piggyResult.data||[]).map((row:any)=>({
+    currency:String(row.currency_code||''),
+    amount:Number(row.amount||0),
+    updated_at:row.updated_at||null
+  }));
+
   const today=localDate(timeZone);
   const instructions=`Ты уточняешь ответ ИИ-Казначея данными из раздела «План» приложения «Семейная казна».
 
-Раздел «План» содержит семейные даты трёх типов: «День рождения», «Встреча» и «Событие». Переданный список plan_events является полным доступным списком событий Плана начиная с 2026 года. Используй даты, названия, владельца и комментарии буквально и ничего не выдумывай.
+Раздел «План» состоит из трёх частей:
+1) семейный календарь: «День рождения», «Встреча», «Событие»;
+2) запланированные/регулярные расходы;
+3) «Копилка» с отдельными остатками по валютам.
+Переданные plan_events, recurring_expenses и piggy_bank являются полным доступным содержимым этих частей Плана. Используй даты, названия, владельца, комментарии, суммы и статусы буквально и ничего не выдумывай.
 
 Правила:
-- Если пользователь спрашивает о днях рождения, встречах, событиях, мероприятиях, важных датах или о Плане, отвечай прежде всего по plan_events.
+- Вопросы о днях рождения, встречах, событиях, мероприятиях и важных датах отвечай по plan_events.
+- Вопросы о запланированных/ежемесячных расходах отвечай по recurring_expenses. Учитывай active и frequency.
+- Вопросы о Копилке отвечай по piggy_bank. Не складывай разные валюты в одну сумму без курса.
 - Если назван месяц без года, используй год из today и явно укажи его в ответе.
 - Для относительных дат («сегодня», «завтра», «в пятницу», «на следующей неделе») считай относительно today.
-- Если подходящих записей нет, прямо скажи, что в Плане таких записей нет.
+- Если подходящих записей нет, прямо скажи, что в соответствующей части Плана таких записей нет.
 - Если вопрос одновременно касается финансов/салона и Плана, сохрани полезную часть base_answer и дополни её точными сведениями Плана.
 - Отвечай по-русски, кратко и предметно.`;
 
-  const input=JSON.stringify({today,timezone:timeZone,question:transcript,base_answer:baseAnswer,plan_events:planEvents});
+  const input=JSON.stringify({today,timezone:timeZone,question:transcript,base_answer:baseAnswer,plan:{plan_events:planEvents,recurring_expenses:recurringExpenses,piggy_bank:piggyBank}});
   const response=await fetch('https://api.openai.com/v1/responses',{
     method:'POST',
     headers:{Authorization:`Bearer ${OPENAI_API_KEY}`,'Content-Type':'application/json'},
