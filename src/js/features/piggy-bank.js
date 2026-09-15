@@ -128,8 +128,6 @@
     document.querySelectorAll('[data-piggy-edit]').forEach(button=>button.onclick=()=>openPiggyModal('edit',button.dataset.piggyEdit));
   };
 
-  // Load balances alongside the rest of the family data. A small local cache keeps
-  // the last known balances visible if the installed app is opened offline.
   const baseLoadDataWithPiggy=loadData;
   loadData=async function(){
     await baseLoadDataWithPiggy();
@@ -150,35 +148,4 @@
       if(restored&&typeof renderApp==='function')renderApp();
     }
   };
-
-  // Extend the existing two-tab Plan page without disturbing goals/recurring logic.
-  if(typeof planTabsMarkup==='function'&&typeof planPage==='function'&&typeof bindPlan==='function'){
-    planTabsMarkup=function(){
-      const alerts=typeof phase3Upcoming==='function'?phase3Upcoming(3):[];
-      const activeGoals=state.goals.filter(g=>!g.archived).length;
-      const filled=PIGGY_ORDER.filter(code=>Number(piggyRow(code)?.amount||0)>0).length;
-      return `<div class="plan-tabs" role="tablist" aria-label="Разделы плана">
-        <button type="button" class="plan-tab ${planSection==='goals'?'active':''}" data-plan-section="goals" role="tab" aria-selected="${planSection==='goals'}"><span>Цели</span><b>${activeGoals}</b></button>
-        <button type="button" class="plan-tab ${planSection==='recurring'?'active':''}" data-plan-section="recurring" role="tab" aria-selected="${planSection==='recurring'}"><span>Ежемесячные затраты</span>${alerts.length?`<b class="plan-tab-alert">${alerts.length}</b>`:`<b>${state.recurring.filter(r=>r.active).length}</b>`}</button>
-        <button type="button" class="plan-tab ${planSection==='piggy'?'active':''}" data-plan-section="piggy" role="tab" aria-selected="${planSection==='piggy'}"><span>Копилка</span><b>${filled}</b></button>
-      </div>`;
-    };
-
-    planPage=function(){
-      if(state.view==='goals')planSection='goals';
-      const subtitle=planSection==='goals'?'Финансовые цели и накопления':planSection==='recurring'?'Регулярные платежи и ежемесячные расходы':'Отложенные средства в разных валютах';
-      const panel=planSection==='goals'?planGoalsPanel():planSection==='recurring'?planRecurringPanel():piggyBankPanel();
-      return `<div class="page-head plan-page-head"><div><h2 class="page-title">План</h2><div class="page-subtitle">${subtitle}</div></div></div>${planTabsMarkup()}${panel}`;
-    };
-
-    bindPlan=function(){
-      document.querySelectorAll('[data-plan-section]').forEach(button=>button.onclick=()=>{
-        const next=button.dataset.planSection;if(!['goals','recurring','piggy'].includes(next)||next===planSection)return;
-        planSection=next;
-        if(state.view==='goals')state.view='recurring';
-        renderApp();
-      });
-      if(planSection==='goals')bindGoals?.();else if(planSection==='recurring')bindRecurring?.();else bindPiggyBank?.();
-    };
-  }
 })();
