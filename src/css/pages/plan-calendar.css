@@ -1,3 +1,5 @@
+@import url("./plan-vintage.css?v=plan-vintage1");
+
 /* Plan v2: family month calendar and personal/work statistics refinements. */
 .plan-tabs-v2{margin-bottom:14px}
 .plan-calendar-workspace{display:grid;gap:14px}
