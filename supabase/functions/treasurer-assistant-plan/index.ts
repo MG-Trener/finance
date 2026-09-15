@@ -58,6 +58,8 @@ async function enrichPlanAnswer(transcript:string,baseAnswer:string,familyId:str
 
   const planEvents=(eventsResult.data||[]).map((row:any)=>({
     date:String(row.entry_date||''),
+    month_day:String(row.entry_date||'').slice(5,10),
+    recurrence:row.event_type==='birthday'?'annual':'once',
     type:row.event_type==='birthday'?'День рождения':row.event_type==='meeting'?'Встреча':'Событие',
     type_code:row.event_type||'event',
     title:row.title||'Событие',
@@ -92,8 +94,16 @@ async function enrichPlanAnswer(transcript:string,baseAnswer:string,familyId:str
 3) «Копилка» с отдельными остатками по валютам.
 Переданные plan_events, recurring_expenses и piggy_bank являются полным доступным содержимым этих частей Плана. Используй даты, названия, владельца, комментарии, суммы и статусы буквально и ничего не выдумывай.
 
-Правила:
+КРИТИЧЕСКОЕ ПРАВИЛО ДЛЯ ДНЕЙ РОЖДЕНИЯ:
+- event с recurrence='annual' — ежегодный день рождения.
+- Год в поле date — только год исходной записи и НЕ ограничивает событие этим годом.
+- День рождения повторяется каждый год по month_day.
+- Если пользователь спрашивает про июнь 2027, 2030 или любой другой год, учитывай все ежегодные дни рождения с month_day, попадающим в июнь, и называй запрошенный год.
+- Для поиска следующего дня рождения вычисляй ближайшее будущее ежегодное наступление по month_day относительно today.
+
+Другие правила:
 - Вопросы о днях рождения, встречах, событиях, мероприятиях и важных датах отвечай по plan_events.
+- Встречи и обычные события с recurrence='once' происходят только в указанную date.
 - Вопросы о запланированных/ежемесячных расходах отвечай по recurring_expenses. Учитывай active и frequency.
 - Вопросы о Копилке отвечай по piggy_bank. Не складывай разные валюты в одну сумму без курса.
 - Если назван месяц без года, используй год из today и явно укажи его в ответе.
@@ -123,9 +133,6 @@ Deno.serve(async(req:Request)=>{
   let form:FormData;
   try{form=await req.formData()}catch{return json({ok:false,error:'INVALID_FORM'},400)}
 
-  // The dedicated client-side voice layer synthesizes the final corrected answer.
-  // Force the base assistant to return text so stale audio can never accompany a
-  // Plan-enriched answer.
   form.set('answer_mode','text');
   const timeZone=String(form.get('timezone')||'Asia/Almaty');
 
