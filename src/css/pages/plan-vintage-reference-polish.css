@@ -1,0 +1,31 @@
+/* Fine polish toward the supplied ornate calendar reference. */
+.plan-reference-ornate.is-calendar::before{content:"";position:absolute;z-index:0;inset:12px;border:1px solid rgba(194,135,48,.24);border-radius:15px;pointer-events:none}
+.plan-reference-ornate.is-calendar::after{content:"";position:absolute;z-index:0;inset:18px;border:1px solid rgba(91,56,17,.62);border-radius:11px;pointer-events:none}
+.plan-reference-ornate.is-calendar>.plan-vintage-actions,.plan-reference-ornate.is-calendar>.plan-calendar-workspace{position:relative;z-index:1}
+
+.plan-reference-ornate .plan-vintage-month-title{filter:drop-shadow(0 8px 14px rgba(0,0,0,.28))}
+.plan-reference-ornate .plan-vintage-month-title strong::first-letter{text-transform:uppercase}
+
+.plan-reference-ornate .plan-vintage-events .plan-day-list-head{position:relative;border-bottom:0!important;padding-bottom:24px!important}
+.plan-reference-ornate .plan-vintage-events .plan-day-list-head::after{content:"";position:absolute;left:50%;bottom:0;width:min(100%,390px);height:30px;transform:translateX(-50%);background:url('../../assets/plan-vintage-divider.svg') center/contain no-repeat;opacity:.86}
+.plan-reference-ornate .plan-vintage-calendar .plan-calendar-legend{padding-bottom:22px!important}
+.plan-reference-ornate .plan-vintage-calendar .plan-calendar-legend::after{content:"";position:absolute;left:50%;bottom:-13px;width:230px;height:26px;transform:translateX(-50%);background:url('../../assets/plan-vintage-divider.svg') center/contain no-repeat;opacity:.68}
+
+.plan-reference-ornate .plan-day-event{position:relative;overflow:hidden}
+.plan-reference-ornate .plan-day-event::after{content:"";position:absolute;inset:4px;border:1px solid rgba(211,155,61,.10);border-radius:6px;pointer-events:none}
+.plan-reference-ornate .plan-day-event:hover{border-color:rgba(218,160,63,.76)!important;background:linear-gradient(90deg,rgba(74,47,17,.54),rgba(20,13,7,.78))!important}
+
+.plan-reference-ornate .plan-vintage-action .plan-action-icon{filter:drop-shadow(0 0 6px rgba(218,154,57,.32))}
+.plan-reference-ornate .plan-vintage-action>span:not(.plan-action-icon){font-family:"Cormorant Garamond",Georgia,serif;font-size:19px;font-weight:600}
+
+.plan-reference-ornate .plan-vintage-calendar .plan-calendar-day.has-entry .calendar-day-number{text-shadow:0 1px 0 #160d04,0 0 7px rgba(223,164,66,.16)}
+.plan-reference-ornate .plan-vintage-calendar .plan-day-type-icon,.plan-reference-ornate .plan-vintage-events .plan-event-icon{color:#e1aa50!important;filter:drop-shadow(0 0 5px rgba(216,147,49,.34))!important}
+
+@media(max-width:760px){
+  .plan-reference-ornate.is-calendar::before{inset:7px;border-radius:10px}
+  .plan-reference-ornate.is-calendar::after{inset:11px;border-radius:8px}
+  .plan-reference-ornate .plan-vintage-action>span:not(.plan-action-icon){font-size:14px}
+  .plan-reference-ornate .plan-vintage-events .plan-day-list-head{padding-bottom:18px!important}
+  .plan-reference-ornate .plan-vintage-events .plan-day-list-head::after{height:22px;width:260px}
+  .plan-reference-ornate .plan-vintage-calendar .plan-calendar-legend::after{width:170px;height:20px;bottom:-10px}
+}
