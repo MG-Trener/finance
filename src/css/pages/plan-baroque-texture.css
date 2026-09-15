@@ -1,0 +1,25 @@
+/* Subtle old-leather / dark-wood texture used only by the Plan theme. */
+.plan-baroque-page.is-baroque-calendar{
+  background-image:
+    url('../../../assets/plan-baroque-texture.svg'),
+    radial-gradient(ellipse at 50% 0,rgba(151,95,31,.16),transparent 34%),
+    linear-gradient(180deg,rgba(15,10,6,.96),rgba(5,3,2,.985))!important;
+  background-repeat:repeat,no-repeat,no-repeat!important;
+  background-size:180px 180px,auto,auto!important;
+}
+.plan-baroque-page.is-baroque-subsection{
+  background-image:
+    url('../../../assets/plan-baroque-texture.svg'),
+    radial-gradient(ellipse at 50% -10%,rgba(142,88,27,.14),transparent 34%),
+    linear-gradient(180deg,rgba(14,9,5,.97),rgba(5,3,2,.99))!important;
+  background-repeat:repeat,no-repeat,no-repeat!important;
+  background-size:180px 180px,auto,auto!important;
+}
+.plan-vintage-modal-shell{
+  background-image:
+    url('../../../assets/plan-baroque-texture.svg'),
+    radial-gradient(ellipse at 50% -10%,rgba(145,89,25,.15),transparent 34%),
+    linear-gradient(180deg,#120c07,#070402)!important;
+  background-repeat:repeat,no-repeat,no-repeat!important;
+  background-size:180px 180px,auto,auto!important;
+}
