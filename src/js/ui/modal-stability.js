@@ -9,7 +9,9 @@
 
     backdrop.classList.remove('modal-layout-top','modal-layout-center','modal-layout-sheet');
 
-    if(modal.querySelector('.salon-day-schedule')){
+    if(modal.classList.contains('plan-vintage-modal-shell')||modal.classList.contains('plan-event-editor-modal')||modal.classList.contains('plan-conflict-modal-vintage')){
+      backdrop.classList.add('modal-layout-top','plan-vintage-modal-backdrop');
+    }else if(modal.querySelector('.salon-day-schedule')){
       modal.classList.add('salon-day-modal');
       backdrop.classList.add('modal-layout-top');
     }else if(modal.classList.contains('salon-client-history-modal')){
