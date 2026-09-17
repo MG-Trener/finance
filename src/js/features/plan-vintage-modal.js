@@ -48,6 +48,52 @@
     }));
   }
 
+  function applyPlanModalLayout(modal){
+    const backdrop=modal.closest('.modal-backdrop');
+    if(!backdrop)return;
+    backdrop.classList.add('plan-vintage-modal-backdrop');
+    window.FinanceModalStability?.classify?.(backdrop);
+  }
+
+  function currentConflictRows(){
+    try{
+      const dateKey=window.FinancePlanCalendar?.selected?.()
+        ||document.querySelector('.plan-calendar-day.is-selected[data-plan-date]')?.dataset.planDate
+        ||null;
+      const person=(state.people||[]).find(item=>item.linked_user_id===state.user?.id)
+        ||(typeof calendarOwnPerson==='function'?calendarOwnPerson():null);
+      if(!dateKey||!person)return [];
+      const rows=(state.calendarEntries||[]).filter(row=>
+        row.person_id===person.id&&row.entry_date===dateKey&&row.calendar_context!=='plan'
+      );
+      return person.label==='wife'
+        ?rows.filter(row=>row.kind==='appointment')
+        :rows.filter(row=>row.kind==='event');
+    }catch(_error){
+      return [];
+    }
+  }
+
+  function installConflictDetails(modal){
+    const rows=currentConflictRows();
+    [...modal.querySelectorAll('.plan-conflict-warning li')].forEach((item,index)=>{
+      const title=item.textContent.trim();
+      const comment=String(rows[index]?.comment||'').trim();
+      const copy=document.createElement('span');
+      copy.className='plan-conflict-copy';
+      const titleNode=document.createElement('strong');
+      titleNode.textContent=title;
+      copy.appendChild(titleNode);
+      if(comment){
+        const commentNode=document.createElement('small');
+        commentNode.className='plan-conflict-comment';
+        commentNode.textContent=`Комментарий: ${comment}`;
+        copy.appendChild(commentNode);
+      }
+      item.replaceChildren(copy);
+    });
+  }
+
   function decorateEventModal(modal){
     modal.classList.add('plan-event-editor-modal','plan-vintage-modal-shell');
     if(!modal.querySelector('.plan-modal-crest'))modal.insertAdjacentHTML('afterbegin','<div class="plan-modal-crest" aria-hidden="true"><span>⚜</span></div>');
@@ -63,15 +109,18 @@
     if(submit)submit.classList.add('plan-vintage-save-event');
     const remove=modal.querySelector('#deletePlanEvent');
     if(remove)remove.classList.add('plan-vintage-delete-event');
+    applyPlanModalLayout(modal);
   }
 
   function decorateConflictModal(modal){
     modal.classList.add('plan-conflict-modal-vintage','plan-vintage-modal-shell');
     if(!modal.querySelector('.plan-modal-crest'))modal.insertAdjacentHTML('afterbegin','<div class="plan-modal-crest is-warning" aria-hidden="true"><span>!</span></div>');
+    installConflictDetails(modal);
     modal.querySelectorAll('.plan-conflict-warning li').forEach(item=>{
       if(!item.querySelector('.plan-conflict-bullet'))item.insertAdjacentHTML('afterbegin','<span class="plan-conflict-bullet" aria-hidden="true">◆</span>');
     });
     modal.querySelector('.plan-conflict-actions')?.classList.add('plan-vintage-form-actions');
+    applyPlanModalLayout(modal);
   }
 
   calendarModal=function(markup){
