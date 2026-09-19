@@ -23,31 +23,43 @@
     return [...years].filter(Number.isFinite).sort((a,b)=>b-a);
   }
 
-  function personCategories(type,personLabel,year,month='all'){
+  function sourceLabel(categoryId,subcategoryId){
+    const category=categoryId?catName(categoryId):'Без категории';
+    const subcategory=subcategoryId?subName(subcategoryId):'';
+    return subcategory?`${category} · ${subcategory}`:category;
+  }
+
+  function personSources(type,personLabel,year,month='all'){
     const person=personByLabel(personLabel);
-    if(!person)return{categories:[],total:0};
-    const categorySums={};
+    if(!person)return{sources:[],total:0};
+    const sourceSums={};
     state.transactions
       .filter(x=>{
         if(x.type!==type||x.person_id!==person.id)return false;
         const date=new Date(x.occurred_at);
         return date.getFullYear()===+year&&(month==='all'||date.getMonth()===+month);
       })
-      .forEach(x=>{categorySums[x.category_id]=(categorySums[x.category_id]||0)+Number(x.amount||0)});
-    const categories=Object.entries(categorySums).sort((a,b)=>b[1]-a[1]);
-    const total=categories.reduce((sum,[,value])=>sum+value,0);
-    return{categories,total};
+      .forEach(x=>{
+        const categoryId=x.category_id||'';
+        const subcategoryId=x.subcategory_id||'';
+        const key=`${categoryId}::${subcategoryId}`;
+        if(!sourceSums[key])sourceSums[key]={categoryId,subcategoryId,value:0};
+        sourceSums[key].value+=Number(x.amount||0);
+      });
+    const sources=Object.values(sourceSums).sort((a,b)=>b.value-a.value);
+    const total=sources.reduce((sum,item)=>sum+item.value,0);
+    return{sources,total};
   }
 
   function periodLabel(year,month){return month==='all'?`${year} год`:`${MONTHS[+month]} ${year}`}
 
-  function sourceList(type,categories,total,year,month){
-    if(!categories.length){
+  function sourceList(type,sources,total,year,month){
+    if(!sources.length){
       const word=type==='income'?'Доходов':'Расходов';
       return `<div class="empty">${word} за ${esc(periodLabel(year,month))} пока нет</div>`;
     }
-    const max=categories[0][1]||1;
-    return categories.slice(0,7).map(([id,val],i)=>`<div class="annual-category"><span class="annual-rank">${i+1}</span><div class="annual-category-main"><div><b>${esc(catName(id))}</b><span>${money(val)} · ${total?Math.round(val/total*100):0}%</span></div><div class="bar-track"><div class="bar" style="width:${Math.max(3,val/max*100)}%"></div></div></div></div>`).join('');
+    const max=sources[0].value||1;
+    return sources.slice(0,7).map((item,i)=>`<div class="annual-category"><span class="annual-rank">${i+1}</span><div class="annual-category-main"><div><b>${esc(sourceLabel(item.categoryId,item.subcategoryId))}</b><span>${money(item.value)} · ${total?Math.round(item.value/total*100):0}%</span></div><div class="bar-track"><div class="bar" style="width:${Math.max(3,item.value/max*100)}%"></div></div></div></div>`).join('');
   }
 
   function monthOptions(selected){
@@ -60,16 +72,16 @@
   }
 
   function sourceCard(type,personLabel,title){
-    const filter=filterFor(type,personLabel),data=personCategories(type,personLabel,filter.year,filter.month);
+    const filter=filterFor(type,personLabel),data=personSources(type,personLabel,filter.year,filter.month);
     const cardKey=`${type}-${personLabel}`;
-    return `<div class="card income-source-card" data-source-card="${cardKey}" data-source-type="${type}" data-person-label="${personLabel}"><div class="income-source-card-head"><h3>${esc(title)}</h3><div class="income-source-filters"><label class="income-source-filter"><span>Месяц</span><select class="income-source-select" data-source-filter="month" aria-label="Месяц для ${esc(title)}">${monthOptions(filter.month)}</select></label><label class="income-source-filter income-source-year"><span>Год</span><select class="income-source-select" data-source-filter="year" aria-label="Год для ${esc(title)}">${yearOptions(type,personLabel,filter.year)}</select></label></div></div><div class="income-source-body">${sourceList(type,data.categories,data.total,filter.year,filter.month)}</div></div>`;
+    return `<div class="card income-source-card" data-source-card="${cardKey}" data-source-type="${type}" data-person-label="${personLabel}"><div class="income-source-card-head"><h3>${esc(title)}</h3><div class="income-source-filters"><label class="income-source-filter"><span>Месяц</span><select class="income-source-select" data-source-filter="month" aria-label="Месяц для ${esc(title)}">${monthOptions(filter.month)}</select></label><label class="income-source-filter income-source-year"><span>Год</span><select class="income-source-select" data-source-filter="year" aria-label="Год для ${esc(title)}">${yearOptions(type,personLabel,filter.year)}</select></label></div></div><div class="income-source-body">${sourceList(type,data.sources,data.total,filter.year,filter.month)}</div></div>`;
   }
 
   function refreshSourceCard(type,personLabel){
     const card=document.querySelector(`[data-source-card="${type}-${personLabel}"]`);
     if(!card)return;
-    const filter=filterFor(type,personLabel),data=personCategories(type,personLabel,filter.year,filter.month),body=card.querySelector('.income-source-body');
-    if(body)body.innerHTML=sourceList(type,data.categories,data.total,filter.year,filter.month);
+    const filter=filterFor(type,personLabel),data=personSources(type,personLabel,filter.year,filter.month),body=card.querySelector('.income-source-body');
+    if(body)body.innerHTML=sourceList(type,data.sources,data.total,filter.year,filter.month);
   }
 
   if(!window.__personalSourceFiltersBound){
