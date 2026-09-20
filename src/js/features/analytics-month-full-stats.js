@@ -7,19 +7,35 @@
     return analyticsTransactions(+state.year,analyticsScope).filter(tx=>new Date(tx.occurred_at).getMonth()===+analyticsSelectedMonth);
   }
 
+  function resolvedCategoryId(tx){
+    if(typeof analyticsResolvedCategoryId==='function')return analyticsResolvedCategoryId(tx);
+    const direct=state.categories.find(category=>category.id===tx.category_id&&category.type===tx.type);
+    return direct?.id||tx.category_id||'__none__';
+  }
+
+  function resolvedSubcategoryKey(tx){
+    const categoryId=resolvedCategoryId(tx);
+    const direct=state.subcategories.find(item=>item.id===tx.subcategory_id&&item.category_id===categoryId);
+    if(direct)return direct.id;
+    return `__category__:${categoryId}`;
+  }
+
   function dimensionBuckets(type,dimension){
     const sums={};
     selectedMonthTransactions().filter(tx=>tx.type===type).forEach(tx=>{
-      const raw=dimension==='subcategory'?tx.subcategory_id:tx.category_id;
-      const key=raw||'__none__';
+      const key=dimension==='subcategory'?resolvedSubcategoryKey(tx):resolvedCategoryId(tx);
       sums[key]=(sums[key]||0)+Number(tx.amount||0);
     });
     return Object.entries(sums).sort((a,b)=>b[1]-a[1]);
   }
 
   function subcategoryLabel(id){
-    if(id==='__none__')return'Без подкатегории';
-    return subName(id)||'Без подкатегории';
+    if(String(id).startsWith('__category__:')){
+      const categoryId=String(id).slice('__category__:'.length);
+      const category=analyticsCategoryName(categoryId);
+      return category&&category!=='Без категории'?`Прочее · ${category}`:'Прочее';
+    }
+    return subName(id)||'Прочее';
   }
 
   function detailTotalMarkup(total,type){
