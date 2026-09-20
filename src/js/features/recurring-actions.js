@@ -9,7 +9,11 @@ function bindRecurring(){
   document.querySelectorAll('.postRecurring').forEach(b=>b.onclick=()=>postRecurring(b.dataset.id));
 }
 async function postRecurring(id){
-  const r=byId(state.recurring,id);if(!r)return;const now=new Date(),payload={person_id:r.person_id,type:r.type,amount:Number(r.amount),category_id:r.category_id,subcategory_id:r.subcategory_id||null,description:r.description||null,occurred_at:now.toISOString()},createArgs={p_family_id:state.family.id,p_person_id:r.person_id,p_type:r.type,p_amount:Number(r.amount),p_category_id:r.category_id,p_subcategory_id:r.subcategory_id||null,p_description:r.description||null,p_occurred_at:now.toISOString()};
-  const result=window.FinanceOffline?.saveTransaction?await window.FinanceOffline.saveTransaction({payload,createArgs}):await sb.rpc('create_family_transaction',createArgs);if(result.error)return alert(result.error.message||result.error);const tx=Array.isArray(result.data)?result.data[0]:result.data;if(tx)syncTransactionState(tx);
-  const next=recurringNextDate(r),recResult=await saveRecurringEntity(r.id,{next_due_date:phase3DateValue(next),last_paid_at:now.toISOString(),last_generated_month:phase3MonthKey(now)});if(recResult.error)return alert(recResult.error.message||recResult.error);if(recResult.data)upsertById(state.recurring,recResult.data);if(typeof uiSound==='function')uiSound('success');renderStateChange();
+  const r=byId(state.recurring,id);if(!r)return;
+  const now=new Date(),next=recurringNextDate(r);
+  const recResult=await saveRecurringEntity(r.id,{next_due_date:phase3DateValue(next),last_paid_at:now.toISOString()});
+  if(recResult.error)return alert(recResult.error.message||recResult.error);
+  if(recResult.data)upsertById(state.recurring,recResult.data);
+  if(typeof uiSound==='function')uiSound('success');
+  renderStateChange();
 }
