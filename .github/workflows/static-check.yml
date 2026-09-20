@@ -69,3 +69,6 @@ jobs:
 
       - name: Check static file graph
         run: node tests/static-integrity.mjs
+
+      - name: Check expanded month analytics
+        run: node tests/analytics-month-full-stats.mjs
