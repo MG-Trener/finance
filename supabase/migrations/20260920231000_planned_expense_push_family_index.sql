@@ -1,0 +1,2 @@
+create index if not exists planned_expense_push_deliveries_family_idx
+on public.planned_expense_push_deliveries(family_id);
