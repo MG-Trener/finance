@@ -7,24 +7,55 @@
   let splashFinished=!document.getElementById('startupCrestSplash');
   let resumeAfterHidden=false;
   let injectQueued=false;
+  let backgroundLoad=null;
+  let backgroundObjectUrl='';
 
-  const splashAudio=new Audio('assets/sounds/splash-epic.webm?v=1');
+  // The supplied ethereal track is used during the splash screen.
+  const splashAudio=new Audio('assets/sounds/background-ambient.webm?v=3');
   splashAudio.preload='auto';
   splashAudio.volume=.76;
 
-  const backgroundAudio=new Audio('assets/sounds/background-ambient.webm?v=1');
+  // The supplied Pirates track is stored as small text chunks and rebuilt locally.
+  const backgroundAudio=new Audio();
   backgroundAudio.preload='auto';
   backgroundAudio.loop=true;
   backgroundAudio.volume=.18;
 
-  function safePlay(audio){
+  function loadBackground(){
+    if(backgroundAudio.src)return Promise.resolve(backgroundAudio);
+    if(backgroundLoad)return backgroundLoad;
+    backgroundLoad=Promise.all(['00','01','02','03'].map(part=>
+      fetch(`assets/sounds/background-pirates/${part}.b64?v=1`,{cache:'force-cache'}).then(response=>{
+        if(!response.ok)throw new Error(`background-pirates/${part}: ${response.status}`);
+        return response.text();
+      })
+    )).then(parts=>{
+      const binary=atob(parts.join('').replace(/\s+/g,''));
+      const bytes=new Uint8Array(binary.length);
+      for(let i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);
+      backgroundObjectUrl=URL.createObjectURL(new Blob([bytes],{type:'audio/webm'}));
+      backgroundAudio.src=backgroundObjectUrl;
+      backgroundAudio.load();
+      return backgroundAudio;
+    }).catch(error=>{
+      console.warn('Не удалось загрузить фоновую музыку приложения.',error);
+      return null;
+    });
+    return backgroundLoad;
+  }
+
+  function safePlay(audio,loader){
     if(!enabled||document.hidden)return Promise.resolve(false);
-    try{
-      const result=audio.play();
-      return result&&typeof result.then==='function'
-        ?result.then(()=>true).catch(()=>false)
-        :Promise.resolve(true);
-    }catch(_){return Promise.resolve(false)}
+    const ready=loader?loader():Promise.resolve(audio);
+    return ready.then(loaded=>{
+      if(!loaded||!enabled||document.hidden)return false;
+      try{
+        const result=audio.play();
+        return result&&typeof result.then==='function'
+          ?result.then(()=>true).catch(()=>false)
+          :true;
+      }catch(_){return false}
+    });
   }
 
   function playSplash(){
@@ -36,7 +67,7 @@
   function playBackground(){
     if(!isNative||!enabled||!splashFinished||document.hidden)return;
     splashAudio.pause();
-    safePlay(backgroundAudio);
+    safePlay(backgroundAudio,loadBackground);
   }
 
   function stopAll(reset=false){
@@ -81,7 +112,7 @@
     const soundButton=document.getElementById('soundToggle');
     const soundCard=soundButton?.closest('.settings-card');
     if(!soundCard)return;
-    soundCard.insertAdjacentHTML('afterend',`<div class="card settings-card"><div class="settings-card-icon">♬</div><div class="settings-card-body"><h3>Музыка приложения</h3><p>Эпическая музыка на заставке и спокойная фоновая музыка во время работы.</p></div><button type="button" class="btn btn-soft btn-small settings-control" id="musicToggle" aria-pressed="${enabled?'true':'false'}">${buttonLabel()}</button></div>`);
+    soundCard.insertAdjacentHTML('afterend',`<div class="card settings-card"><div class="settings-card-icon">♬</div><div class="settings-card-body"><h3>Музыка приложения</h3><p>Музыка на заставке и фоновая мелодия во время работы.</p></div><button type="button" class="btn btn-soft btn-small settings-control" id="musicToggle" aria-pressed="${enabled?'true':'false'}">${buttonLabel()}</button></div>`);
   }
 
   function queueSettingsInjection(){
@@ -118,8 +149,10 @@
       else playSplash();
     }
   });
+  window.addEventListener('beforeunload',()=>{
+    if(backgroundObjectUrl)URL.revokeObjectURL(backgroundObjectUrl);
+  });
 
-  // A user gesture is a fallback for browsers/WebViews that block autoplay.
   function unlock(){
     if(!enabled||document.hidden)return;
     if(splashFinished&&backgroundAudio.paused)playBackground();
@@ -139,6 +172,7 @@
     observer.observe(document.body,{childList:true,subtree:true});
     observer.observe(splash,{attributes:true,attributeFilter:['class']});
     setTimeout(finishSplash,6500);
+    loadBackground();
     playSplash();
   }else{
     splashFinished=true;
