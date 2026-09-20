@@ -8,12 +8,15 @@ const styles=fs.readFileSync('src/css/pages/analytics-month-full-stats.css','utf
 
 assert.match(index,/analytics-month-full-stats\.js/,'month analytics extension must be loaded');
 assert.match(appCss,/analytics-month-full-stats\.css/,'month analytics styles must be imported');
-assert.match(feature,/analytics-month-full-stats/,'full month KPI block must be rendered');
+assert.doesNotMatch(feature,/analytics-month-full-stats/,'summary KPI block must not be rendered');
 assert.match(feature,/Категории доходов/,'income category widget is required');
 assert.match(feature,/Подкатегории доходов/,'income subcategory widget is required');
 assert.match(feature,/Категории расходов/,'expense category widget is required');
 assert.match(feature,/Подкатегории расходов/,'expense subcategory widget is required');
+assert.match(feature,/analytics-detail-total/,'detail blocks must render control totals');
 assert.match(feature,/analyticsCategoryList=function/,'doughnut detail list must be expanded');
 assert.match(styles,/analytics-linear-grid/,'linear widget grid styles are required');
+assert.match(styles,/\.analytics-linear-rows\{[^}]*max-height:none[^}]*overflow:visible/,'linear rows must not use nested scrolling');
+assert.match(styles,/\.analytics-category-list-full\{[^}]*max-height:none[^}]*overflow:visible/,'category lists must not use nested scrolling');
 
-console.log('analytics month full stats: ok');
+console.log('analytics month detail: ok');
