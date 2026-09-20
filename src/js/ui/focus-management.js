@@ -12,15 +12,3 @@
     }));
   };
 })();
-
-// Keep the music controller isolated from the core UI bundle. It is loaded here
-// because this script runs after the document body exists but before app startup.
-(function(){
-  if(document.querySelector('script[data-finance-music]'))return;
-  const script=document.createElement('script');
-  script.src='src/js/ui/music.js?v=music4';
-  script.dataset.financeMusic='1';
-  script.async=true;
-  script.onerror=()=>console.warn('Не удалось загрузить музыкальный модуль приложения.');
-  document.head.appendChild(script);
-})();
