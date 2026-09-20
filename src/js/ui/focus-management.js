@@ -18,7 +18,7 @@
 (function(){
   if(document.querySelector('script[data-finance-music]'))return;
   const script=document.createElement('script');
-  script.src='src/js/ui/music.js?v=music3';
+  script.src='src/js/ui/music.js?v=music4';
   script.dataset.financeMusic='1';
   script.async=true;
   script.onerror=()=>console.warn('Не удалось загрузить музыкальный модуль приложения.');
