@@ -2,6 +2,7 @@
 let chartJsPromise=null;
 let analyticsScope='combined';
 let analyticsSelectedMonth=null;
+let analyticsCategoryRepairPromise=null;
 
 // Analytics starts in 2026. A new year appears here only when it actually begins.
 if(typeof availableYears==='function'){
@@ -77,14 +78,61 @@ function analyticsYearSummary(year=+state.year,scope=analyticsScope){
   return{tx,series,income,expense,balance,savingsRate,positiveMonths,negativeMonths,activeMonths,averageExpense};
 }
 
-function analyticsCategoryName(id){return id==='__none__'?'Без категории':catName(id)}
+function analyticsFallbackCategory(type){
+  const wanted=type==='expense'?'Прочие расходы':'Прочие доходы';
+  return state.categories.find(category=>category.type===type&&String(category.name||'').trim().toLocaleLowerCase('ru-RU')===wanted.toLocaleLowerCase('ru-RU'))||null;
+}
+
+function analyticsResolvedCategoryId(tx){
+  const direct=state.categories.find(category=>category.id===tx.category_id&&category.type===tx.type);
+  if(direct)return direct.id;
+  const subcategory=state.subcategories.find(item=>item.id===tx.subcategory_id);
+  if(subcategory){
+    const parent=state.categories.find(category=>category.id===subcategory.category_id&&category.type===tx.type);
+    if(parent)return parent.id;
+  }
+  return analyticsFallbackCategory(tx.type)?.id||'__none__';
+}
+
+async function repairAnalyticsCategoryAssignments(){
+  if(analyticsCategoryRepairPromise)return analyticsCategoryRepairPromise;
+  const repairs=state.transactions
+    .filter(tx=>tx.type==='income'||tx.type==='expense')
+    .map(tx=>({tx,resolvedId:analyticsResolvedCategoryId(tx)}))
+    .filter(({tx,resolvedId})=>resolvedId!=='__none__'&&tx.category_id!==resolvedId);
+  if(!repairs.length)return 0;
+  analyticsCategoryRepairPromise=(async()=>{
+    let repaired=0;
+    for(const {tx,resolvedId} of repairs){
+      const subcategory=state.subcategories.find(item=>item.id===tx.subcategory_id);
+      const patch={category_id:resolvedId};
+      if(subcategory&&subcategory.category_id!==resolvedId)patch.subcategory_id=null;
+      try{
+        if(window.FinanceOffline?.updateTransaction){
+          const result=await window.FinanceOffline.updateTransaction(tx.id,patch);
+          if(result?.error)throw result.error;
+        }else{
+          Object.assign(tx,patch);
+        }
+        repaired++;
+      }catch(error){
+        console.warn('Не удалось исправить категорию операции в аналитике',tx.id,error);
+      }
+    }
+    window.FinanceOffline?.persistSnapshotSoon?.();
+    return repaired;
+  })().finally(()=>{analyticsCategoryRepairPromise=null});
+  return analyticsCategoryRepairPromise;
+}
+
+function analyticsCategoryName(id){return id==='__none__'?'Прочие':catName(id)}
 
 function analyticsCategoryBuckets(type,monthIndex,year=+state.year,scope=analyticsScope){
   const sums={};
   analyticsTransactions(year,scope)
     .filter(tx=>tx.type===type&&new Date(tx.occurred_at).getMonth()===+monthIndex)
     .forEach(tx=>{
-      const key=tx.category_id||'__none__';
+      const key=analyticsResolvedCategoryId(tx);
       sums[key]=(sums[key]||0)+Number(tx.amount||0);
     });
   return Object.entries(sums).sort((a,b)=>b[1]-a[1]);
@@ -196,6 +244,7 @@ function bindAnalyticsControls(){
 
 function drawAnalytics(){
   bindAnalyticsControls();
+  void repairAnalyticsCategoryAssignments();
   if(!window.Chart||analyticsSelectedMonth==null)return;
   window.Chart.defaults.color='#cbb994';
   window.Chart.defaults.borderColor='rgba(177,139,82,.20)';
