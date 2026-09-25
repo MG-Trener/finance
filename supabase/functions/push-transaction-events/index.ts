@@ -15,6 +15,27 @@ const CORS={
 const json=(data:unknown,status=200)=>new Response(JSON.stringify(data),{status,headers:{...CORS,'Content-Type':'application/json','Connection':'keep-alive'}});
 const money=(value:unknown)=>`${new Intl.NumberFormat('ru-RU',{maximumFractionDigits:0}).format(Number(value||0))} ₸`;
 const typeLabel=(type:unknown)=>String(type)==='income'?'Доход':String(type)==='transfer'?'Перевод':'Расход';
+const BALANCE_MILESTONES=[
+  {amount:100000,title:'Ничего себе! Почти +100500!!!'},
+  {amount:200000,title:'А может в копилку отложим?'},
+  {amount:300000,title:'Оу, оу, а что происходит?'},
+  {amount:400000,title:'Шубу купишь?'},
+  {amount:500000,title:'Пора открывать банк развития'},
+  {amount:600000,title:'Казначей просит ещё один сундук'},
+  {amount:700000,title:'Так… а где мы будем всё это хранить?'},
+  {amount:800000,title:'Кажется, деньги начали размножаться'},
+  {amount:900000,title:'Миллион уже стучится в ворота'},
+  {amount:1000000,title:'Прикинь... МУЛЛЬООООН!!!'}
+] as const;
+const balanceNumber=(value:unknown)=>{
+  const n=Number(value);
+  return Number.isFinite(n)?n:null;
+};
+function crossedMilestone(before:number,after:number){
+  let hit:(typeof BALANCE_MILESTONES)[number]|null=null;
+  for(const item of BALANCE_MILESTONES)if(before<item.amount&&after>=item.amount)hit=item;
+  return hit;
+}
 
 function b64url(input:Uint8Array|string){
   const bytes=typeof input==='string'?new TextEncoder().encode(input):input;
@@ -58,21 +79,50 @@ async function sendToToken(service:any,accessToken:string,token:string,notificat
 }
 async function messageMeta(admin:any,event:any){
   const current=event.after_data||event.before_data||{},before=event.before_data||{};
-  const [{data:actor},{data:person},{data:category}]=await Promise.all([
+  const [{data:actor},{data:person},{data:category},{data:subcategory}]=await Promise.all([
     event.actor_user_id?admin.from('people').select('display_name,label').eq('family_id',event.family_id).eq('linked_user_id',event.actor_user_id).maybeSingle():Promise.resolve({data:null}),
     current.person_id?admin.from('people').select('display_name,label').eq('id',current.person_id).maybeSingle():Promise.resolve({data:null}),
-    current.category_id?admin.from('categories').select('name').eq('id',current.category_id).maybeSingle():Promise.resolve({data:null})
+    current.category_id?admin.from('categories').select('name').eq('id',current.category_id).maybeSingle():Promise.resolve({data:null}),
+    current.subcategory_id?admin.from('subcategories').select('name').eq('id',current.subcategory_id).maybeSingle():Promise.resolve({data:null})
   ]);
   const actorName=actor?.display_name||'Участник семьи';
   const personName=person?.display_name||(person?.label==='husband'?'Муж':person?.label==='wife'?'Жена':'');
-  const categoryName=category?.name||'Без категории',operation=typeLabel(current.type);
+  const categoryName=category?.name||'Без категории';
+  const subcategoryName=subcategory?.name||'';
+  const operation=typeLabel(current.type);
+  const balanceBefore=balanceNumber(current._family_balance_before);
+  const balanceAfter=balanceNumber(current._family_balance_after);
+  const insertBody=current.type==='transfer'
+    ?[personName||actorName,money(current.amount)].filter(Boolean).join(' · ')
+    :[personName||actorName,money(current.amount),categoryName,subcategoryName].filter(Boolean).join(' · ');
+
   let title='Изменение в семейной казне';
-  if(event.event_type==='insert')title=`${operation} ${money(current.amount)}`;
-  else if(event.event_type==='delete')title=`Удалён ${operation.toLowerCase()} ${money(current.amount)}`;
+  let body=[actorName,categoryName,personName].filter(Boolean).join(' · ');
+  if(event.event_type==='insert'){
+    body=insertBody;
+    if(current.type==='expense'){
+      title=balanceBefore!==null&&balanceBefore<0?'Казна опустела, но подданные продолжают тратить':'Расход казны...';
+    }else if(current.type==='income'){
+      title=balanceBefore!==null&&balanceAfter!==null&&balanceBefore<=0&&balanceAfter>0?'Вау, казна снова в плюсе':'Пополнение казны';
+    }else{
+      title=`Перевод ${money(current.amount)}`;
+    }
+  }else if(event.event_type==='delete')title=`Удалён ${operation.toLowerCase()} ${money(current.amount)}`;
   else if(event.event_type==='restore')title=`Восстановлен ${operation.toLowerCase()} ${money(current.amount)}`;
   else if(Number(before.amount||0)!==Number(current.amount||0))title=`${operation}: ${money(before.amount)} → ${money(current.amount)}`;
   else title=`Изменён ${operation.toLowerCase()} ${money(current.amount)}`;
-  return{title,body:[actorName,categoryName,personName].filter(Boolean).join(' · ')};
+
+  const messages:Array<{title:string,body:string,kind:string,milestone?:string}>=[{title,body,kind:'transaction'}];
+  if(event.event_type==='insert'&&current.type==='income'&&balanceBefore!==null&&balanceAfter!==null){
+    const milestone=crossedMilestone(balanceBefore,balanceAfter);
+    if(milestone)messages.push({
+      title:milestone.title,
+      body:`Баланс казны: ${money(balanceAfter)} · ${insertBody}`,
+      kind:'balance_milestone',
+      milestone:String(milestone.amount)
+    });
+  }
+  return{messages};
 }
 
 async function sendFamilyMessage(admin:any,user:any,familyIds:string[],message:string){
@@ -154,20 +204,43 @@ Deno.serve(async(req:Request)=>{
       continue;
     }
     const meta=await messageMeta(admin,event);
-    let eventSuccess=0;
+    let successfulDeliveries=0;
+    const expectedDeliveries=recipients.length*meta.messages.length;
     const errors:string[]=[];
     for(const device of recipients){
-      const response=await sendToToken(service,accessToken,device.token,{title:meta.title,body:meta.body},{kind:'transaction',event_type:String(event.event_type),transaction_id:String(event.transaction_id),family_id:String(event.family_id)});
-      if(response.ok){eventSuccess++;sent++;continue}
-      failed++;
-      const text=await response.text();errors.push(text.slice(0,500));
-      if(response.status===404||/UNREGISTERED|registration-token-not-registered/i.test(text))await admin.from('push_devices').update({enabled:false,updated_at:new Date().toISOString()}).eq('id',device.id);
+      for(const message of meta.messages){
+        const data:Record<string,string>={
+          kind:message.kind,
+          event_type:String(event.event_type),
+          transaction_id:String(event.transaction_id),
+          family_id:String(event.family_id)
+        };
+        if(message.milestone)data.milestone=message.milestone;
+        const response=await sendToToken(service,accessToken,device.token,{title:message.title,body:message.body},data);
+        if(response.ok){successfulDeliveries++;sent++;continue}
+        failed++;
+        const responseText=await response.text();errors.push(responseText.slice(0,500));
+        if(response.status===404||/UNREGISTERED|registration-token-not-registered/i.test(responseText)){
+          await admin.from('push_devices').update({enabled:false,updated_at:new Date().toISOString()}).eq('id',device.id);
+          break;
+        }
+      }
     }
-    if(eventSuccess>0){
-      await admin.from('push_outbox').update({delivered_at:new Date().toISOString(),delivery_status:eventSuccess===recipients.length?'sent':'partial',attempts:Number(event.attempts||0)+1,delivery_error:errors.join('\n').slice(0,1500)||null}).eq('id',event.id);
+    if(successfulDeliveries>0){
+      await admin.from('push_outbox').update({
+        delivered_at:new Date().toISOString(),
+        delivery_status:successfulDeliveries===expectedDeliveries?'sent':'partial',
+        attempts:Number(event.attempts||0)+1,
+        delivery_error:errors.join('\n').slice(0,1500)||null
+      }).eq('id',event.id);
     }else{
       const attempts=Number(event.attempts||0)+1;
-      await admin.from('push_outbox').update({attempts,delivery_status:'failed',delivery_error:errors.join('\n').slice(0,1500)||'FCM_SEND_FAILED',...(attempts>=5?{delivered_at:new Date().toISOString()}: {})}).eq('id',event.id);
+      await admin.from('push_outbox').update({
+        attempts,
+        delivery_status:'failed',
+        delivery_error:errors.join('\n').slice(0,1500)||'FCM_SEND_FAILED',
+        ...(attempts>=5?{delivered_at:new Date().toISOString()}: {})
+      }).eq('id',event.id);
     }
   }
   return json({ok:true,configured:true,sent,failed,processed:events.length});
